@@ -1,0 +1,3371 @@
+{
+  "_provenance": {
+    "source": "https://data.rcsb.org/graphql",
+    "retrieved": "2026-10-19",
+    "enumerations": [
+      "data/ree_pdb_entries.json",
+      "data/calcium_counterparts.json"
+    ],
+    "meaning": "asu = polymer chains in the deposited coordinates; assembly = chains in the largest biological assembly",
+    "curation_status": "uncurated -- assembly > asu flags an entry as AT RISK of a truncated metal site, it does not show that any site is truncated. Re-parsing the assembly is what decides that."
+  },
+  "counts": {
+    "entries": 808,
+    "expanded": 119
+  },
+  "expanded": [
+    "1A3C",
+    "1BUU",
+    "1CM1",
+    "1DT6",
+    "1DUH",
+    "1FS7",
+    "1FS8",
+    "1FS9",
+    "1ISR",
+    "1JHW",
+    "1LT7",
+    "1M6E",
+    "1MQE",
+    "1NCG",
+    "1R14",
+    "1RER",
+    "1SOI",
+    "1SU3",
+    "1V8M",
+    "1XVQ",
+    "2ANV",
+    "2BOP",
+    "2E80",
+    "2E81",
+    "2HYZ",
+    "2IF5",
+    "2NXQ",
+    "2O6N",
+    "2OLC",
+    "2OQR",
+    "2PES",
+    "2PSR",
+    "2R3C",
+    "2WJD",
+    "2WND",
+    "2WOR",
+    "2WOS",
+    "2X6C",
+    "2YAT",
+    "3ATB",
+    "3ATD",
+    "3ATE",
+    "3BNF",
+    "3BNG",
+    "3BNH",
+    "3BNJ",
+    "3CQR",
+    "3H9V",
+    "3IO1",
+    "3K36",
+    "3K37",
+    "3PAK",
+    "3PBF",
+    "3U3N",
+    "4AK8",
+    "4AQJ",
+    "4DW0",
+    "4FLB",
+    "4IRW",
+    "4NUQ",
+    "4WB9",
+    "4WJ9",
+    "4WN0",
+    "4WP7",
+    "4WPN",
+    "4WRC",
+    "4WRE",
+    "4X4L",
+    "4X8I",
+    "5AC2",
+    "5FFS",
+    "5I2S",
+    "5IWT",
+    "5KLF",
+    "5L2M",
+    "5L2N",
+    "5NPL",
+    "5TEI",
+    "6C8H",
+    "6DUM",
+    "6F2F",
+    "6HF6",
+    "6HK1",
+    "6HVQ",
+    "6L6K",
+    "6NBT",
+    "6OOM",
+    "6OOP",
+    "6P4Z",
+    "6P74",
+    "6THE",
+    "6YUO",
+    "6Z1D",
+    "7JWS",
+    "7JWT",
+    "7JWU",
+    "7JWV",
+    "7JWW",
+    "7PEO",
+    "7UM9",
+    "8AB2",
+    "8BHD",
+    "8F7N",
+    "8OOL",
+    "8SNP",
+    "8T0N",
+    "8T0T",
+    "9C8X",
+    "9C8Y",
+    "9C8Z",
+    "9C90",
+    "9DE4",
+    "9GH7",
+    "9P4E",
+    "9SOM",
+    "9VY6",
+    "9VY7",
+    "9VY8",
+    "9VYA"
+  ],
+  "entries": {
+    "1A3C": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "1A4Z": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "1AFB": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "1AK8": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1AVS": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "1AWB": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1AZ0": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "1B2V": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1B94": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "1B9X": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "1B9Y": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "1BIX": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1BSU": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "1BUB": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1BUU": {
+      "asu": 1,
+      "assembly": 3
+    },
+    "1C5K": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1CDM": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1CEL": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "1CGE": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1CGF": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "1CM1": {
+      "asu": 2,
+      "assembly": 4
+    },
+    "1CNT": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "1CX8": {
+      "asu": 8,
+      "assembly": 2
+    },
+    "1DDE": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1DJG": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "1DJI": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "1DJW": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "1DJX": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "1DKH": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1DT6": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "1DUH": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "1E8S": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "1E8X": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1EVU": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1EX0": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1EXZ": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "1F0O": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "1F6S": {
+      "asu": 6,
+      "assembly": 1
+    },
+    "1FCK": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1FS7": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "1FS8": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "1FS9": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "1FW4": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1GA7": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1GGU": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1GGY": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1GU6": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "1GW6": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1H19": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1H87": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1HFC": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1HFZ": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "1HS6": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1HT9": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1IMA": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1IMB": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1IME": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1ISR": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "1JHW": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "1K0Z": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1K7L": {
+      "asu": 8,
+      "assembly": 2
+    },
+    "1K90": {
+      "asu": 6,
+      "assembly": 6
+    },
+    "1KHV": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "1KQV": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1KSM": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1KWW": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "1KWZ": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "1LT7": {
+      "asu": 2,
+      "assembly": 4
+    },
+    "1LVA": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1LVC": {
+      "asu": 6,
+      "assembly": 2
+    },
+    "1M3D": {
+      "asu": 12,
+      "assembly": 6
+    },
+    "1M6E": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "1M9S": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1MQE": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "1MSB": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1N65": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1NC2": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "1NC4": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "1NCG": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "1NCH": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1NCZ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1NIW": {
+      "asu": 8,
+      "assembly": 8
+    },
+    "1NKF": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1O88": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1O8D": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1O8E": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1O8F": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1O8G": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1OKJ": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "1P1C": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1PJL": {
+      "asu": 8,
+      "assembly": 4
+    },
+    "1PK0": {
+      "asu": 6,
+      "assembly": 6
+    },
+    "1PLU": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1PRW": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1PSR": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1PY0": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1Q2E": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "1QAT": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "1QJM": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1QSL": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1QX2": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1R14": {
+      "asu": 1,
+      "assembly": 3
+    },
+    "1R6O": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "1R6Q": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "1RER": {
+      "asu": 3,
+      "assembly": 6
+    },
+    "1RTM": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "1RVG": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "1S26": {
+      "asu": 6,
+      "assembly": 2
+    },
+    "1SCF": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "1SK6": {
+      "asu": 6,
+      "assembly": 2
+    },
+    "1SOI": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "1SQM": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1ST0": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1ST4": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1SU3": {
+      "asu": 2,
+      "assembly": 8
+    },
+    "1T61": {
+      "asu": 6,
+      "assembly": 6
+    },
+    "1TJB": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "1TOP": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1TVG": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1UMN": {
+      "asu": 12,
+      "assembly": 12
+    },
+    "1UZJ": {
+      "asu": 3,
+      "assembly": 1
+    },
+    "1UZK": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1UZP": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1V04": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1V8M": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "1W6Z": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1WC0": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1WC4": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1WC5": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "1XKG": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1XR5": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1XVQ": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "1YTT": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "1YYD": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1YYG": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1YZP": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1YZR": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "1Z1Y": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "2AHX": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "2ANV": {
+      "asu": 2,
+      "assembly": 4
+    },
+    "2ANX": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "2B0D": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "2B0E": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "2BEC": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "2BOP": {
+      "asu": 2,
+      "assembly": 4
+    },
+    "2BPU": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2BW1": {
+      "asu": 12,
+      "assembly": 12
+    },
+    "2BW7": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "2C1C": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "2CCM": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "2CEL": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "2CF7": {
+      "asu": 12,
+      "assembly": 12
+    },
+    "2DBX": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "2DG5": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "2E0X": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "2E0Y": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "2E80": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "2E81": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "2F1R": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "2FBY": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2G4N": {
+      "asu": 6,
+      "assembly": 1
+    },
+    "2GUY": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2GVY": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "2HD4": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "2HHM": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "2HYZ": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "2I18": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2IF5": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "2ISN": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "2K0J": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2K61": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2K62": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2KTR": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "2MSB": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "2NXQ": {
+      "asu": 2,
+      "assembly": 6
+    },
+    "2O3H": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2O5W": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "2O6N": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "2OJR": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2OLC": {
+      "asu": 2,
+      "assembly": 4
+    },
+    "2OQR": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "2P1X": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2P80": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "2PC2": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2PE7": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2PES": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "2PSR": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "2PWA": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2QMI": {
+      "asu": 8,
+      "assembly": 8
+    },
+    "2R3C": {
+      "asu": 4,
+      "assembly": 6
+    },
+    "2R59": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2RDZ": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "2RF7": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "2RPV": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2RSE": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "2TCL": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2TRC": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "2UX1": {
+      "asu": 12,
+      "assembly": 12
+    },
+    "2V15": {
+      "asu": 12,
+      "assembly": 12
+    },
+    "2V8B": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2VJ8": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2VSY": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "2VXB": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "2VXC": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "2VZY": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "2W86": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2WJD": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "2WND": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "2WOR": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "2WOS": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "2WVI": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2X3L": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "2X6C": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "2XJN": {
+      "asu": 12,
+      "assembly": 12
+    },
+    "2XJP": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2XJR": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2XJS": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2XJT": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2XJU": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2Y9W": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "2Y9X": {
+      "asu": 8,
+      "assembly": 2
+    },
+    "2YAT": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "2YEU": {
+      "asu": 6,
+      "assembly": 2
+    },
+    "2YGG": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "2YKN": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "2YZW": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2ZNR": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "2ZTB": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "359D": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "3A7C": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3AKC": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3ATB": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "3ATD": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "3ATE": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "3B7R": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3B7S": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "3B7T": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "3B7U": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3BEJ": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "3BFW": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "3BNF": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "3BNG": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "3BNH": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "3BNJ": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "3BOF": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "3BOL": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "3C22": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "3CHO": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3CHP": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3CHQ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3CHR": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3CHS": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3CM6": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "3CQR": {
+      "asu": 2,
+      "assembly": 4
+    },
+    "3DH4": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "3DSZ": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "3EEU": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "3FH5": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FH7": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FH8": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FHE": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FOU": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "3FTS": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FTU": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FTV": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FTW": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FTX": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FTY": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FTZ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FU0": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FU3": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FU5": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FU6": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FUD": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FUE": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FUF": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FUH": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FUI": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FUJ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FUK": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FUL": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FUM": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3FUN": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3H1W": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3H9V": {
+      "asu": 1,
+      "assembly": 3
+    },
+    "3ICB": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3IF7": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3IO1": {
+      "asu": 2,
+      "assembly": 4
+    },
+    "3K36": {
+      "asu": 2,
+      "assembly": 4
+    },
+    "3K37": {
+      "asu": 2,
+      "assembly": 4
+    },
+    "3K38": {
+      "asu": 16,
+      "assembly": 4
+    },
+    "3K39": {
+      "asu": 16,
+      "assembly": 4
+    },
+    "3K3A": {
+      "asu": 16,
+      "assembly": 4
+    },
+    "3KLT": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "3L1T": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "3LGR": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3LTQ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3M5Q": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3M8M": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3MVC": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "3N9B": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "3N9D": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3OJO": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "3P5G": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "3P7G": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "3PAK": {
+      "asu": 1,
+      "assembly": 3
+    },
+    "3PBF": {
+      "asu": 1,
+      "assembly": 3
+    },
+    "3PH5": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "3PH6": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "3PY9": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3Q4I": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "3Q8K": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "3Q8L": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "3R79": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "3SAF": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "3SAG": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "3SAH": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "3SYX": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3TF6": {
+      "asu": 3,
+      "assembly": 1
+    },
+    "3TOR": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "3TXM": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3U3L": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3U3N": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "3U3U": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3U9W": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3UF3": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "3UKJ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3V3C": {
+      "asu": 14,
+      "assembly": 14
+    },
+    "3VDZ": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "3VX0": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "3ZNI": {
+      "asu": 16,
+      "assembly": 4
+    },
+    "3ZTY": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "3ZXS": {
+      "asu": 3,
+      "assembly": 1
+    },
+    "4AFI": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "4AFP": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4AHW": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4AHX": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4AHY": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4AHZ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4AI0": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4AI1": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4AI2": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4AI3": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4AK8": {
+      "asu": 4,
+      "assembly": 8
+    },
+    "4AQJ": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "4BAD": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4BAF": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4BAL": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4BAP": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4BAR": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4BD7": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "4BD8": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "4BDW": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4BS7": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4BSP": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4CEL": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "4D1O": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "4D1P": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "4DJC": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "4DK7": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "4DPR": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4DW0": {
+      "asu": 1,
+      "assembly": 3
+    },
+    "4ESQ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4EUL": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4F3V": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "4FLB": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "4G6U": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "4GF6": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4H1P": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4IAW": {
+      "asu": 3,
+      "assembly": 1
+    },
+    "4IAX": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4ICB": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4ICV": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4IRW": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "4JA3": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "4KTY": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "4L12": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4L1I": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4L2L": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4LL7": {
+      "asu": 8,
+      "assembly": 2
+    },
+    "4LP1": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "4MAE": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "4MKT": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4MS6": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4N5R": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4NDB": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "4NDC": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "4NGV": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4NGW": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4NGY": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4NGZ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4NUQ": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "4OR5": {
+      "asu": 8,
+      "assembly": 4
+    },
+    "4P1H": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4P1J": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4P3W": {
+      "asu": 12,
+      "assembly": 2
+    },
+    "4PEU": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4PHB": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4PHG": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4PIG": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "4PIH": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "4R7L": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4REB": {
+      "asu": 5,
+      "assembly": 5
+    },
+    "4RSY": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4RVB": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4TNC": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4TWS": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "4U47": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "4WB9": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "4WFD": {
+      "asu": 9,
+      "assembly": 3
+    },
+    "4WJ9": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "4WJY": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "4WMO": {
+      "asu": 6,
+      "assembly": 3
+    },
+    "4WN0": {
+      "asu": 1,
+      "assembly": 3
+    },
+    "4WP7": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "4WPN": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "4WRC": {
+      "asu": 1,
+      "assembly": 3
+    },
+    "4WRE": {
+      "asu": 1,
+      "assembly": 3
+    },
+    "4WSZ": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "4WT0": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "4X1D": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "4X4L": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "4X8I": {
+      "asu": 3,
+      "assembly": 12
+    },
+    "4XHA": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "4YE3": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "4YHQ": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "4YHU": {
+      "asu": 3,
+      "assembly": 1
+    },
+    "4ZHH": {
+      "asu": 6,
+      "assembly": 1
+    },
+    "5AC2": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "5AEN": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5AVK": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5B5T": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "5BPP": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5C6I": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5C6J": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5C6L": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5F6T": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5F8A": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "5FBH": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "5FFS": {
+      "asu": 1,
+      "assembly": 3
+    },
+    "5FGR": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "5FIS": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "5FWQ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5G3S": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "5G6U": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "5GGM": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5H13": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5HJ2": {
+      "asu": 6,
+      "assembly": 1
+    },
+    "5HLK": {
+      "asu": 6,
+      "assembly": 6
+    },
+    "5I2S": {
+      "asu": 1,
+      "assembly": 3
+    },
+    "5IWT": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "5IZR": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "5K97": {
+      "asu": 5,
+      "assembly": 5
+    },
+    "5KIJ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5KKB": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "5KLF": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "5KSE": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "5KTJ": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "5L2M": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "5L2N": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "5L2O": {
+      "asu": 8,
+      "assembly": 4
+    },
+    "5LXR": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "5MF2": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "5MHM": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "5N35": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5N3W": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5NGY": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "5NI2": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5NI6": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5NJ8": {
+      "asu": 8,
+      "assembly": 4
+    },
+    "5NPL": {
+      "asu": 3,
+      "assembly": 6
+    },
+    "5NSJ": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "5OBB": {
+      "asu": 24,
+      "assembly": 24
+    },
+    "5OER": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5SH8": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "5SIF": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "5SIO": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "5SJE": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "5SJO": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "5SJT": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "5SKD": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "5SKF": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "5SKH": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "5TC9": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5TEI": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "5U5T": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "5U62": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "5UM9": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "5UO8": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "5UO9": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "5UOA": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "5UOB": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "5UOC": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "5VPG": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "5VPH": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "5VVB": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "5VVC": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "5VVD": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "5WN1": {
+      "asu": 5,
+      "assembly": 4
+    },
+    "5WN2": {
+      "asu": 5,
+      "assembly": 4
+    },
+    "5WN3": {
+      "asu": 5,
+      "assembly": 4
+    },
+    "5WN4": {
+      "asu": 5,
+      "assembly": 4
+    },
+    "5WOA": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5WRC": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "5X7O": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "5X7P": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "5X7Q": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "5X7R": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "5X7S": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "5XBO": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "5XIT": {
+      "asu": 6,
+      "assembly": 3
+    },
+    "5YJD": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "5YT7": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "5YTQ": {
+      "asu": 3,
+      "assembly": 2
+    },
+    "5ZB8": {
+      "asu": 5,
+      "assembly": 1
+    },
+    "5ZC0": {
+      "asu": 6,
+      "assembly": 3
+    },
+    "6AV6": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6AV7": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6C8H": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "6CIE": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6CIF": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6DAM": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6DUM": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "6ENB": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "6ENC": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6END": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6EUQ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6F2F": {
+      "asu": 3,
+      "assembly": 6
+    },
+    "6F2H": {
+      "asu": 12,
+      "assembly": 6
+    },
+    "6F2I": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6F2J": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6F2K": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6F2M": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "6FKW": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6FRM": {
+      "asu": 8,
+      "assembly": 4
+    },
+    "6FRN": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "6FRO": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6FRQ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6FSN": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6GYI": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "6H6N": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "6HF6": {
+      "asu": 3,
+      "assembly": 6
+    },
+    "6HF7": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "6HK1": {
+      "asu": 6,
+      "assembly": 8
+    },
+    "6HVQ": {
+      "asu": 6,
+      "assembly": 12
+    },
+    "6IAV": {
+      "asu": 4,
+      "assembly": 1
+    },
+    "6IP9": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6K2X": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6KSU": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "6KSV": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "6L6K": {
+      "asu": 2,
+      "assembly": 4
+    },
+    "6MI5": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6NBT": {
+      "asu": 2,
+      "assembly": 4
+    },
+    "6NDE": {
+      "asu": 18,
+      "assembly": 3
+    },
+    "6NDG": {
+      "asu": 18,
+      "assembly": 3
+    },
+    "6NFQ": {
+      "asu": 3,
+      "assembly": 1
+    },
+    "6NH1": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6NH2": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6NH3": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6NH4": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6NH5": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6NH6": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6NH7": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "6NH8": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6NHF": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6NKQ": {
+      "asu": 6,
+      "assembly": 1
+    },
+    "6NQ7": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6NUC": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "6NUF": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "6NUU": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "6OC5": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "6OC6": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "6OOM": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "6OOP": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "6OWW": {
+      "asu": 8,
+      "assembly": 2
+    },
+    "6P4Z": {
+      "asu": 4,
+      "assembly": 12
+    },
+    "6P74": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "6POU": {
+      "asu": 6,
+      "assembly": 2
+    },
+    "6POV": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6POW": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6POX": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6POY": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6POZ": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6PP0": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6PP1": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6PP2": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6PP3": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6PP4": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6PRF": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "6QSS": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "6QUH": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "6RQ7": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6RQA": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "6SR0": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6SR1": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6SR2": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6SR3": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6SR4": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6SR5": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6THE": {
+      "asu": 1,
+      "assembly": 3
+    },
+    "6TMR": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6TRT": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6TVY": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6U04": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6U3Z": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "6VRZ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6VS0": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6VS1": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6VS2": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6W3U": {
+      "asu": 5,
+      "assembly": 4
+    },
+    "6WRO": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6WRR": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6WRV": {
+      "asu": 6,
+      "assembly": 6
+    },
+    "6WRY": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6X25": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6XJJ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6XSJ": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "6XSV": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6XXX": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "6XYM": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "6XZF": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "6Y0E": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "6Y1R": {
+      "asu": 5,
+      "assembly": 5
+    },
+    "6YQ7": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "6YUO": {
+      "asu": 2,
+      "assembly": 4
+    },
+    "6YXF": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "6Z1D": {
+      "asu": 2,
+      "assembly": 6
+    },
+    "6ZCV": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6ZCW": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "6ZV9": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "7A9C": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7AUZ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7AV0": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7AV1": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7AV2": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7BF1": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "7BF2": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "7BXF": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "7CCN": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7CCO": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7F05": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "7JWS": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "7JWT": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "7JWU": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "7JWV": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "7JWW": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "7KIO": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7LJI": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "7LPZ": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "7LRY": {
+      "asu": 6,
+      "assembly": 3
+    },
+    "7LTD": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7LTI": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7LTV": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7LW9": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "7M3G": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "7M56": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "7ML9": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7NX1": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7O6Z": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "7O9P": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7P3H": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "7PEO": {
+      "asu": 1,
+      "assembly": 14
+    },
+    "7PH2": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "7PH3": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "7PH4": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "7PH7": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "7QB3": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7R0T": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7TSG": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "7TSH": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "7TSI": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "7TSK": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "7TSL": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "7TSM": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "7TSN": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "7TSO": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "7TSP": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "7UAO": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "7UM9": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "7VCN": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "7YTQ": {
+      "asu": 5,
+      "assembly": 1
+    },
+    "7Z1F": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "7ZHB": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7ZKC": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7ZLE": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "7ZLU": {
+      "asu": 3,
+      "assembly": 1
+    },
+    "8A9E": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "8AB2": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "8AVA": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "8AWH": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "8BHD": {
+      "asu": 5,
+      "assembly": 6
+    },
+    "8BL6": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "8CH0": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "8CMQ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "8CR8": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "8D87": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "8DQ2": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "8E0Y": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "8F7N": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "8FGN": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "8FGO": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "8FGP": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "8FGQ": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "8FGR": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "8FGS": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "8FGT": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "8FGU": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "8FNR": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "8FNS": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "8OOL": {
+      "asu": 6,
+      "assembly": 12
+    },
+    "8OWC": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "8PIW": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "8POB": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "8PUN": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "8QOW": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "8QPN": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "8QQ4": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "8RKI": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "8RX3": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "8RX7": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "8RX9": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "8SNP": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "8T0N": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "8T0T": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "8U7C": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "8UFR": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "8UFS": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "8UFT": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "8UFU": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "8UQY": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "8UQZ": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "8UYN": {
+      "asu": 3,
+      "assembly": 1
+    },
+    "8ZST": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "8ZSU": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "966C": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "9B1V": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "9B26": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "9BIF": {
+      "asu": 24,
+      "assembly": 6
+    },
+    "9C1Z": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9C8X": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "9C8Y": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "9C8Z": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "9C90": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "9CEQ": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "9CW2": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9CW4": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9CW5": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9CW6": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9CW7": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9CW8": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9CW9": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9CWD": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9CWI": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9CWJ": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9CWK": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9DE4": {
+      "asu": 1,
+      "assembly": 4
+    },
+    "9EKK": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "9EKM": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "9ER9": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "9ERZ": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "9GH7": {
+      "asu": 2,
+      "assembly": 4
+    },
+    "9KW1": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "9L6D": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "9MWN": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9MWO": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9MWP": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "9MWQ": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9MWR": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9MWS": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9MWT": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9MWU": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "9MWV": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9MWW": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9MWX": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9MXD": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "9MZ1": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9MZ2": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9MZ3": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9MZ4": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9NXE": {
+      "asu": 3,
+      "assembly": 3
+    },
+    "9OZW": {
+      "asu": 6,
+      "assembly": 1
+    },
+    "9P4D": {
+      "asu": 6,
+      "assembly": 1
+    },
+    "9P4E": {
+      "asu": 1,
+      "assembly": 3
+    },
+    "9PI2": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "9PQC": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "9Q4X": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9Q4Y": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9Q4Z": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9Q51": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9Q52": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9Q53": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9Q54": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9Q55": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9Q58": {
+      "asu": 4,
+      "assembly": 2
+    },
+    "9QUP": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "9R0Q": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "9SOM": {
+      "asu": 1,
+      "assembly": 3
+    },
+    "9SZU": {
+      "asu": 1,
+      "assembly": 1
+    },
+    "9US6": {
+      "asu": 2,
+      "assembly": 1
+    },
+    "9VY4": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "9VY5": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "9VY6": {
+      "asu": 6,
+      "assembly": 12
+    },
+    "9VY7": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "9VY8": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "9VY9": {
+      "asu": 4,
+      "assembly": 4
+    },
+    "9VYA": {
+      "asu": 1,
+      "assembly": 2
+    },
+    "9WE9": {
+      "asu": 2,
+      "assembly": 2
+    },
+    "9WEJ": {
+      "asu": 2,
+      "assembly": 2
+    }
+  }
+}

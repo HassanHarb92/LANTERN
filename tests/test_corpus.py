@@ -204,3 +204,43 @@ def test_resolution_filter_is_not_optional_once_asked_for():
             load(path, 2, 3, 2.5)
     finally:
         path.unlink(missing_ok=True)
+
+
+def test_land_is_natural_biology_without_matching_islandicus():
+    """Regression: the obvious keyword for landiscernin is a trap.
+
+    LanD is a third natural family -- a lanthanide chaperone whose published
+    function is separating light lanthanides -- and the first keyword set
+    missed all four of its entries. The obvious fix, the substring "land",
+    also matches "Ignicoccus islandicus" (6QSS), a malate dehydrogenase
+    co-crystallised with Tb-Xo4, which is a phasing experiment. Both halves
+    are pinned here because fixing the miss by reintroducing the trap is the
+    likely regression.
+    """
+    label, basis = title_first_pass(
+        "X-ray crystal structure of Methylorubrum extorquens La(III)-bound LanD")
+    assert label == "natural_ln_biology", basis
+
+    label, _ = title_first_pass(
+        "Crystal Structure of Ignicoccus islandicus malate dehydrogenase "
+        "co-crystallized with 10 mM Tb-Xo4")
+    assert label != "natural_ln_biology", (
+        "'islandicus' contains 'land'; a soaked archaeal dehydrogenase is "
+        "not lanthanide biology")
+
+
+def test_table_records_which_coordinates_each_site_came_from():
+    """A site parsed from the asymmetric unit when its partner protomer is
+    missing is wrong in every geometric column at once -- 9C8X read CN 5,
+    charge -3, SASA 47.9 from the ASU against CN 10, charge -6, SASA 0.0
+    from the dimer. Which source was used therefore has to be recoverable
+    from the table, or a contrast that mixes the two unevenly between its
+    arms is confounded with no way to notice.
+    """
+    import pandas as pd
+    frame = pd.read_parquet(TABLE)
+    assert "coordinate_source" in frame.columns
+    assert set(frame["coordinate_source"]) <= {"asu", "assembly1"}
+    # One entry is one deposition, so it cannot have been parsed both ways.
+    per_entry = frame.groupby("pdb_id")["coordinate_source"].nunique()
+    assert (per_entry == 1).all(), "an entry parsed from two sources at once"

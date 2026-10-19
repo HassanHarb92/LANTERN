@@ -1007,6 +1007,138 @@ rationale and a stated validation gap.
 Reproduce: `python scripts/paired_sites.py --contrast data/calcium_sites.parquet` for §3.15 and
 `python scripts/selectivity_contrast.py` for §3.16.
 
+> **The numbers in the table above are superseded by §3.17.** They were computed from deposited
+> asymmetric units, and for sites on a symmetry axis that is half the coordination sphere. The
+> *conclusion* survives the correction and gets a third family; the per-descriptor figures change.
+
+---
+
+### 3.17 The asymmetric unit is not the site: a third family, and two statistical traps
+
+§3.16 ended with a stated weakness — *n* = 2 families — so the next move was to search the 600
+unclassified Corpus A entries for more natural lanthanide biology. That search found a family, and
+the family found a parsing bug underneath it.
+
+**A third family: LanD.** Four entries (9C8X/Y/Z/90) titled *"Methylorubrum extorquens La(III)-bound
+LanD"* were unclassified because `"lanm"` does not match "LanD" and `"methylotroph"` does not match
+"Methylorubrum". The entity is **landiscernin**, a **lanthanide chaperone** (PNAS 2024, PMID
+39467132), and the paper is titled *"Modulating metal-centered dimerization of a lanthanide
+chaperone protein for separation of light lanthanides."* A protein whose published function is
+telling lanthanides apart from each other is the most on-target entry in the corpus, and it was
+sitting in the unclassified pile.
+
+**Why it looked like junk.** Parsed from the deposited coordinates, its site read coordination
+number 5, net charge −3, and SASA 47.9 Å² — an exposed, unremarkable surface metal. The ASU holds
+**one chain**; the biological assembly is a **homo-2-mer with C2 symmetry**, and the metal sits on
+the interface. The deposited coordinates contain half the site:
+
+| descriptor | asymmetric unit | biological assembly |
+|---|---:|---:|
+| coordination_number | 5 | **10** |
+| carboxylate_residues | 3 | **6** — GLU70/73/75 from *both* protomers |
+| bidentate_carboxylates | 1 | **2** |
+| net_charge | −3 | **−6** — as anionic as any site in the corpus (11 sites reach −6) |
+| metal_sasa_A2 | 47.94 | **0.00** — buried, not exposed |
+
+Every descriptor was wrong, and all of them in the direction that makes a real site look
+adventitious. **This is a general defect, not one entry**: `scripts/assembly_audit.py` finds
+**99 of 636 Corpus A entries (15.6%)** and **20 of 172 calcium entries (11.6%)** — 119 of 808 —
+whose biological assembly is larger than their deposited coordinates. Being larger does not prove
+any site is truncated, which is why `data/assembly_counts.json` records itself as uncurated and
+re-parsing is what decides. The fix fetches assembly 1 for exactly those
+entries, and every row now records a `coordinate_source` of `asu` or `assembly1` — because applying
+this correction to one arm and not the other would have been §3.15's resolution bug a second time.
+
+**Burial was checked and cleared.** Coordination number does partly measure burial: it correlates
+with solvent exposure at −0.521 across the lanthanide family sites and −0.572 across calcium sites,
+and in the calcium set alone median CN falls 7.0 → 5.5 from the buried to the exposed tertile.
+Since the corrected LanD and lanmodulin sites are at SASA 0.00, "lanthanide sites are buried, buried
+sites are high-CN" is the obvious alternative explanation. Stratifying kills it. Holding both sides
+to SASA ≤ 10 Å² leaves the two arms **indistinguishable on burial** — median 0.00 Å² each,
+permutation *p* = 1.0 — while the lanthanide side still carries **median CN 10 against 7**, and
+tightening to ≤ 5 Å² gives CN 9.5 against 7 on the same null burial difference. All three families
+survive both strata, so this is not lanmodulin carrying the result. These are site-level counts
+(53 and 46 lanthanide sites) and therefore pseudo-replicated — the claim is not the *p*-value but
+the fact that **matching on burial does not shrink the CN gap**.
+
+> **Two statistical traps, both of which briefly reversed the conclusion.**
+>
+> **Pseudo-replication at the entry level.** With 14 entries, net charge reaches *p* < 0.0001 —
+> ahead of coordination number at 0.0001 and far ahead of bidentate carboxylates at 0.0134, so on
+> the entry-level table it is the descriptor to pick. Four of those entries are LanD — one protein
+> crystallised with four different lanthanides, which are technical replicates — and they drag the
+> median to −4. At the family level net charge is still significant but **17 of 55 calcium
+> accessions overlap it**. Pseudo-replication did not merely inflate confidence; it changed which
+> descriptor ranked first.
+>
+> **The wrong test at small *n*.** A two-sided permutation test on the difference of medians also
+> counts random triples whose median falls far *below* the pooled median, and the calcium lower
+> tail is fat. Coordination number — which **no** calcium accession in the set reaches — scored
+> *p* = 0.148, and bidentate carboxylates, also with zero overlap, scored *p* = 0.298; net charge,
+> with 17 of 55 accessions overlapping, scored *p* = 0.029. **Perfect separation came out five to
+> ten times worse than partial separation.** Since Ln³⁺ coordination chemistry fixes the expected
+> direction in advance, the honest statistic is a **one-sided exact rank test**, and at *n* = 3 the
+> null can be enumerated rather than sampled.
+
+**The corrected result.** Three lanthanide families against 55 calcium accessions, both sides
+≤2.5 Å, chelator-free, assembly-corrected by one rule; exact one-sided rank test over all
+C(58,3) = 30 856 assignments:
+
+| descriptor | Ln | Ca | Ca accessions reaching it | exact *p* |
+|---|---:|---:|---:|---:|
+| **coordination_number** | 9.00 | 7.00 | **0 / 55** | **0.00003** |
+| **bidentate_carboxylates** | 2.00 | 1.00 | **0 / 55** | **0.00003** |
+| protein_donor_count | 8.00 | 4.00 | 16 / 55 | 0.00107 |
+| net_charge | −4.00 | −2.00 | 17 / 55 | 0.00240 |
+| carboxylate_residues | 4.00 | 2.00 | 17 / 55 | 0.00240 |
+| shell_net_charge | −4.00 | −2.00 | 26 / 55 | 0.04589 |
+| mean_donor_distance_A | 2.54 | 2.45 | 15 / 54 | 0.04925 |
+| metal_sasa_A2 | 0.00 | 12.11 | 25 / 55 | 0.063 *(n.s.)* |
+| protein_atoms_within_8A | 100.0 | 87.0 | 30 / 55 | 0.083 *(n.s.)* |
+
+Per family, on the two descriptors that separate cleanly — every family above every calcium
+accession, which is what "0 / 55" means:
+
+| family | CN | bidentate carboxylates | net charge | SASA Å² |
+|---|---:|---:|---:|---:|
+| LanD (lanthanide chaperone) | 9.00 | 2.00 | −6.00 | 0.00 |
+| MDH/XoxF (dehydrogenases) | 9.00 | 2.00 | −3.00 | 8.72 |
+| lanmodulin | 10.00 | 3.50 | −4.00 | 0.00 |
+
+**§3.16's recommendation survives, on better evidence.** Coordination number and bidentate
+carboxylate count are the only two descriptors with **no overlap at all** — all three lanthanide
+families rank above all 55 calcium accessions, which is the smallest *p* attainable at *n* = 3.
+The honest *n* rose from two families to three, and the third was found by fixing a bug rather than
+by relaxing a filter.
+
+**Net charge fails for the fourth time**, and this is the most informative of the four. It is
+significant (*p* = 0.0024) and it is the Dudev prediction, so the temptation to promote it is real
+— but 17 of 55 calcium accessions are as anionic as the lanthanide families. A descriptor that a
+third of the negative class satisfies is a triage filter, not a selectivity term. **SASA fails for
+the fifth time** (*p* = 0.063, 25/55 overlapping).
+
+**A keyword trap worth recording.** The obvious fix for the LanD miss — matching the substring
+`"land"` — also matches *"Ignicoccus **island**icus"* (6QSS), a malate dehydrogenase co-crystallised
+with Tb-Xo4, which is a phasing experiment and not lanthanide biology. `"methylo"` catches all four
+LanD entries without that cost. Both halves are pinned by
+`test_land_is_natural_biology_without_matching_islandicus`, because fixing the miss by reintroducing
+the trap is the likely regression. The widened rules take `natural_ln_biology` from 13 to **17
+entries (65 sites)** and `engineered_lbt` from 27 to **111 sites**, the latter mostly LBT peptides,
+tagging constructs and designed coiled coils that the tag-centric wording had missed. Recall is
+still the limiting problem: **590 of 636 Corpus A entries remain unclassified**, which is why M2
+hand-curation stays on the list rather than being declared solved by keywords.
+
+**What this changes in M3.1.** Nothing in the recommendation — coordination number and bidentate
+carboxylate count, with donor distance and protein donor count as weaker support, and net charge in
+triage. What changed is the confidence behind it: three families rather than two, a defect in the
+coordinates corrected, burial excluded as the cause, and the two tests that would have told a
+different story identified and discarded on their merits rather than on their answers.
+
+Reproduce: `python scripts/assembly_audit.py`, then
+`python -I scripts/download_corpus.py --assembly --enumeration data/assembly_counts.json --out .cache/assembly`,
+rebuild both site tables with `--assembly-dir .cache/assembly`, then
+`python scripts/selectivity_contrast.py`.
+
 ---
 
 ## 4. The strategic reframe: three finite corpora
@@ -1358,9 +1490,16 @@ These are cheap, they are what unblocks the headline screen, and none of them ne
   holds: 97.6% of cached sites fall in that class. Coordination number, already shipped, separates
   better than either (93.1% vs 77.8% and 75.0% balanced accuracy). Calibrating them needs Ln sites
   from **outside** this fold, where charge varies — i.e. M2's corpus.
+- ✅ **Which descriptors go in is now settled (§3.17).** Against three natural Ln families and 55
+  Ca accessions, **coordination number** and **bidentate carboxylate count** are the only two with
+  **zero overlap** — no calcium accession reaches either. Net charge is significant and is the
+  Dudev prediction, but 17 of 55 Ca accessions are as anionic, so it stays in **triage** for the
+  fourth time; SASA is out for the fifth (n.s.). Build `geometry-v1` on those two.
 - Calibrate thresholds on M2's curated Ln sites versus the Ca contrast set. With ~tens of
   genuine biological Ln sites this is **threshold calibration and ROC reporting, not machine
   learning** — do not train a model on this sample size and do not call the output a probability.
+  At *n* = 3 families, **report the overlap count beside every threshold**: it is the number that
+  survives a small sample, where a *p*-value is mostly a statement about *n* (§3.17).
 - Version it (`score_version: "geometry-v1"`) and keep the sequence heuristic alongside, clearly
   labelled as triage only.
 

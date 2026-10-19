@@ -45,6 +45,11 @@ import requests                                           # noqa: E402
 ENUMERATION = ROOT / "data" / "ree_pdb_entries.json"
 DEFAULT_OUT = ROOT / ".cache" / "corpus"
 URL = "https://files.rcsb.org/download/{pdb_id}.cif.gz"
+# The biological assembly, for entries whose deposited coordinates hold only
+# part of it. A metal on a symmetry axis is coordinated by two protomers and
+# the asymmetric unit contains one, so the ASU parse finds half the site --
+# see scripts/assembly_audit.py for the measured damage.
+ASSEMBLY_URL = "https://files.rcsb.org/download/{pdb_id}-assembly1.cif.gz"
 
 # Six at a time is brisk without being rude: RCSB serves this endpoint from a
 # CDN, but 636 simultaneous connections would be abuse whether or not it
@@ -57,14 +62,18 @@ USER_AGENT = "REE-Finder/0.1 (research; contact via repository)"
 _print_lock = threading.Lock()
 
 
-def entry_ids(enumeration: Path = ENUMERATION) -> list[str]:
+def entry_ids(enumeration: Path = ENUMERATION, key: str = "entries") -> list[str]:
     payload = json.loads(enumeration.read_text())
-    return sorted(payload["entries"])
+    if key not in payload:
+        raise SystemExit(f"{enumeration} has no '{key}' key "
+                         f"(has: {', '.join(k for k in payload if k[0] != '_')})")
+    return sorted(payload[key])
 
 
-def fetch_one(session: requests.Session, pdb_id: str, out_dir: Path) -> dict:
+def fetch_one(session: requests.Session, pdb_id: str, out_dir: Path,
+              url: str = URL, suffix: str = "") -> dict:
     """Download one entry, or report why not. Never raises."""
-    target = out_dir / f"{pdb_id}.cif.gz"
+    target = out_dir / f"{pdb_id}{suffix}.cif.gz"
     if target.exists() and target.stat().st_size > 0:
         body = target.read_bytes()
         return {"pdb_id": pdb_id, "status": "cached", "bytes": len(body),
@@ -73,7 +82,7 @@ def fetch_one(session: requests.Session, pdb_id: str, out_dir: Path) -> dict:
     last = None
     for attempt in range(1, ATTEMPTS + 1):
         try:
-            response = session.get(URL.format(pdb_id=pdb_id), timeout=TIMEOUT)
+            response = session.get(url.format(pdb_id=pdb_id), timeout=TIMEOUT)
             if response.status_code == 404:
                 return {"pdb_id": pdb_id, "status": "missing", "http": 404}
             response.raise_for_status()
@@ -105,19 +114,35 @@ def main() -> int:
     # --enumeration are set together or not at all.
     parser.add_argument("--enumeration", type=Path, default=ENUMERATION,
                         help="JSON with an 'entries' mapping of PDB IDs")
+    # Assemblies are fetched for the few entries that need them, not for the
+    # corpus: re-downloading 636 entries to fix 99 would be most of a
+    # gigabyte to no purpose, so the default key is the audit's shortlist.
+    parser.add_argument("--assembly", action="store_true",
+                        help="fetch -assembly1.cif.gz instead of the deposited "
+                             "coordinates, reading the 'expanded' shortlist "
+                             "written by scripts/assembly_audit.py")
+    parser.add_argument("--key", default=None,
+                        help="JSON key listing the IDs (default: 'expanded' "
+                             "with --assembly, otherwise 'entries')")
     args = parser.parse_args()
 
-    ids = entry_ids(args.enumeration)
+    url = ASSEMBLY_URL if args.assembly else URL
+    suffix = "-assembly1" if args.assembly else ""
+    key = args.key or ("expanded" if args.assembly else "entries")
+
+    ids = entry_ids(args.enumeration, key)
     if args.limit:
         ids = ids[:args.limit]
     args.out.mkdir(parents=True, exist_ok=True)
-    print(f"{len(ids)} entries -> {args.out}")
+    print(f"{len(ids)} entries -> {args.out}"
+          f"{'  (biological assemblies)' if args.assembly else ''}")
 
     results, started = [], time.time()
     session = requests.Session()
     session.headers["User-Agent"] = USER_AGENT
     with ThreadPoolExecutor(max_workers=WORKERS) as pool:
-        futures = {pool.submit(fetch_one, session, i, args.out): i for i in ids}
+        futures = {pool.submit(fetch_one, session, i, args.out, url, suffix): i
+                   for i in ids}
         for done, future in enumerate(as_completed(futures), start=1):
             record = future.result()
             results.append(record)
@@ -131,7 +156,9 @@ def main() -> int:
         by_status.setdefault(record["status"], []).append(record["pdb_id"])
     manifest = {
         "_provenance": {
-            "source": URL,
+            "source": url,
+            "coordinates": ("biological assembly 1" if args.assembly
+                            else "deposited asymmetric unit"),
             "format": "gzipped mmCIF (see module docstring for why not bcif)",
             "retrieved": time.strftime("%Y-%m-%d"),
             "entries_requested": len(ids),

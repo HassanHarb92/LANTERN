@@ -43,6 +43,7 @@ from reefinder.structure import (ALL_METAL_CODES,         # noqa: E402
                                  binding_neighborhood)
 
 CORPUS = ROOT / ".cache" / "corpus"
+ASSEMBLY_DIR = ROOT / ".cache" / "assembly"
 ENUMERATION = ROOT / "data" / "ree_pdb_entries.json"
 DEFAULT_OUT = ROOT / "data" / "lanthanide_sites.parquet"
 
@@ -51,14 +52,34 @@ DEFAULT_OUT = ROOT / "data" / "lanthanide_sites.parquet"
 # construct that is an LBT fused to calmodulin.
 TITLE_RULES = [
     ("engineered_lbt", ("lanthanide-binding tag", "lanthanide binding tag",
-                        "de novo", "designed protein", "computational design")),
+                        "lanthanide-binding peptide", "lanthanide binding motif",
+                        "lanthanoid tagging", "artificial metalloprotein",
+                        "clanp", "de novo", "designed protein", "designed coiled",
+                        "computational design")),
     # "lanm", not "lanmodulin": 9PI2 is titled "Ancylobacter lacus LanM" and
     # the longer keyword silently dropped a known lanmodulin into the
     # unclassified pile. Checked against all 636 titles -- the five that
     # contain "lanm" are all lanmodulins, so the shorter key costs nothing.
-    ("natural_ln_biology", ("lanm", "methanol dehydrogenase", "xoxf",
-                            "methylotroph", "lanthanide-dependent",
-                            "pyrroloquinoline")),
+    # "methylo", not "methylotroph": the four LanD entries (9C8X/Y/Z/90) are
+    # titled "Methylorubrum extorquens ...-bound LanD" and the longer keyword
+    # matched none of them, so a third natural family sat unclassified. LanD
+    # is landiscernin, the lanthanide chaperone of PNAS 2024 (PMID 39467132),
+    # and a pointed omission: its published function is separating light
+    # lanthanides from each other, which is the selectivity this project is
+    # looking for. Checked against all 808 titles -- the eight containing
+    # "methylo" are XoxF, lanmodulin and LanD, all genuine. The residual risk
+    # is an unrelated Methylobacterium protein soaked with a lanthanide for
+    # phasing; none is in the corpus today, and the four-class hand curation
+    # is where that would be caught.
+    #
+    # NOT "land", though it is the name in the title: it also matches
+    # "Ignicoccus islandicus" (6QSS, a malate dehydrogenase co-crystallised
+    # with Tb-Xo4), which is a phasing experiment and not lanthanide biology.
+    # "methylo" already catches all four LanD entries, so the substring buys
+    # nothing and costs a false positive.
+    ("natural_ln_biology", ("lanm", "landiscernin", "methanol dehydrogenase",
+                            "xoxf", "methylo", "lanthanide-dependent",
+                            "lanthanide chaperone", "pyrroloquinoline")),
     ("ln_substituted_ca", ("calmodulin", "troponin", "parvalbumin", "ef-hand",
                            "calbindin", "recoverin", "calcineurin",
                            "s100", "annexin", "synaptotagmin")),
@@ -83,7 +104,8 @@ def title_first_pass(title: str) -> tuple[str, str]:
     return "unclassified", "title:none"
 
 
-def site_rows(pdb_id: str, text: str, meta: dict) -> list[dict]:
+def site_rows(pdb_id: str, text: str, meta: dict,
+              coordinate_source: str = "asu") -> list[dict]:
     """One flat row per metal site in one entry."""
     sites = binding_neighborhood(text, "cif", metals=ALL_METAL_CODES)
     label, basis = title_first_pass(meta.get("title", ""))
@@ -184,6 +206,11 @@ def site_rows(pdb_id: str, text: str, meta: dict) -> list[dict]:
             "resolution_A": meta.get("resolution_A"),
             "method": meta.get("method", ""),
             "title": meta.get("title", ""),
+            # "asu" or "assembly1". Not cosmetic: a site parsed from the ASU
+            # when its partner protomer is missing is wrong in every
+            # geometric column, so any contrast that mixes the two sources
+            # unevenly between its arms is confounded by this.
+            "coordinate_source": coordinate_source,
         })
     return rows
 
@@ -198,6 +225,16 @@ def main() -> int:
     # the title is what the class first pass runs on.
     parser.add_argument("--enumeration", type=Path, default=ENUMERATION,
                         help="JSON with {'entries': {PDB_ID: {'title': ...}}}")
+    # A metal on a symmetry axis is coordinated by two protomers, and the
+    # deposited asymmetric unit holds one of them. Parsing the ASU then finds
+    # half the site and moves every descriptor at once: 9C8X (landiscernin)
+    # read CN 5, charge -3, SASA 47.9 from the ASU and CN 10, charge -6,
+    # SASA 0.0 from the dimer -- a buried, highly anionic lanthanide site
+    # that the ASU made look like adventitious surface binding. Where an
+    # assembly file is supplied it wins, and the row records which was used.
+    parser.add_argument("--assembly-dir", type=Path, default=ASSEMBLY_DIR,
+                        help="directory of {ID}-assembly1.cif.gz to prefer "
+                             "over the deposited coordinates")
     args = parser.parse_args()
 
     enumeration = json.loads(args.enumeration.read_text())["entries"]
@@ -207,7 +244,17 @@ def main() -> int:
     if not files:
         print(f"no .cif.gz under {args.corpus} -- run download_corpus.py first")
         return 1
+
+    assemblies = {}
+    if args.assembly_dir and args.assembly_dir.is_dir():
+        assemblies = {p.name.removesuffix("-assembly1.cif.gz"): p
+                      for p in args.assembly_dir.glob("*-assembly1.cif.gz")}
     print(f"parsing {len(files)} entries from {args.corpus}")
+    if assemblies:
+        covered = sum(1 for p in files
+                      if p.name.removesuffix(".cif.gz") in assemblies)
+        print(f"  {covered} of them from biological assemblies in "
+              f"{args.assembly_dir}")
 
     rows, failures, started = [], [], time.time()
     with warnings.catch_warnings():
@@ -217,9 +264,11 @@ def main() -> int:
         warnings.simplefilter("ignore")
         for done, path in enumerate(files, start=1):
             pdb_id = path.name.removesuffix(".cif.gz")
+            source = assemblies.get(pdb_id, path)
             try:
-                text = gzip.open(path, "rt", errors="replace").read()
-                rows += site_rows(pdb_id, text, enumeration.get(pdb_id, {}))
+                text = gzip.open(source, "rt", errors="replace").read()
+                rows += site_rows(pdb_id, text, enumeration.get(pdb_id, {}),
+                                  "assembly1" if pdb_id in assemblies else "asu")
             except Exception as error:                    # noqa: BLE001
                 failures.append((pdb_id, f"{type(error).__name__}: {error}"))
             if done % 100 == 0 or done == len(files):

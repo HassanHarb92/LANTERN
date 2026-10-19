@@ -85,20 +85,22 @@ REE-Finder/
 │   ├── sequence_hallmarks.py     # EF-hand period and Pro-at-2, measured through the instrument
 │   ├── burial_and_charge.py      # The Dudev descriptors, and why they do not separate here
 │   ├── download_corpus.py        # Fetch all 636 entries as gzipped mmCIF, resumable
-│   ├── build_site_table.py       # Parse them into one 2795-site table
+│   ├── build_site_table.py       # Parse them into one 3375-site table
 │   ├── corpus_descriptors.py     # Re-test the descriptors on the corpus, not on one fold
 │   ├── crosscheck_metalpdb.py    # Validate the parser against an independent implementation
 │   ├── matched_calcium.py        # Fetch Ca-only depositions of the same proteins, by UniProt
 │   ├── paired_sites.py           # Same site, both ions: the fold-controlled contrast
+│   ├── assembly_audit.py         # Which entries are parsed with half a site (ASU < assembly)
 │   └── selectivity_contrast.py   # Native Ln biology vs native Ca -- what actually separates
 ├── data/reference_proteins.json  # 6 authentic UniProt sequences, checksummed
 ├── data/synthetic_examples.json  # Synthetic fixtures, used only by tests
 ├── data/structures/              # Prefetched coordinates + manifest
 ├── data/ree_pdb_entries.json     # All 636 rare-earth PDB entries, uncurated
-├── data/lanthanide_sites.parquet # 2795 metal sites from those entries, with geometry
-├── data/calcium_sites.parquet    # 645 Ca sites in 172 Ca-only depositions of the same proteins
+├── data/lanthanide_sites.parquet # 3375 metal sites from those entries, with geometry
+├── data/calcium_sites.parquet    # 681 Ca sites in 172 Ca-only depositions of the same proteins
 ├── data/calcium_counterparts.json# How those 172 were chosen, and from which accessions
-├── tests/                        # Offline regression tests (100, no network)
+├── data/assembly_counts.json     # Chains deposited vs chains in the biological assembly, per entry
+├── tests/                        # Offline regression tests (102, no network)
 ├── docs/SCIENTIFIC_CONTRACT.md   # Scientific claims and evidence gates
 ├── ROADMAP.md                    # Verified state, defects, milestones M0-M6
 ├── IMPLEMENTATION_PLAN.md        # Earlier aspirational plan, superseded in part
@@ -152,7 +154,7 @@ pytest -q
   number, already shipped, separates better than either. Measure it yourself:
   `python scripts/burial_and_charge.py`.
 - **The full rare-earth structure corpus, measured.** All 636 entries parsed into
-  `data/lanthanide_sites.parquet` — **2795 sites, 2570 lanthanide and 225 calcium**, 33 columns of
+  `data/lanthanide_sites.parquet` — **3375 sites, 3116 rare-earth and 259 calcium**, 38 columns of
   geometry each. The parser is checked against MetalPDB, an independent implementation: **65 of 65
   metal ions agree on every donor it reports**, and the 26 extra donors this repo finds all lie in
   the 3.00–3.18 Å band between the two cutoffs. Two results worth knowing before using the table:
@@ -162,24 +164,39 @@ pytest -q
   `python scripts/download_corpus.py && python scripts/build_site_table.py`, measure it with
   `python scripts/corpus_descriptors.py`.
 - **The matched calcium contrast, and the two ways it can lie.** 172 Ca-only depositions of the
-  same proteins, found by UniProt accession rather than by title, give **645 calcium sites** to
+  same proteins, found by UniProt accession rather than by title, give **681 calcium sites** to
   compare against. Pairing them to Corpus A by *site signature* — the coordinating residues with
-  the chain dropped — yields 31 same-site Ln/Ca pairs. Two traps, both measured. The first run
+  the chain dropped — yields 19 same-site Ln/Ca pairs. Two traps, both measured. The first run
   capped the calcium side at 2.5 Å and not the lanthanide side, which left the Ln sites 0.17 Å
   worse-resolved (p=0.0094) and manufactured a donor-distance difference that vanished under a
   symmetric cutoff. The second is structural: a site seen with *both* ions is a site that is not
-  selective, so **no natural-lanthanide-biology site has a calcium partner at all** and all 19
-  clean pairs are calcium proteins with a lanthanide soaked in. Their geometry is indistinguishable
+  selective, so **no natural-lanthanide-biology site has a calcium partner at all** (299 of 342
+  lanthanide sites, 87.4%, have no partner) and every clean pair is a calcium protein with a
+  lanthanide soaked in. Their geometry is indistinguishable
   — which does establish that a pre-formed calcium site *does not deform* when it takes a
   lanthanide. Run `python scripts/paired_sites.py --contrast data/calcium_sites.parquet`.
-- **What separates a lanthanide-selective site, measured native against native.** Comparing the
-  10 genuine Ln-biology entries to the 171 Ca-only entries, entry-level and resolution-matched:
-  **coordination number ≥8.5 (balanced accuracy 1.000, p=0.0016)** and **bidentate carboxylates
-  ≥1.5 (0.988, p<0.0001)** separate; **net charge does not (p=0.168)**, a third independent
-  confirmation that it belongs in triage and not in the selectivity score, and neither does SASA
-  (p=0.659). The honest *n* is **two families** — lanmodulin and the XoxF/MDH dehydrogenases —
-  and the thresholds are fitted and scored on the same points, so these are descriptive
-  separations, not a validated classifier. `python scripts/selectivity_contrast.py`.
+- **The asymmetric unit is not the site.** A metal on a crystallographic symmetry axis is
+  coordinated by two protomers, but the deposited coordinates hold one — so the parse finds **half
+  the coordination sphere**, and every geometric column moves at once in the direction that makes a
+  real site look adventitious. For 9C8X this is CN 5→10, net charge −3→−6 and SASA 47.9→**0.00 Å²**.
+  It affects **119 of 808 entries (14.7%)**: 99 in Corpus A, 20 on the calcium side. Those entries
+  are now re-parsed from biological assembly 1, every row records a `coordinate_source` of `asu` or
+  `assembly1`, and the correction is applied to both corpora by one rule — fixing one arm of a
+  contrast and not the other is how the resolution bug above happened. Audit it with
+  `python scripts/assembly_audit.py`.
+- **What separates a lanthanide-selective site, measured native against native.** Three natural
+  families — lanmodulin, the XoxF/MDH dehydrogenases, and the LanD lanthanide chaperone found by
+  the assembly fix — against 55 calcium accessions, both sides ≤2.5 Å and chelator-free, scored by
+  an exact one-sided rank test over all C(58,3) assignments: **coordination number (9.00 vs 7.00)**
+  and **bidentate carboxylates (2.00 vs 1.00)** are the only descriptors **no calcium accession
+  reaches** (*p* = 0.00003, the floor at this *n*). **Net charge fails for the fourth time** — it is
+  significant (*p* = 0.0024) and it is the Dudev prediction, but 17 of 55 calcium accessions are as
+  anionic, so it stays in triage; SASA fails for the fifth (*p* = 0.063). Two statistical traps are
+  recorded in ROADMAP §3.17 because each briefly reversed the answer: entry-level pseudo-replication
+  (four LanD entries are one protein with four metals) and a two-sided permutation test that scores
+  perfect separation *worse* than partial separation at *n* = 3. At three families the overlap count
+  is the honest statistic and the *p*-value is mostly a statement about *n*.
+  `python scripts/selectivity_contrast.py`.
 - Argo text explanations constrained to screening output, with rejected credentials failing closed.
 
 ## Measured baseline
