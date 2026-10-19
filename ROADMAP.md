@@ -683,7 +683,7 @@ raising; no query returns endocytosis proteins.
 **Done when:** ~~the default demo runs offline on authentic sequences, every record carries a
 verified checksum and provenance, and the ranking — including its known inversion — is pinned by
 test.~~ — ✅ **DONE 2026-10-19.** All of that, plus the inversion resolved rather than merely
-pinned: 70 tests, no xfail, five structures cached (8FNS, 8FNR, 8DQ2, 9PI2, 1CLL), both lanthanide
+pinned: 73 tests, no xfail, five structures cached (8FNS, 8FNR, 8DQ2, 9PI2, 1CLL), both lanthanide
 binders above both calcium proteins.
 
 ### M2 — The lanthanide structure corpus (3–5 days) ← *the core asset*
@@ -726,6 +726,41 @@ Build Corpus A as a versioned local database.
   entries — and never the legacy `.pdb` endpoint, which 404s on large structures (§3.5).
 - Compute per site: CN, protein-O/N/S donor counts, water count, bidentate carboxylate count,
   mean and spread of Ln–O distance, residue composition, B-factors/occupancy, solvent exposure.
+- **Filter chelator-dominated sites, which are a second contamination class.** §4's
+  `CHELATED_REE_CODES` catches entries where the metal *is* a pre-chelated component. It does not
+  catch the commoner case: a bare `GD`/`TB`/`YB` ion in an entry that also contains a separate
+  chelator molecule — bis-tris (`BTB`), DOTA/DO3A-type macrocycles (`DO3`), pyridine-2,6-
+  dicarboxylate (`PDC`), citrate, EDTA — which is what actually coordinates it. The site passes the
+  bare-ion filter and is still not protein-coordinated.
+
+  This needs no new chemistry: `binding_neighborhood()` already returns `other_ligand_donor_count`
+  per site, counting first-shell donors that are neither protein nor water. A site where those
+  dominate is a chelator complex that happens to sit near a protein. Suggested rule, to be
+  hand-checked rather than trusted: flag any site where `other_ligand_donor_count` is at least half
+  of `coordination_number`. Record the flag; do not silently drop, since a few genuine sites have a
+  bound carbonate or acetate. Checked against the 42 cached biological sites: **zero** are flagged,
+  so the rule costs nothing on the positive class. Its false-*negative* rate is untested and needs
+  a chelator-containing entry to measure — pick one from the `BTB` list below.
+
+  **The scale of the problem, measured over all 636 corpus entries** (RCSB Data API, 2026-10-19):
+  **207 entries — 32.5% — contain at least one known metal-chelating co-solute.**
+
+  | Component | What it is | Entries |
+  |---|---|---:|
+  | `BTB` | bis-tris | 96 |
+  | `ACT` | acetate | 93 |
+  | `DO3` | DO3A macrocycle | 21 |
+  | `PDC` | pyridine-2,6-dicarboxylate | 6 |
+  | `CIT` / `FLC` | citrate | 7 |
+  | `DOT` | DOTA | 1 |
+  | `TLA` | L-tartrate | 1 |
+
+  **Do not read that 32.5% as "207 entries to drop."** Bis-tris in the crystallization buffer
+  usually sits nowhere near the metal, and acetate is often an innocent surface passenger. Presence
+  is a reason to *check the geometry*, which is why the filter is a first-shell measurement and not
+  a component-presence lookup. The 21 `DO3` and 1 `DOT` entries are the ones to inspect first:
+  DOTA-type macrocycles are purpose-built lanthanide cages, and in those entries the metal is
+  almost certainly theirs rather than the protein's.
 - **Classify every site into the four classes of §4** — natural Ln biology, Ln-substituted Ca site,
   engineered LBT, phasing/surface artefact. Use deposition metadata and title text for a first
   pass, then hand-check. Site 11 of 8FNR (CN = 4, 2 carboxylates, no water) is a worked example of
