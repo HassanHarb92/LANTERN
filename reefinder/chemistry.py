@@ -1,5 +1,7 @@
 """Transparent pre-screen; NOT metal affinity or selectivity prediction."""
 import re
+from collections import Counter
+
 from .models import Protein, Candidate
 
 # Flexible EF-hand-like patterns are search hints, not proof of a functional site.
@@ -28,6 +30,33 @@ from .models import Protein, Candidate
 # lanmodulin family rises 91.0% -> 96.8% while specificity holds at ~91%, and
 # the share of family members scoring zero motifs falls from 1.1% to 0.0%.
 EF_HAND_HINT = re.compile(r"[DN].[DN].[DN]..[ILV][DE]..E")
+
+# The loop is 12 residues and the pattern above spans exactly those 12, so a
+# match *is* a loop and can be indexed by position directly.
+LOOP_LENGTH = 12
+LIGAND_POSITIONS = (1, 3, 5, 7, 9, 12)   # X, Y, Z, -Y, -X, -Z
+
+# Position 9 is reported as a named feature rather than left implicit in the
+# regex, because the obvious reading of the structural evidence is wrong and
+# somebody will otherwise implement it.
+#
+# Structurally, Glu at 9 is the tighter architecture: bidentate, expels the
+# water, CN 10 (8DQ2, 9PI2). Asp at 9 gives CN 9 with two waters (8FNS).
+# Both bind lanthanides. It is tempting to conclude Glu-at-9 is the
+# lanthanide marker. At the sequence level that is backwards. Measured over
+# 694 sequences with position 9 unconstrained (scripts/validate_motif.py):
+#
+#                     pos 9 = Asp      pos 9 = Glu     any carboxylate
+#   LanM family          82.1%             0.5%             82.6%
+#   calcium EF-hands     26.4%            13.3%             39.7%
+#
+# So the discriminating fact is "position 9 is a carboxylate", and Asp
+# carries essentially all of it. Glu at 9 is 27x *more* common in calcium
+# EF-hands than in lanmodulins -- it marks the H. quercus sub-architecture,
+# not lanthanide binding. A descriptor keyed on Glu-at-9 would select
+# calcium proteins.
+POSITION_9 = 9
+LANTHANIDE_LIKE_POSITION_9 = frozenset("DE")
 METALS = {
     "Nd3+": {"name": "Neodymium(III)", "kind": "lanthanide", "notes": "Hard trivalent cation; often prefers oxygen donors."},
     "Dy3+": {"name": "Dysprosium(III)", "kind": "lanthanide", "notes": "Hard trivalent cation; often prefers oxygen donors."},
@@ -36,23 +65,54 @@ METALS = {
     "Ca2+": {"name": "Calcium(II)", "kind": "competitor", "notes": "Divalent competitor for oxygen-rich binding sites."},
 }
 
+def ef_hand_loops(sequence: str) -> list[dict]:
+    """Every loop the classifier matches, with its ligand positions named.
+
+    Returns the residue sitting at each of the six coordinating positions, so
+    the thing doing the discriminating is inspectable instead of buried in a
+    regex. Non-overlapping, in sequence order, consistent with the motif
+    count used by the score.
+    """
+    seq = sequence.upper().replace(" ", "").replace("\n", "")
+    loops = []
+    for match in EF_HAND_HINT.finditer(seq):
+        loop = match.group(0)
+        loops.append({
+            "start": match.start() + 1,       # 1-based residue number
+            "loop": loop,
+            "ligands": {p: loop[p - 1] for p in LIGAND_POSITIONS},
+            "position_9": loop[POSITION_9 - 1],
+        })
+    return loops
+
+
 def score_sequence(protein: Protein) -> Candidate:
     seq = protein.sequence.upper().replace(" ", "").replace("\n", "")
     if not seq or not re.fullmatch(r"[ACDEFGHIKLMNPQRSTVWY]+", seq):
         return Candidate(protein, 0., 0, 0., ["Missing or unsupported amino-acid sequence"],
                          "Insufficient sequence information for scoring")
     acidic = (seq.count("D") + seq.count("E")) / len(seq)
-    motifs = len(EF_HAND_HINT.findall(seq))
-    # Consciously modest score and no metal-specific component.
+    loops = ef_hand_loops(seq)
+    motifs = len(loops)
+    # Consciously modest score and no metal-specific component. Position 9 is
+    # deliberately NOT a term here -- it is already implicit in which loops
+    # matched, and adding it again would double-count the same evidence.
     score = round(min(100., 10. + min(acidic / 0.22, 1.) * 35. + min(motifs, 4) * 12.), 1)
+    position_9 = Counter(loop["position_9"] for loop in loops)
     flags = ["Sequence-only screening", "Does not predict metal affinity or selectivity"]
     if motifs:
         flags.append(f"{motifs} EF-hand-like sequence motif(s); structural validation needed")
     if acidic > 0.17:
         flags.append("Acidic-residue enriched, not proof of an accessible pocket")
-    return Candidate(protein, score, motifs, round(acidic, 4), flags,
-                     f"Acidic-residue fraction {acidic:.1%}; EF-hand-like motif matches {motifs}. "
-                     "No 3D coordination geometry or binding free energy has been evaluated.")
+    rationale = (f"Acidic-residue fraction {acidic:.1%}; EF-hand-like motif matches {motifs}. "
+                 "No 3D coordination geometry or binding free energy has been evaluated.")
+    if position_9:
+        spread = ", ".join(f"{res}x{n}" for res, n in sorted(position_9.items()))
+        rationale += (f" Loop position 9 (the discriminating position): {spread}. "
+                      "Asp there is the lanthanide-family signal; Glu marks a rarer "
+                      "sub-architecture and is commoner in calcium EF-hands.")
+    return Candidate(protein, score, motifs, round(acidic, 4), flags, rationale,
+                     position_9=dict(position_9))
 
 def screen(proteins: list[Protein]) -> list[Candidate]:
     return sorted((score_sequence(p) for p in proteins), key=lambda c: c.score, reverse=True)

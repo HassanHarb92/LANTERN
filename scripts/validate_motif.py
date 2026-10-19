@@ -20,6 +20,7 @@ Usage:  python scripts/validate_motif.py
 import json
 import re
 import sys
+from collections import Counter
 from pathlib import Path
 
 import requests
@@ -103,6 +104,44 @@ def summarise(label: str, pattern: re.Pattern,
           f"specificity {spec:.1%}, balanced accuracy {bal:.1%}")
 
 
+# Position 9 deliberately unconstrained, so its composition can be measured
+# without conditioning on the answer. Everything else matches the shipped
+# pattern, so the loop population is the same one the classifier sees.
+POSITION_9_FREE = re.compile(r"[DN].[DN].[DN]..[ILV]...E")
+# A second, far more permissive definition used only as a robustness check:
+# Asp at 1, hydrophobic gateway at 8, Glu at 12, and nothing LanM-specific.
+POSITION_9_NEUTRAL = re.compile(r"D.{6}[ILVMFC].{3}E")
+# Both patterns span exactly the 12-residue loop, so position 9 is offset 8.
+POSITION_9_INDEX = 8
+
+
+def position_9_composition(pos: list[dict], neg: list[dict]) -> None:
+    """What actually sits at loop position 9 in each family.
+
+    The structural evidence invites a wrong conclusion. Glu at 9 is the
+    tighter architecture -- bidentate, expels the water, CN 10 in 8DQ2 and
+    9PI2 -- so Glu-at-9 looks like the lanthanide marker. At the sequence
+    level it is the reverse, and this table is why the code says so.
+    """
+    for label, pattern in (("pattern-matched loops", POSITION_9_FREE),
+                           ("neutral loop definition", POSITION_9_NEUTRAL)):
+        print(f"\nPosition 9 composition -- {label}  ({pattern.pattern})")
+        print(f"  {'set':22s} {'loops':>6} {'Asp':>7} {'Glu':>7} {'carboxylate':>12}")
+        for name, records in (("lanmodulin family", pos), ("calcium EF-hands", neg)):
+            residues = Counter()
+            for record in records:
+                for match in pattern.finditer(record["sequence"]):
+                    residues[match.group(0)[POSITION_9_INDEX]] += 1
+            total = sum(residues.values()) or 1
+            d, e = residues["D"], residues["E"]
+            print(f"  {name:22s} {total:6d} {d/total:7.1%} {e/total:7.1%} "
+                  f"{(d + e)/total:12.1%}")
+    print("\n  Read the Glu column, not the headline: Glu at position 9 is RARER in")
+    print("  lanmodulins than in calcium EF-hands. The discriminating fact is that")
+    print("  position 9 is a carboxylate at all, and Asp carries nearly all of it.")
+    print("  A descriptor keyed on Glu-at-9 would select calcium proteins.")
+
+
 def main() -> int:
     pos = family_sequences()
     neg = calcium_ef_hands()
@@ -113,6 +152,8 @@ def main() -> int:
               CANONICAL, pos, neg)
     summarise("STRUCTURE-DERIVED  [DN].[DN].[DN]..[ILV][DE]..E",
               STRUCTURE_DERIVED, pos, neg)
+
+    position_9_composition(pos, neg)
 
     print("\nCAUTION: the negative set is reviewed calcium EF-hand proteins only.")
     print("It does not test specificity against the whole proteome, and a motif")

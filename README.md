@@ -198,8 +198,19 @@ not a donor at all. Relaxing exactly those two positions makes the three Dy³⁺
 **The fix is not a tuning exercise, and three things keep it honest:**
 
 1. **The discriminating constraint was inherited, not added.** Position 9's `[DE]` was already in
-   the calcium consensus and was left untouched. It turns out to be the position doing the work —
-   Glu at 9 is a bidentate first-shell ligand that expels water, Asp at 9 works second-sphere.
+   the calcium consensus and was left untouched. It turns out to be the position doing the work:
+   a carboxylate sits at position 9 in **82.6%** of lanmodulin loops versus **39.7%** of calcium
+   EF-hand loops. Position 9 is now reported as a named feature (`Candidate.position_9`) rather
+   than left buried in the regex — but deliberately *not* added to the score, since the loops that
+   matched already required it and scoring it twice would double-count.
+
+   > **The obvious reading of the structures is wrong here, so it is worth stating plainly.** In
+   > every structure that reaches CN 10 the position-9 residue is **Glu** — bidentate, water
+   > expelled — which makes Glu-at-9 look like the lanthanide marker. Across the family it is the
+   > reverse: Glu at 9 appears in **0.5%** of lanmodulin loops and **13.3%** of calcium EF-hand
+   > loops, 27× enriched in the wrong direction. **Asp carries the signal** (82.1% vs 26.4%). Glu
+   > at 9 marks a rare sub-architecture — which happens to include this project's best structural
+   > control, A0A4V2JDD3. Both facts are true; they are about different things.
 2. **It was validated before it shipped, on 694 sequences, not six.** Against 505 reviewed calcium
    EF-hand proteins, sensitivity for the 189-member lanmodulin family rises **91.0% → 96.8%** while
    specificity holds at ~91% (balanced accuracy 91.0% → 93.9%), and the share of family members

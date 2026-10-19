@@ -344,11 +344,18 @@ because the one available held-out positive control is invisible to both ends.
 > main 642-member group at 65% identity. Family-annotation-based retrieval is structurally biased
 > toward the prototype. **M4 must retrieve by sequence criteria, not by family label** (§3.8).
 
-### 3.8 There *is* a sequence-only discriminator, and it is loop position 9
+### 3.8 There *is* a sequence-only discriminator at loop position 9 — but it is Asp, not Glu
 
 **The strongest one is a single residue.** The EF-loop ligates at positions 1, 3, 5, 7, 9, 12, and
 position 9 is where lanmodulins and calcium proteins diverge. Loop sequences extracted from
 deposited coordinates:
+
+> **Read §3.8.1 before implementing anything from this section.** The structural evidence below is
+> correct and invites a conclusion that is wrong at the sequence level. Every crystal structure
+> here that reaches CN 10 does it with **Glu** at position 9, so Glu-at-9 looks like the lanthanide
+> marker. Measured across 694 sequences it is the reverse: Glu at 9 is **27× more common in calcium
+> EF-hands than in lanmodulins**. The transferable signal is that position 9 is a *carboxylate*,
+> and **Asp carries essentially all of it**.
 
 | Protein (PDB) | EF1 | EF2 | EF3 | EF4 | pos 9 |
 |---|---|---|---|---|---|
@@ -392,9 +399,61 @@ position 9 — a constraint **inherited unchanged from the calcium consensus**, 
 exactly Hans-LanM's three lanthanide loops and skips its calcium-like EF4, which is the behaviour
 `test_hans_lanm_scores_its_three_lanthanide_loops_and_not_its_calcium_one` pins.
 
-**A caution that follows from the same table:** Mex-LanM, the prototype, has **Asp** at position 9
-in all four loops. A descriptor keyed on Glu alone would reject the founding member of the family.
-Position 9 ∈ {Asp, Glu} is the usable form; Glu specifically marks the CN-10, water-free subtype.
+#### 3.8.1 The correction: at sequence scale the signal is Asp, and Glu points the other way
+
+Everything above is structural, and three of the four structures are the same sub-architecture.
+Before encoding position 9 as a feature I measured its composition across the family rather than
+across five crystals, with position 9 **unconstrained** in the detector so the measurement does not
+assume its own answer (`scripts/validate_motif.py`, 189 lanmodulins vs 505 reviewed calcium
+EF-hand proteins):
+
+| detector | set | loops | pos 9 = **Asp** | pos 9 = **Glu** | any carboxylate |
+|---|---|---:|---:|---:|---:|
+| `[DN].[DN].[DN]..[ILV]...E` (shipped pattern, pos 9 freed) | LanM family | 660 | **83.0%** | 1.4% | 84.4% |
+| | calcium EF-hands | 990 | 26.2% | 3.3% | 29.5% |
+| `D.{6}[ILVMFC].{3}E` (neutral, nothing LanM-specific) | LanM family | 609 | **82.1%** | **0.5%** | **82.6%** |
+| | calcium EF-hands | 1247 | 26.4% | **13.3%** | **39.7%** |
+
+Three things follow, and the third contradicts the obvious reading of the structural table:
+
+1. **Position 9 does discriminate.** Carboxylate at 9 in 82.6% of LanM loops versus 39.7% of
+   calcium loops — a real, sequence-readable, family-scale difference. The section title stands.
+2. **Asp carries it.** 82.1 of those 82.6 points. The Asp column alone separates the families
+   about as well as the carboxylate column does.
+3. **Glu at 9 is a calcium signal, not a lanthanide one.** 0.5% in lanmodulins against 13.3% in
+   calcium EF-hands under the neutral detector: **27× enriched in the wrong direction**. A
+   descriptor keyed on Glu-at-9 would select *against* the target.
+
+The structural claim and the sequence claim are both true and are about different things. Glu at 9
+really is the tighter architecture *given that the protein is already a lanmodulin* — bidentate,
+water-free, CN 10. It is just not what makes a sequence a lanmodulin, because almost no lanmodulins
+have it. Hans-LanM and *A. lacus* LanM are the rare subtype; Mex-LanM's `Asp ×4` is the family.
+
+> **The project's best structural positive control is its family's least representative member.**
+> A0A4V2JDD3 (Hans-LanM, 8FNR/8DQ2) is the protein whose coordinates drove the §3.6 fix and whose
+> three Dy³⁺ loops the ranking test pins — and it is `Glu ×3` at position 9, the 0.5% form. Tuning
+> a sequence descriptor on it would miss the 188 family members that look like Mex-LanM, which are
+> the entire point of M4. Pinned in `test_the_two_lanmodulins_do_not_share_a_position_9_residue`.
+
+**What this means for the score.** Position 9 ∈ {Asp, Glu} stays — but for a corrected reason. The
+earlier reason given here ("Glu alone would reject Mex-LanM") understated it: Glu-only is not
+merely incomplete, it is inverted. Benchmarked balanced accuracy on the 694-sequence set:
+
+| position-9 constraint | balanced accuracy |
+|---|---:|
+| canonical `D.[DN].[DN]G.[ILV][DE]..E` | 91.0% |
+| **`[DE]` as shipped** | **93.9%** |
+| `[D]` only (Asp) | 94.3% |
+| `[E]` only (Glu) | 50.0% |
+
+Asp-only scores 0.4 pp above the shipped form. **It was not adopted.** 0.4 pp on the single
+benchmark being optimised against, chosen after seeing the benchmark, is fitting — and `[DE]` is
+the form inherited from the calcium consensus rather than selected here, which is worth more than
+0.4 pp. Revisit only against a held-out set (M4).
+
+Position 9 is now reported as a named feature (`Candidate.position_9`, `ef_hand_loops()`) and
+deliberately **not** added as a score term: the loops that matched already required `[DE]` there,
+so scoring it again would double-count one piece of evidence.
 
 #### Secondary: EF-hand spacing
 
@@ -427,7 +486,10 @@ Mex-LanM loops. Across the 189 family members the median period is **24.0**.
 > not find. The n=6 result above and the published hallmark are what support spacing; measuring it
 > against calcium proteins needs a balanced-recall detector that does not yet exist. **Spacing stays
 > out of the score until then.** Position 9 did not need it: it is carried by the existing pattern
-> and is validated on 694 sequences (§3.6).
+> and is validated on 694 sequences (§3.6). Its *composition* was still measured against a second,
+> deliberately neutral loop definition (§3.8.1) — not a validated balanced detector, but enough to
+> catch that the biased pattern was understating Glu in calcium loops by 4× (3.3% → 13.3%). Where
+> the biased detector can be checked against a neutral one, it should be.
 
 ### 3.9 Which structural features actually discriminate — and one that does not, here
 
@@ -797,10 +859,17 @@ These are cheap, they are what unblocks the headline screen, and none of them ne
   ~36) and Pro at loop position 2 — the latter is quantified, the 4P2A mutant tightens Ln³⁺ by only
   5–10× but Ca²⁺ by ~300×, so Pro at 2 is almost pure Ca²⁺ rejection. Both need the balanced
   detector above first. **Only then** may a spacing term enter the score.
-- **Encode position 9 explicitly** rather than leaving it implicit in the regex (§3.8). It is
-  currently carried by the inherited `[DE]`, which works but is invisible to anyone reading the
-  score. Make it a named, separately reported feature, and use the {Asp, Glu} form — Glu-only would
-  reject Mex-LanM, the founding family member.
+- ✅ **Encode position 9 explicitly** rather than leaving it implicit in the regex (§3.8). **Done**
+  — `ef_hand_loops()` returns every matched loop with all six ligand positions named, and
+  `Candidate.position_9` reports the composition. It is *not* a score term: the matched loops
+  already required `[DE]` there, so scoring it again would double-count.
+  **The reason previously given in this bullet for keeping the {Asp, Glu} form was wrong and has
+  been corrected in §3.8.1.** It said Glu-only "would reject Mex-LanM, the founding family member".
+  True, but far too weak: measured over 694 sequences, Glu at position 9 occurs in **0.5% of
+  lanmodulin loops and 13.3% of calcium EF-hand loops**. Glu-only is not an incomplete lanthanide
+  feature, it is a calcium feature — 50.0% balanced accuracy, i.e. no better than a coin. Asp
+  carries the signal (82.1% vs 26.4%). Asp-only benchmarks 0.4 pp above `[DE]` and was deliberately
+  **not** adopted: that is fitting to the one set being measured against.
 
 **M3.1 — the geometric descriptor.**
 
@@ -1094,6 +1163,12 @@ beyond the six demo proteins — is reproduced by `scripts/validate_motif.py`. I
 189-member LanM family against 505 reviewed calcium EF-hand proteins under both the canonical and
 the structure-derived pattern, and prints sensitivity, specificity and balanced accuracy at the
 best threshold for each. Both sets cache under `.cache/`, so reruns are offline.
+
+The same script also prints **§3.8.1's position-9 composition table** — the measurement that shows
+Glu-at-9 is a calcium signal rather than a lanthanide one. It reports the composition under two
+detectors, the shipped pattern with position 9 freed and a neutral `D.{6}[ILVMFC].{3}E`, because
+the headline number (Glu 0.5% vs 13.3%) depends on not letting the biased pattern define the loop
+population it is being measured on.
 
 §3.9's donor-chemistry comparison, including the 9PI2 internal control and the finding that
 backbone-carbonyl count carries zero information *within* the EF-hand family, is reproduced by the

@@ -14,7 +14,7 @@ import pytest
 
 from reefinder.catalog import (REFERENCE_PATH, SYNTHETIC_PATH, load_reference,
                                load_synthetic, provenance)
-from reefinder.chemistry import screen
+from reefinder.chemistry import ef_hand_loops, screen
 
 REFERENCE = {p.accession: p for p in load_reference()}
 PROVENANCE = provenance()
@@ -143,3 +143,54 @@ def test_hans_lanm_scores_its_three_lanthanide_loops_and_not_its_calcium_one():
     # Calmodulin has four EF-hands and should still score well under three:
     # the pattern is deliberately a poor detector of calcium loops.
     assert scored["P0DP23"].motif_count < 3
+
+
+def test_the_two_lanmodulins_do_not_share_a_position_9_residue():
+    """The best structural control is the family's least typical member.
+
+    C5B164 (M. extorquens, the reviewed founding member) carries Asp at loop
+    position 9 in all four loops. A0A4V2JDD3 (H. quercus) carries Glu in all
+    three. Both bind lanthanides; the architectures differ -- Glu at 9 is
+    bidentate and expels the water (8DQ2, 9PI2: CN 10, no water), Asp at 9
+    leaves two waters (8FNS: CN 9).
+
+    This matters for M4. Measured over the whole family, Asp at 9 appears in
+    82.1% of loops and Glu in 0.5%, so A0A4V2JDD3 is the rare architecture.
+    Tuning a descriptor on it would miss the 188 members that look like
+    C5B164 -- which are the entire point of the screen.
+    """
+    scored = {c.protein.accession: c for c in screen(load_reference())}
+    assert scored["C5B164"].position_9 == {"D": 4}
+    assert scored["A0A4V2JDD3"].position_9 == {"E": 3}
+
+
+def test_position_9_identity_alone_does_not_separate_lanm_from_calcium():
+    """Guards against the wrong lesson being drawn from the position.
+
+    Position 9 discriminates by being a *carboxylate at all* -- 82.6% of LanM
+    loops versus 39.7% of calcium EF-hand loops. Which carboxylate it is does
+    not help here: troponin C's matched loops carry Asp at 9, exactly like
+    the LanM family's dominant form. The separation in the score comes from
+    how many loops qualify, not from the residue's identity within them.
+
+    So a feature keyed on Glu-at-9 would be worse than useless: Glu is 27x
+    commoner at position 9 in calcium EF-hands (13.3%) than in lanmodulins
+    (0.5%). It would select *against* the target.
+    """
+    scored = {c.protein.accession: c for c in screen(load_reference())}
+    assert set(scored["P02585"].position_9) == {"D"}      # troponin C, calcium
+    assert set(scored["C5B164"].position_9) == {"D"}      # lanmodulin
+    # Same residue at position 9, opposite metal preference.
+    assert scored["P02585"].position_9 != {}
+
+
+def test_ef_hand_loops_are_twelve_residues_with_named_ligand_positions():
+    reference = {p.accession: p for p in load_reference()}
+    loops = ef_hand_loops(reference["C5B164"].sequence)
+    assert len(loops) == 4
+    for loop in loops:
+        assert len(loop["loop"]) == 12
+        assert set(loop["ligands"]) == {1, 3, 5, 7, 9, 12}
+        # The named position must agree with the raw string it came from.
+        assert loop["ligands"][9] == loop["position_9"] == loop["loop"][8]
+        assert loop["ligands"][12] == "E"                 # -Z, the bidentate anchor

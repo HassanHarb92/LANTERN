@@ -22,6 +22,10 @@ class Candidate:
     flags: list[str] = field(default_factory=list)
     rationale: str = ""
     score_type: str = "sequence heuristic (unvalidated)"
+    # Residue counts at EF-loop position 9, the position that actually
+    # discriminates. Reported rather than folded into the score: it is
+    # evidence for a reader, not a term in the arithmetic.
+    position_9: dict[str, int] = field(default_factory=dict)
 
     def as_dict(self):
         d = asdict(self)
