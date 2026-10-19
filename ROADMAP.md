@@ -85,12 +85,25 @@ Top hits the app actually returns today: Huntingtin-interacting protein 1, Lymph
 Epsin-2 — 755 of them, none relevant. There is **no UniProt keyword for EF-hand**; it is a domain.
 Correct handles (all verified live):
 
-- EF-hand domain → `xref:interpro-IPR002048` (485,408 proteins — too broad to be a "family" option)
+- EF-hand domain → `xref:interpro-IPR002048` (488,200 proteins — too broad to be a "family" option)
 - Calcium → `KW-0106` · Metal-binding → `KW-0479`
 - **Lanmodulin family → NCBIfam `NF053806`** (189 proteins) ← this is the one that matters
 
 Also: `protein_name:lanmodulin` returns **exactly one** protein (C5B164). A one-row table is not a
-discovery. The LanM *family* handle above is the fix.
+discovery. The LanM *family* handle above is the fix — but it is **not reachable from UniProt
+search**:
+
+> **Second gotcha, also found the hard way.** `xref:ncbifam-NF053806` returns **0** results, and
+> inspecting C5B164's cross-references shows why: UniProt records no NCBIfam xref for it at all.
+> Its only family handles are the generic EF-hand ones (IPR002048, IPR011992, IPR018247, Pfam
+> PF13202, PROSITE PS00018/PS50222) — every one of which matches hundreds of thousands of calcium
+> proteins. **LanM family membership exists in InterPro, not in UniProt.** Retrieval is therefore
+> two-step: list the 189 accessions from the InterPro API, then batch-fetch sequences from UniProt
+> with `accession:A OR accession:B OR …`. Both halves verified live.
+
+Counts of this kind drift as the databases grow — IPR002048 was 485,408 earlier in this analysis
+and is 488,200 now. Record a retrieval date beside every count, and never hard-code one as a test
+assertion.
 
 ### 3.3 The default demo is uninformative and self-contradicting
 
@@ -220,7 +233,7 @@ contribution* — no public resource currently offers it.
 NF053806; 1 reviewed (C5B164), 188 unreviewed, mostly *Methylobacterium* and relatives. Spot-checked
 AlphaFold coverage: all present, mean pLDDT 77–83. This is the project's headline deliverable.
 
-**Corpus C — the broad screen: 485,408 EF-hand proteins.** Only attempt this after a descriptor
+**Corpus C — the broad screen: ~488,000 EF-hand proteins** (488,200 on 2026-10-19). Only attempt this after a descriptor
 validated on A and B exists. It is the stretch goal, not the starting point.
 
 ---
@@ -229,9 +242,17 @@ validated on A and B exists. It is the stretch goal, not the starting point.
 
 Each milestone is independently demoable and leaves the app working. Effort assumes one developer.
 
-### M0 — Stop the bleeding (half a day)
+### M0 — Stop the bleeding (half a day) — ✅ **DONE 2026-10-19**
 
 Small, high-leverage correctness fixes. No new capability.
+
+> **Completed.** All five bullets below are implemented and verified. Test suite went from 5 tests
+> to **47**, all offline, including the first coverage `structure.py` has ever had. Measured
+> results: 8FNS reports CN = 9 (7 protein O + 2 water) on sites 201–203 and CN = 10 on site 204;
+> 1CLL calcium sites report CN = 7 (6 protein + 1 water) under identical rules — the §3.1
+> separation survives the rewrite. `lanm-family` retrieval returns real uncharacterized homologs
+> scoring 59.7–75.5 with 2–3 motif hits. The Streamlit app runs clean under `AppTest` with zero
+> exceptions. Baseline commit `5e7491f` is the restore point if any of this needs reverting.
 
 - `argo.py`: reject auth-denial responses that arrive as HTTP 200 — test `id.startswith("chatcmpl-blocked-")`
   **or** `usage.total_tokens == 0`, and raise `ArgoError`; rename `ARGO_API_KEY` → `ARGO_USER`
@@ -239,7 +260,9 @@ Small, high-leverage correctness fixes. No new capability.
   add a `/v1/models` health check behind the "Argo configured" badge, which currently only checks
   that two strings are non-empty. Shape sampling parameters per model family (§3.4.4) instead of
   hard-coding `temperature=0.2`/`max_tokens=900`.
-- `uniprot.py`: delete the `ef-hand`/KW-0254 query. Add `lanm-family` → NCBIfam NF053806.
+- `uniprot.py`: delete the `ef-hand`/KW-0254 query. Add a `lanm-family` source that resolves the
+  189 accessions through the **InterPro** API and then batch-fetches sequences from UniProt — the
+  family is not selectable from UniProt search alone (§3.2).
 - `structure.py`: filter neighbours to elements O/N/S; include HOH as explicitly labelled water
   donors; report protein donors, water donors, and total CN separately; replace the ion-symbol set
   with the verified 18 codes from §4; fall back to mmCIF when `.pdb` 404s.
