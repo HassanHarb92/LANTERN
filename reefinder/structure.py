@@ -1,5 +1,6 @@
 """Fetch and inspect publicly deposited PDB structures."""
 import io
+import re
 from pathlib import Path
 
 import requests
@@ -148,6 +149,33 @@ def fetch_pdb(pdb_id: str, timeout: int = 25) -> str:
     if fmt != "pdb":
         raise ValueError(f"{pdb_id.upper()} is not available in legacy PDB format; use fetch_structure")
     return text
+
+
+RESOLUTION_PDB = re.compile(r"^REMARK\s+2\s+RESOLUTION\.\s*([0-9]*\.?[0-9]+)\s+ANGSTROM",
+                            re.MULTILINE)
+RESOLUTION_CIF = re.compile(r"^_refine\.ls_d_res_high\s+([0-9]*\.?[0-9]+)", re.MULTILINE)
+
+
+def resolution_from_coordinates(text: str, fmt: str = "pdb") -> float | None:
+    """Diffraction resolution as deposited, or None if the entry states none.
+
+    None is a real answer, not a parse failure: NMR entries write "RESOLUTION.
+    NOT APPLICABLE." and carry no `_refine.ls_d_res_high` at all. geometry-v1
+    treats an unknown resolution as a caveat rather than as a good one, so
+    returning None is safer than guessing a number, and guessing 2.0 would
+    silently admit entries the contrast behind the thresholds excluded.
+
+    Both patterns are tried regardless of `fmt`, because the cache stores
+    whichever format RCSB served and a mislabelled format should degrade to a
+    correct answer rather than to None.
+    """
+    first, second = ((RESOLUTION_CIF, RESOLUTION_PDB) if fmt == "cif"
+                     else (RESOLUTION_PDB, RESOLUTION_CIF))
+    match = first.search(text) or second.search(text)
+    if match is None:
+        return None
+    value = float(match.group(1))
+    return value if value > 0 else None
 
 
 def _parse(text: str, fmt: str):

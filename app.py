@@ -10,7 +10,9 @@ from reefinder.agent import run_campaign, explain_campaign, SCORE_LIMITATION
 from reefinder.argo import ArgoClient, ArgoError
 from reefinder.catalog import load_reference
 from reefinder.chemistry import METALS
-from reefinder.structure import fetch_structure, binding_neighborhood
+from reefinder.geometry import SCORE_VERSION, score_site
+from reefinder.structure import (ALL_METAL_CODES, fetch_structure, binding_neighborhood,
+                                 resolution_from_coordinates)
 from reefinder.uniprot import TOPICS
 
 # Pinned rather than floating: an unversioned third-party script can change
@@ -132,23 +134,41 @@ v.addModel({coords_js},'{fmt}');v.setStyle({{}},{{cartoon:{{color:'spectrum'}}}}
 v.addStyle({{hetflag:true}},{{sphere:{{scale:0.45}}}});v.zoomTo();v.render();</script>'''
         components.html(html, height=480)
         try:
-            sites = binding_neighborhood(text, fmt)
+            sites = binding_neighborhood(text, fmt, metals=ALL_METAL_CODES)
             if sites:
-                st.success(f"Found {len(sites)} deposited rare-earth ion site(s) in these coordinates.")
+                # RCSB serves the deposited asymmetric unit here, not the
+                # biological assembly, so every call made on this page is
+                # marked "asu" and geometry-v1 downgrades its negatives.
+                resolution = resolution_from_coordinates(text, fmt)
+                calls = [score_site(s, resolution_A=resolution, coordinate_source="asu")
+                         for s in sites]
+                st.success(f"Found {len(sites)} deposited metal site(s) in these coordinates.")
                 st.dataframe(pd.DataFrame([{
                     "Element": s["element"], "Chain": s["chain"], "Site": s["site"],
                     "Coordination number": s["coordination_number"],
+                    "Bidentate carboxylates": s["chemistry"]["bidentate_carboxylates"],
                     "Protein donors": s["protein_donor_count"],
                     "Water donors": s["water_donor_count"],
                     "Mean donor distance (Å)": s["mean_donor_distance_A"],
-                } for s in sites]), width='stretch', hide_index=True)
+                    f"{SCORE_VERSION} call": c["call"],
+                    "Call reliable": c["call_reliable"],
+                } for s, c in zip(sites, calls)]), width='stretch', hide_index=True)
                 st.caption("Coordination number counts O/N/S first-shell donors within 3.2 Å, waters "
                            "included. Biological lanthanide sites typically show CN 9–10; calcium "
                            "sites in the same fold show CN ≈ 7.")
-                with st.expander("Per-site donor atoms"):
-                    st.json(sites)
+                st.markdown(f"**{SCORE_VERSION}** calls a site lanthanide-like when it reaches "
+                            "**CN ≥ 9 and ≥ 2 bidentate carboxylates** — the only two descriptors "
+                            "that separate three natural lanthanide families from all 55 calcium "
+                            "accessions with no overlap (ROADMAP §3.17). Net charge and solvent "
+                            "accessibility are measured and shown below, and deliberately **not** "
+                            "scored.")
+                shown = {c for call in calls for c in call["caveats"]}
+                st.warning("  \n".join(f"• {c}" for c in sorted(shown)))
+                with st.expander("Per-site donor atoms and full geometry-v1 output"):
+                    st.json([{"site": s, SCORE_VERSION: c} for s, c in zip(sites, calls)])
             else:
-                st.info("No deposited rare-earth ions found. No hypothetical coordinates have been invented.")
+                st.info("No deposited rare-earth or calcium ions found. No hypothetical "
+                        "coordinates have been invented.")
         except Exception as exc:
             st.warning(f"Coordinate parsing unavailable: {type(exc).__name__}")
         st.download_button(f"Download deposited {fmt.upper()}", text,

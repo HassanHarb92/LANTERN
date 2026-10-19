@@ -5,7 +5,8 @@ import pytest
 from reefinder.structure import (REE_LIGAND_CODES, ALL_METAL_CODES, DONOR_ELEMENTS,
                                  CHELATED_REE_CODES, binding_neighborhood,
                                  donor_chemistry, cached_structure,
-                                 fetch_structure, site_net_charge, _valid_id)
+                                 fetch_structure, resolution_from_coordinates,
+                                 site_net_charge, _valid_id)
 
 
 def _atom(serial, name, resname, chain, resseq, x, y, z, element, hetatm=False):
@@ -434,3 +435,35 @@ def test_net_charge_does_not_separate_lanthanide_from_calcium_ef_hands():
     assert set(charges["calcium"]) <= {-3, -4}
     assert abs(statistics.median(charges["lanthanide"])
                - statistics.median(charges["calcium"])) <= 1
+
+
+def test_resolution_is_read_from_both_coordinate_formats():
+    """geometry-v1 gates on resolution, so a silent None would turn the gate
+    into a caveat on every entry."""
+    pdb = ("REMARK   2\n"
+           "REMARK   2 RESOLUTION.    1.85 ANGSTROMS.\n")
+    cif = "_refine.ls_d_res_high              1.85\n"
+    assert resolution_from_coordinates(pdb, "pdb") == 1.85
+    assert resolution_from_coordinates(cif, "cif") == 1.85
+    # A mislabelled format must degrade to the right answer, not to None.
+    assert resolution_from_coordinates(cif, "pdb") == 1.85
+    assert resolution_from_coordinates(pdb, "cif") == 1.85
+
+
+def test_an_entry_with_no_diffraction_resolution_returns_none():
+    """NMR entries say so in words. None is the honest answer and geometry-v1
+    turns it into a caveat; inventing a number would admit entries the
+    contrast behind the thresholds excluded.
+    """
+    nmr = "REMARK   2 RESOLUTION. NOT APPLICABLE.\n"
+    assert resolution_from_coordinates(nmr, "pdb") is None
+    assert resolution_from_coordinates("", "cif") is None
+
+
+@pytest.mark.skipif(cached_structure("9PI2") is None, reason="9PI2 not cached")
+def test_cached_demo_structures_report_their_real_resolution():
+    for code, expected in (("9PI2", 0.99), ("8FNS", 1.01), ("1CLL", 1.7)):
+        cached = cached_structure(code)
+        if cached is None:
+            continue
+        assert resolution_from_coordinates(*cached) == pytest.approx(expected)

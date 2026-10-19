@@ -73,6 +73,7 @@ REE-Finder/
 │   ├── catalog.py                # Loads the authentic reference set and the test fixtures
 │   ├── uniprot.py                # UniProt search + InterPro family retrieval
 │   ├── structure.py              # Structure fetch + first-shell coordination analysis
+│   ├── geometry.py               # geometry-v1: the structural call, and what it refuses to score
 │   ├── argo.py                   # Argo chat client, fails closed on rejected credentials
 │   └── agent.py                  # Fixed retrieve-then-score pipeline (not a planner)
 ├── scripts/
@@ -100,7 +101,7 @@ REE-Finder/
 ├── data/calcium_sites.parquet    # 681 Ca sites in 172 Ca-only depositions of the same proteins
 ├── data/calcium_counterparts.json# How those 172 were chosen, and from which accessions
 ├── data/assembly_counts.json     # Chains deposited vs chains in the biological assembly, per entry
-├── tests/                        # Offline regression tests (102, no network)
+├── tests/                        # Offline regression tests (120, no network)
 ├── docs/SCIENTIFIC_CONTRACT.md   # Scientific claims and evidence gates
 ├── ROADMAP.md                    # Verified state, defects, milestones M0-M6
 ├── IMPLEMENTATION_PLAN.md        # Earlier aspirational plan, superseded in part
@@ -197,6 +198,18 @@ pytest -q
   perfect separation *worse* than partial separation at *n* = 3. At three families the overlap count
   is the honest statistic and the *p*-value is mostly a statement about *n*.
   `python scripts/selectivity_contrast.py`.
+- **`geometry-v1`, the structural call** (`reefinder/geometry.py`, shown in the Structure tab).
+  Coordination number ≥ 9 **and** bidentate carboxylates ≥ 2 — the two descriptors above, at the
+  weakest of the three lanthanide families. **There are no weights**: the score is how many of the
+  two criteria a site meets, and ties break on the raw descriptors, because a weighted sum fitted
+  on three families would be three numbers fitted to three points. It reproduces the separation it
+  came from (3/3 Ln families pass, **0/55 Ca accessions**), and on 9PI2 — Nd³⁺ and Ca²⁺ in one
+  0.99 Å crystal, so fold and resolution are held identical — it calls all **6 Nd sites**
+  lanthanide-like and both **Ca sites** calcium-like. Site-level calibration, pseudo-replicated
+  and quoted as such: 75.9% sensitivity, 99.5% specificity. It **refuses** to score chelated
+  sites, anything worse than 2.5 Å, and marks a *negative* call made on an asymmetric unit as
+  unreliable — both criteria are counts a truncated parse can only understate. Net charge and
+  SASA are reported next to every call and never scored.
 - Argo text explanations constrained to screening output, with rejected credentials failing closed.
 
 ## Measured baseline

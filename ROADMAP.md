@@ -1141,6 +1141,62 @@ rebuild both site tables with `--assembly-dir .cache/assembly`, then
 
 ---
 
+### 3.18 geometry-v1, and what it refuses to do
+
+M3.1 is implemented as `reefinder/geometry.py`. It is the smallest thing §3.17 supports: the two
+descriptors that separated with zero overlap, no weights, and a set of refusals.
+
+**No weights.** A weighted sum of two descriptors fitted on three families would be three numbers
+fitted to three points. The score is the **count of criteria met** (0, 1 or 2) and ties break on the
+raw descriptors, so the ordering inside a band is transparently "more donors, more bidentate
+carboxylates" rather than a fitted combination presented as one number. Thresholds are the
+**weakest of the three lanthanide families** — CN ≥ 9, bidentate carboxylates ≥ 2 — not a midpoint
+between the classes, because a midpoint is tuned to the calcium set's upper tail and the family
+minimum is a statement about the positive class, which is the thing being generalised from. CN ≥ 9
+is exactly the zero-overlap boundary: at CN ≥ 8 one calcium accession passes.
+
+**It reproduces the result it came from**, re-derived through the shipped scorer rather than the
+analysis script: 3 of 3 lanthanide families pass, **0 of 55 calcium accessions** do. Pinned by
+`test_geometry_v1_reproduces_the_separation_it_was_derived_from`, which fails if a threshold is
+loosened.
+
+**The single-crystal control.** 9PI2 holds Nd³⁺ *and* Ca²⁺ in one 0.99 Å crystal, so fold,
+resolution, crystal form, refinement and depositor are identical across the two ions and none of
+the usual confounders can explain a split. All **6 Nd sites** are called lanthanide-like (CN 10,
+4 bidentate); both **Ca sites** are called calcium-like (CN 7 and 5, 1 bidentate). This is the
+strongest control the project has and it runs offline from the cached coordinates.
+
+**Site-level calibration — pseudo-replicated, quoted for calibration only.** Across the §3.17
+filters: sensitivity **44/58 (75.9%)**, specificity **661/664 (99.5%)**. The three calcium sites
+that pass are worth naming rather than burying: 2YGG (a calmodulin complex, CN 9, 3 bidentate,
+SASA 3.46 Å²) is simply a lanthanide-like calcium site, and two calsequestrin sites in 7F05 are
+CN 9 with 2 bidentate but **SASA 53.6 and 65.7 Å²**, where all three lanthanide families sit
+between 0.00 and 8.72. So solvent accessibility, which fails as a *selectivity* term (25 of 55
+overlapping), might work as a *negative triage* filter. That observation is **post-hoc on three
+false positives and is not adopted** — it is written down so it can be tested on data that did not
+suggest it.
+
+**What it refuses to do**, each refusal pinned by a test:
+
+- **A chelated site is not callable.** Half the first shell non-protein means the geometry
+  describes the ligand, not the protein — the same flag the corpus filters on.
+- **Worse than 2.5 Å is not callable**, the cutoff both arms of the contrast were held to.
+  Resolution is read from the coordinates; an entry that states none (NMR) is scored with an
+  explicit caveat rather than assigned a number.
+- **A negative call from an asymmetric unit is marked unreliable.** Both criteria are counts a
+  truncated parse can only *understate*, so an ASU can turn a real site into a negative but never
+  into a false positive — §3.17's bug, encoded as an asymmetry. Unstated provenance is treated as
+  an ASU rather than given the benefit of the doubt.
+- **Net charge and SASA are reported and never scored.** They appear under `triage_only`, and
+  `test_net_charge_and_sasa_are_reported_but_never_scored` makes promoting them loud, because net
+  charge is the published Dudev prediction and the pressure to let it in is recurring.
+- **No call returns a bare number.** Every output carries the *n* = 3 caveat, the fitted-and-scored-
+  on-the-same-points caveat, and "not an affinity, not a selectivity constant, not a probability."
+
+Reproduce: `pytest tests/test_geometry.py -v`, or open the Structure tab for 9PI2.
+
+---
+
 ## 4. The strategic reframe: three finite corpora
 
 Everything below follows from sizing the problem honestly.
@@ -1500,8 +1556,13 @@ These are cheap, they are what unblocks the headline screen, and none of them ne
   learning** — do not train a model on this sample size and do not call the output a probability.
   At *n* = 3 families, **report the overlap count beside every threshold**: it is the number that
   survives a small sample, where a *p*-value is mostly a statement about *n* (§3.17).
-- Version it (`score_version: "geometry-v1"`) and keep the sequence heuristic alongside, clearly
-  labelled as triage only.
+- ✅ Version it (`score_version: "geometry-v1"`) and keep the sequence heuristic alongside, clearly
+  labelled as triage only. **Shipped** as `reefinder/geometry.py` and wired into the Structure tab
+  (§3.18): two criteria, no fitted weights, and refusals for chelated sites, resolution worse than
+  2.5 Å, and negative calls made on an asymmetric unit. Calibration: 3/3 Ln families pass and 0/55
+  Ca accessions do; 9PI2's six Nd and two Ca sites split correctly inside one 0.99 Å crystal.
+- **Still open:** the honest *n* is three families, so raising it is worth more than any refinement
+  of the score. That is M2 curation, not M3.
 
 > **Two external baselines to beat, both verified to exist.** A descriptor that cannot outperform
 > these is not worth shipping.
