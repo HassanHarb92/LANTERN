@@ -81,7 +81,8 @@ REE-Finder/
 │   ├── prefetch_structures.py    # Cache 8FNS/8FNR/8DQ2/9PI2/1CLL for an offline demo
 │   ├── analyze_motifs.py         # Reproduce the ROADMAP §3.6 / §3.8 findings
 │   ├── validate_motif.py         # Validate the loop pattern on 694 sequences, not six
-│   └── loop_detector.py          # Build the balanced *instrument*, vs the biased classifier
+│   ├── loop_detector.py          # Build the balanced *instrument*, vs the biased classifier
+│   └── sequence_hallmarks.py     # EF-hand period and Pro-at-2, measured through the instrument
 ├── data/reference_proteins.json  # 6 authentic UniProt sequences, checksummed
 ├── data/synthetic_examples.json  # Synthetic fixtures, used only by tests
 ├── data/structures/              # Prefetched coordinates + manifest

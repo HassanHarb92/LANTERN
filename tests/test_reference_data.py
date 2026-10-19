@@ -146,7 +146,7 @@ def test_hans_lanm_scores_its_three_lanthanide_loops_and_not_its_calcium_one():
 
 
 def test_the_two_lanmodulins_do_not_share_a_position_9_residue():
-    """The best structural control is the family's least typical member.
+    """The best structural control is not representative of the family.
 
     C5B164 (M. extorquens, the reviewed founding member) carries Asp at loop
     position 9 in all four loops. A0A4V2JDD3 (H. quercus) carries Glu in all
@@ -154,10 +154,15 @@ def test_the_two_lanmodulins_do_not_share_a_position_9_residue():
     bidentate and expels the water (8DQ2, 9PI2: CN 10, no water), Asp at 9
     leaves two waters (8FNS: CN 9).
 
-    This matters for M4. Measured over the whole family, Asp at 9 appears in
-    82.1% of loops and Glu in 0.5%, so A0A4V2JDD3 is the rare architecture.
-    Tuning a descriptor on it would miss the 188 members that look like
-    C5B164 -- which are the entire point of the screen.
+    This matters for M4. Measured over the 189-member NCBIfam NF053806 set,
+    Asp at 9 appears in 82.1% of loops and Glu in 0.5%, so tuning a sequence
+    descriptor on A0A4V2JDD3 would miss the members that look like C5B164 --
+    which are the entire point of the screen.
+
+    A0A4V2JDD3 is in fact *absent* from that 189-protein set (nearest member
+    ~42% similar), so the 0.5% does not include it. A family HMM missing a
+    lanmodulin with two deposited lanthanide structures is the concrete
+    argument for retrieving by sequence criteria rather than family label.
     """
     scored = {c.protein.accession: c for c in screen(load_reference())}
     assert scored["C5B164"].position_9 == {"D": 4}

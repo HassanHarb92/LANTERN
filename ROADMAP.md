@@ -432,8 +432,16 @@ have it. Hans-LanM and *A. lacus* LanM are the rare subtype; Mex-LanM's `Asp ×4
 > **The project's best structural positive control is its family's least representative member.**
 > A0A4V2JDD3 (Hans-LanM, 8FNR/8DQ2) is the protein whose coordinates drove the §3.6 fix and whose
 > three Dy³⁺ loops the ranking test pins — and it is `Glu ×3` at position 9, the 0.5% form. Tuning
-> a sequence descriptor on it would miss the 188 family members that look like Mex-LanM, which are
+> a sequence descriptor on it would miss the 189 family members that look like Mex-LanM, which are
 > the entire point of M4. Pinned in `test_the_two_lanmodulins_do_not_share_a_position_9_residue`.
+>
+> **It is more unrepresentative than "atypical member" suggests: it is not a member at all.**
+> A0A4V2JDD3 is **absent from the 189-protein NCBIfam NF053806 set**, and its closest sequence
+> neighbour in that set is only ~42% similar. So the 0.5% Glu-at-9 figure does not include it —
+> the three Glu loops in the family come from other proteins — and the 189/188 counts elsewhere in
+> this document exclude it throughout. **This is the sharpest available evidence for §3.7: the
+> family HMM fails to retrieve a lanmodulin whose lanthanide binding is confirmed in two
+> deposited structures.** Retrieving by family label would never have found it.
 
 **What this means for the score.** Position 9 ∈ {Asp, Glu} stays — but for a corrected reason. The
 earlier reason given here ("Glu alone would reject Mex-LanM") understated it: Glu-only is not
@@ -646,6 +654,57 @@ position 1 from `[DN]` to `[D]` costs **58 points of lanthanide recall and 0.2 o
 
 Reproduce: `python scripts/loop_detector.py`.
 
+### 3.11 The two remaining hallmarks, measured — and the strongest one so far
+
+With §3.10's instrument the other two Mattocks hallmarks can finally be measured rather than
+cited. Both are reported under **both** detectors, so the cost of having used the biased one is
+visible instead of asserted (`scripts/sequence_hallmarks.py`, 189 LanM vs 505 calcium):
+
+**Hallmark 2 — EF-hand period.** Gap between consecutive loop starts:
+
+| detector | set | gaps | median | IQR | in 20–28 |
+|---|---|---:|---:|---:|---:|
+| classifier | lanmodulin family | 368 | 24.0 | 24–49 | 61.4% |
+| classifier | calcium EF-hands | **46** | **45.5** | 36–73 | 0.0% |
+| **instrument** | lanmodulin family | 487 | **24.0** | **24–25** | **84.8%** |
+| **instrument** | calcium EF-hands | 793 | **36.0** | **36–39** | **0.8%** |
+
+The instrument reproduces the published 24–25 vs ~36 exactly. **The classifier does not**: it
+measures the calcium period as 45.5 from 46 gaps where the instrument gets 36.0 from 793. That is
+the predicted failure mode made concrete — period is measured *between* loops, so missing four
+calcium loops in five both inflates the gaps and collapses the sample. Anyone who had measured
+this through `EF_HAND_HINT` would have published 45.5 with conviction.
+
+**Hallmark 3 — Pro at loop position 2**, and it is the cleanest sequence feature found so far:
+
+| detector | set | loops | Pro at 2 | proteins with ≥1 |
+|---|---|---:|---:|---:|
+| classifier | lanmodulin family | 557 | 67.5% | 92.6% |
+| classifier | calcium EF-hands | 292 | 0.0% | 0.0% |
+| **instrument** | lanmodulin family | 676 | **71.2%** | **100.0%** |
+| **instrument** | calcium EF-hands | 1249 | **0.1%** | **0.2%** |
+
+Position 2 composition: lanmodulins `P 71% T 21%`, calcium EF-hands `K 31% A 16% Q 8% V 7% S 7%`.
+Calcium EF-hands essentially never carry Pro there. This separates far better than position 9
+(82.6% vs 39.7%) or motif count, and it is mechanistically coherent with the 4P2A result — Pro at
+2 costs Ca²⁺ ~300× and Ln³⁺ only 5–10×, so it reads as Ca²⁺ *rejection* rather than Ln³⁺ affinity,
+which is exactly the property a selectivity screen wants.
+
+> **⚠️ Do not promote either hallmark to a score term on this evidence. The positive set is
+> whatever NCBIfam NF053806 retrieves, so these are measured on precisely the set an HMM selected
+> and cannot validate that HMM.** Two observations argue the signal is not purely definitional:
+> per-protein Pro-at-2 runs 25–100% with median 67% rather than saturating, and **the HMM misses
+> A0A4V2JDD3 entirely** — a lanmodulin with two deposited lanthanide structures, nearest family
+> member ~42% similar. Neither settles it. The genuine test is M4: retrieve by these criteria and
+> see what returns that the HMM did not already contain. Until then they are descriptions of a
+> known family, not validated discovery features.
+
+That last point cuts both ways and is worth stating plainly: **the family HMM failed to retrieve a
+confirmed lanthanide binder.** §3.7 argued M4 must retrieve by sequence criteria rather than family
+label; this is the measured instance of the failure it predicted.
+
+Reproduce: `python scripts/sequence_hallmarks.py`.
+
 ---
 
 ## 4. The strategic reframe: three finite corpora
@@ -810,7 +869,7 @@ raising; no query returns endocytosis proteins.
 **Done when:** ~~the default demo runs offline on authentic sequences, every record carries a
 verified checksum and provenance, and the ranking — including its known inversion — is pinned by
 test.~~ — ✅ **DONE 2026-10-19.** All of that, plus the inversion resolved rather than merely
-pinned: 80 tests, no xfail, five structures cached (8FNS, 8FNR, 8DQ2, 9PI2, 1CLL), both lanthanide
+pinned: 82 tests, no xfail, five structures cached (8FNS, 8FNR, 8DQ2, 9PI2, 1CLL), both lanthanide
 binders above both calcium proteins.
 
 ### M2 — The lanthanide structure corpus (3–5 days) ← *the core asset*
@@ -922,11 +981,19 @@ These are cheap, they are what unblocks the headline screen, and none of them ne
   the separation is pinned by `test_scoring_never_uses_the_measuring_instrument` — swapping the
   instrument into the score would look like a recall improvement and would silently destroy the
   discrimination the score depends on. One is a classifier, the other is an instrument.
-- **Implement the remaining sequence hallmarks** from Mattocks et al. 2023: EF-hand period (24–25 vs
-  ~36) and Pro at loop position 2 — the latter is quantified, the 4P2A mutant tightens Ln³⁺ by only
-  5–10× but Ca²⁺ by ~300×, so Pro at 2 is almost pure Ca²⁺ rejection. **Unblocked**: the balanced
-  detector they were waiting on now exists (§3.10). Measure both through `EF_LOOP_INSTRUMENT`, never
-  through `EF_HAND_HINT`. **Only then** may a spacing term enter the score.
+- ✅ **Measure the remaining sequence hallmarks** from Mattocks et al. 2023. **Done** (§3.11,
+  `scripts/sequence_hallmarks.py`), through `EF_LOOP_INSTRUMENT`. Period: **24.0 (IQR 24–25) for
+  lanmodulins vs 36.0 (IQR 36–39)** for calcium EF-hands, reproducing the published figures — the
+  classifier gets 45.5 from 46 gaps for the same calcium set, which is what the instrument was
+  built to prevent. Pro at loop position 2: **71.2% of lanmodulin loops vs 0.1%** of calcium
+  loops, the cleanest sequence feature found so far.
+- **Neither hallmark may enter the score yet, and the blocker is not implementation.** Both are
+  measured on exactly the set NCBIfam NF053806 retrieves, so they describe a known family rather
+  than predicting membership in it (§3.11). Promoting them now would fit the score to an HMM.
+  **The unblocking step is M4 retrieval**: search by period + Pro-at-2 and see what returns that
+  the HMM did not contain. If that set is non-empty and survives structural checks, the features
+  have earned their place; if it is empty, they were definitional and the score is better without
+  them.
 - ✅ **Encode position 9 explicitly** rather than leaving it implicit in the regex (§3.8). **Done**
   — `ef_hand_loops()` returns every matched loop with all six ligand positions named, and
   `Candidate.position_9` reports the composition. It is *not* a score term: the matched loops
@@ -1245,6 +1312,11 @@ per-position composition of 1421 curated calcium loops, and the recall table —
 lanthanide loops off the five cached structures with this repo's own `binding_neighborhood()`
 rather than transcribing them. The classifier/instrument separation itself is pinned by
 `tests/test_chemistry.py`, which does not need the network.
+
+§3.11's two hallmark tables are reproduced by `scripts/sequence_hallmarks.py`, which reports each
+hallmark under both detectors so the classifier's error is visible rather than described. The
+parts that can be checked without the network — calmodulin's ~36-residue period, Pro-at-2 on the
+coordinate-derived loops — are also pinned in `tests/test_chemistry.py`.
 
 §3.9's donor-chemistry comparison, including the 9PI2 internal control and the finding that
 backbone-carbonyl count carries zero information *within* the EF-hand family, is reproduced by the

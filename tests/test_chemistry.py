@@ -104,3 +104,40 @@ def test_instrument_finds_all_four_calmodulin_loops_and_classifier_does_not():
     calmodulin = {p.accession: p for p in load_reference()}["P0DP23"].sequence
     assert len(ef_hand_loops(calmodulin, EF_LOOP_INSTRUMENT)) == 4
     assert len(ef_hand_loops(calmodulin)) == 1
+
+
+def test_measuring_period_through_the_classifier_gets_the_wrong_answer():
+    """Why §3.10 had to come before §3.11, on data needing no network.
+
+    Period is measured *between* loops, so a detector that misses one reports
+    the sum of two gaps. On calmodulin the instrument recovers the ~36-residue
+    canonical period; the classifier finds a single loop and so cannot report
+    a period at all. At family scale that becomes 45.5 vs the true 36.0.
+    """
+    calmodulin = {p.accession: p for p in load_reference()}["P0DP23"].sequence
+
+    def gaps(pattern):
+        starts = [lp["start"] for lp in ef_hand_loops(calmodulin, pattern)]
+        return [b - a for a, b in zip(starts, starts[1:])]
+
+    instrument_gaps = gaps(EF_LOOP_INSTRUMENT)
+    assert len(instrument_gaps) == 3
+    assert all(34 <= g <= 38 for g in instrument_gaps), instrument_gaps
+    assert gaps(EF_HAND_HINT) == []     # one loop found; no period measurable
+
+
+def test_proline_at_position_2_separates_the_structural_loops():
+    """Hallmark 3 on coordinate-derived loops, independent of the family HMM.
+
+    Measured at family scale this is 71.2% vs 0.1%, but that is measured on
+    the set an HMM chose (§3.11). These twelve loops come from deposited
+    structures instead, so they are not subject to that circularity -- a
+    smaller check, but one the HMM cannot have biased.
+    """
+    lanthanide_pro = sum(1 for x in LANTHANIDE_LOOPS if x[1] == "P")
+    calcium_pro = sum(1 for x in CALCIUM_LOOPS if x[1] == "P")
+    assert calcium_pro == 0
+    assert lanthanide_pro >= 6
+    # Not a clean rule even here: Hans-LanM carries Pro in only one loop, so
+    # Pro-at-2 is a per-protein signal, not a per-loop requirement.
+    assert lanthanide_pro < len(LANTHANIDE_LOOPS)
