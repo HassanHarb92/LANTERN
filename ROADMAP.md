@@ -760,6 +760,94 @@ Reproduce: `python scripts/burial_and_charge.py`.
 
 ---
 
+### 3.13 Corpus A, measured: charge does vary — and the corpus-wide contrast is a trap
+
+§3.12 left a prediction on the table: if the EF-hand *fold* was holding first-shell charge constant,
+then charge should vary once you leave that fold. Corpus A is now built and the prediction is
+testable. All 636 entries are downloaded and parsed into **2795 sites — 2570 lanthanide, 225
+calcium — in `data/lanthanide_sites.parquet`**, each carrying the full §3.9/§3.12 descriptor set.
+
+**The parser was validated against MetalPDB before any of this was read.** Across Nd, La, Ce and Dy,
+**65 of 65 metal ions agree with MetalPDB on every donor it reports**, atom for atom and distance
+for distance; the 66th is an ion both sources give zero donors. The 26 donors this repo finds and
+MetalPDB does not all lie between **3.00 and 3.18 Å** — precisely the band between this repo's 3.2 Å
+cutoff and MetalPDB's ~3.0 Å, which is a documented convention difference and not a disagreement.
+Nothing below 2.9 Å is in dispute. Six donors matched only after allowing for a PDB relabelling:
+5KKB and 5KIJ have a mannose that MetalPDB calls `A/MAN709` and the current archive carries as
+`C/MAN5`, because the carbohydrate remediation moved oligosaccharides into branched-entity chains.
+Those are reported on their own line and counted separately, never folded into the agreement figure.
+
+**Q1 — charge varies, and §3.12's explanation survives.** Only **10.0% of the 2570 corpus lanthanide
+sites carry −3 or −4**, against 97.6% inside the EF-hand sample. The modal site is −1 (38.1%) and a
+third are neutral.
+
+| Net charge | −5 | −4 | −3 | −2 | −1 | 0 |
+|---|---:|---:|---:|---:|---:|---:|
+| Sites | 63 | 120 | 137 | 411 | 980 | 859 |
+| Share | 2.5% | 4.7% | 5.3% | 16.0% | 38.1% | 33.4% |
+
+It was the fold, not the descriptor. `test_charge_varies_outside_the_ef_hand_fold` pins this, so if
+a future change makes charge look constant everywhere, §3.12's explanation gets re-opened rather
+than quietly inherited.
+
+**Q0 — what the corpus actually contains, which §4 flagged as a risk and nobody had sized.**
+Geometry answers this with no labels at all: **69.8% of lanthanide sites have two protein donors or
+fewer, and 29.5% have none**. A permissive sieve — ≥4 protein donors, CN ≥ 6, not chelator-flagged —
+passes **374 of 2570 sites (14.6%), in 139 entries**. That is the realistic ceiling on curated
+biology, and it is a sieve to point hand-curation at, not a classifier.
+
+> **Q2 is a trap, and it is worth recording as one.** Corpus-wide, Ln-bound sites are *more* solvent
+> exposed than the Ca-bound sites in the same entries (median SASA 68.3 vs 1.7 Å²) and have *fewer*
+> protein atoms within 8 Å (37 vs 93). Read as chemistry that is absurd — it would say lanthanides
+> prefer the surface. It is provenance: the lanthanide population of the PDB is mostly phasing
+> soaks, while the calcium in those same entries is mostly structural calcium the protein evolved to
+> hold. **A descriptor fitted on uncurated Ln-vs-Ca learns "was this ion soaked in?" and nothing
+> about selectivity.** No Q2 figure may enter the score. This is the concrete reason M2's curation
+> step is load-bearing rather than tidying.
+
+**Q3 — and the reconciliation with §3.12.** Against the titled-biology subset (n=54 Ln sites) versus
+everything untitled (n=2460):
+
+| Descriptor | Titled biology (median, IQR) | Untitled (median, IQR) | Balanced acc. | at |
+|---|---|---|---:|---|
+| net charge, first shell | −4.00 (−4.00 … −3.00) | −1.00 (−2.00 … 0.00) | **94.1%** | < −2 |
+| protein donor count | 8.50 (6.00 … 10.00) | 2.00 (0.00 … 3.00) | **94.1%** | ≥ 6 |
+| metal SASA Å² | 0.00 (0.00 … 5.45) | 69.73 (39.22 … 92.97) | 93.4% | < 13.07 |
+| protein atoms <8 Å | 87.0 (84.0 … 103.5) | 36.0 (24.0 … 57.0) | 91.9% | ≥ 80 |
+| bidentate carboxylates | 3.00 (2.00 … 4.00) | 0.00 (0.00 … 1.00) | 90.6% | ≥ 2 |
+| coordination number | 9.00 (9.00 … 10.00) | 4.00 (2.00 … 7.00) | 83.6% | ≥ 7 |
+| shell net charge <8 Å | −3.00 (−4.00 … −3.00) | −1.00 (−3.00 … 0.00) | 79.3% | < −2 |
+
+Net charge scores 94.1% here and scored 75.0% in §3.12. That is not a contradiction and the
+difference is the whole point:
+
+> **§3.12 asked which ion a genuine site holds. Q3 asks whether a site is genuine at all.** Those
+> are different questions and net charge answers only the second. Within one fold, where every site
+> is real and the loop grammar fixes the carboxylate count, charge has nothing to rank with. Across
+> the corpus, where most sites are surface soaks with no carboxylates at all, charge separates real
+> from artefactual almost perfectly. **Net charge is a good artefact filter and a useless
+> selectivity descriptor** — which tells M3 exactly where to put it: in triage, never in the
+> selectivity score.
+
+Four caveats hold Q3 down, in decreasing order of how much they matter. The negative class is "no
+keyword matched the title", not "artefact", so it contains every genuine site whose depositors did
+not mention lanthanides — that biases every figure *downward*, which makes a strong result
+meaningful and a weak one uninformative. Thresholds are fitted on the data they are scored on, so
+each is an upper bound. The positive class is 54 sites. And Q3 is largely re-measuring Q0's
+buried-versus-surface axis, so the seven rows are closer to one finding than to seven.
+
+**Contamination is recorded, not dropped.** 522 sites (18.7%) have a first shell at least half
+non-protein non-water, and 481 carry a *named* chelator — bis-tris 352, acetate 57, DO3A 45,
+pyridine-2,6-dicarboxylate 16, citrate 9, DOTA 2. MetalPDB independently confirms PQQ and methanol
+as genuine first-shell donors of the XoxF lanthanide site, which is why the flag records rather than
+filters: the same column that catches a DO3A cage would throw away methanol dehydrogenase.
+
+Reproduce: `python scripts/download_corpus.py`, then `python scripts/build_site_table.py`, then
+`python scripts/corpus_descriptors.py`. Validate the parser with
+`python scripts/crosscheck_metalpdb.py`.
+
+---
+
 ## 4. The strategic reframe: three finite corpora
 
 Everything below follows from sizing the problem honestly.
@@ -922,7 +1010,7 @@ raising; no query returns endocytosis proteins.
 **Done when:** ~~the default demo runs offline on authentic sequences, every record carries a
 verified checksum and provenance, and the ranking — including its known inversion — is pinned by
 test.~~ — ✅ **DONE 2026-10-19.** All of that, plus the inversion resolved rather than merely
-pinned: 88 tests, no xfail, five structures cached (8FNS, 8FNR, 8DQ2, 9PI2, 1CLL), both lanthanide
+pinned: 88 tests at M1 close, no xfail, five structures cached (8FNS, 8FNR, 8DQ2, 9PI2, 1CLL), both lanthanide
 binders above both calcium proteins.
 
 ### M2 — The lanthanide structure corpus (3–5 days) ← *the core asset*
@@ -958,13 +1046,23 @@ Build Corpus A as a versioned local database.
 > biology, and most of the lanthanide set that does exist is phasing apparatus (Gd 179, Yb 118,
 > Tb 64 entries are classic MAD/SAD heavy atoms).
 
-- Download mmCIF for all 636, parse with `MMCIFParser`, extract every rare-earth site with full
-  first-shell geometry. (Do not re-derive the list by hand; rerun `scripts/build_ree_corpus.py`, which enumerates the
-  codes from RCSB — see §4.) Use
-  BinaryCIF (`models.rcsb.org/{ID}.bcif`) for the bulk pull — much smaller than mmCIF over 636
-  entries — and never the legacy `.pdb` endpoint, which 404s on large structures (§3.5).
-- Compute per site: CN, protein-O/N/S donor counts, water count, bidentate carboxylate count,
-  mean and spread of Ln–O distance, residue composition, B-factors/occupancy, solvent exposure.
+- ✅ **Download all 636 and extract every rare-earth site.** **Done 2026-10-19.** All 636 entries
+  fetched, zero failures, 186 MB into gitignored `.cache/corpus/`; parsed to **2795 sites from 636
+  entries** (2570 Ln, 225 Ca) in `data/lanthanide_sites.parquet` (93 KB). §3.13 has the results.
+
+  **The format recommendation above was wrong, and it was measured rather than assumed.** BinaryCIF
+  is smaller than *uncompressed* mmCIF, which is not the comparison that matters: gzipped mmCIF is
+  **5× smaller than bcif**, bcif gains only ~15% even with `--compressed`, it needs msgpack (not
+  installed), and `models.rcsb.org` 404s on 6EK0. The corpus is gzipped mmCIF. The legacy `.pdb`
+  warning stands (§3.5).
+- ✅ **Per-site measurements.** **Done 2026-10-19.** 33 columns: CN, protein/water/other donor
+  counts, bidentate and monodentate carboxylates, Glu/Asp carboxylate O, backbone carbonyl,
+  sidechain amide, hydroxyl, mean donor distance, first-shell net charge, metal SASA, protein atoms
+  within 8 Å, shell charge, chelator evidence, title class and its basis.
+- ✅ **The parser is validated against an independent implementation.** **Done 2026-10-19.** 65 of
+  65 metal ions agree with MetalPDB on every donor it reports, atom for atom and distance for
+  distance; the 26 extras all fall in the 3.00–3.18 Å band between the two cutoffs (§3.13).
+  `scripts/crosscheck_metalpdb.py`.
 - **Filter chelator-dominated sites, which are a second contamination class.** §4's
   `CHELATED_REE_CODES` catches entries where the metal *is* a pre-chelated component. It does not
   catch the commoner case: a bare `GD`/`TB`/`YB` ion in an entry that also contains a separate
@@ -1000,19 +1098,45 @@ Build Corpus A as a versioned local database.
   a component-presence lookup. The 21 `DO3` and 1 `DOT` entries are the ones to inspect first:
   DOTA-type macrocycles are purpose-built lanthanide cages, and in those entries the metal is
   almost certainly theirs rather than the protein's.
-- **Classify every site into the four classes of §4** — natural Ln biology, Ln-substituted Ca site,
-  engineered LBT, phasing/surface artefact. Use deposition metadata and title text for a first
-  pass, then hand-check. Site 11 of 8FNR (CN = 4, 2 carboxylates, no water) is a worked example of
-  an artefact the classifier must reject; sites 1–3 of the same entry (CN = 9, 3 bidentate) are
-  what it must keep.
+
+  ✅ **Measured over the real first shells, 2026-10-19, and the caution above was right.** The
+  component-presence survey flagged 32.5% of *entries*; the first-shell measurement flags **522 of
+  2795 sites (18.7%)**, and **481 sites carry a named chelator** — bis-tris 352, acetate 57, DO3A
+  45, pyridine-2,6-dicarboxylate 16, citrate 9, DOTA 2. The flag is recorded in two columns
+  (`chelator_flagged`, plus the chelator names themselves) and nothing is dropped: MetalPDB
+  independently confirms PQQ and methanol as genuine first-shell donors of the XoxF lanthanide
+  site, so a filter that discarded non-protein donors would discard methanol dehydrogenase.
+- 🟡 **Classify every site into the four classes of §4** — natural Ln biology, Ln-substituted Ca
+  site, engineered LBT, phasing/surface artefact. **First pass done, hand-check outstanding.** The
+  title pass ships as `class_first_pass` with `class_basis` naming the keyword that fired, because
+  a label whose provenance is not recorded cannot be audited later: **2655 unclassified, 57 natural
+  Ln biology, 56 Ln-substituted Ca, 27 engineered LBT**. It is a *hint*. A title cannot tell a
+  phasing derivative from biology, and "STRUCTURE OF X" is the commonest title in the corpus.
+
+  Two things now make the hand-check tractable rather than open-ended. Geometry sieves 2570 Ln
+  sites down to **374 worth looking at** (§3.13, Q0), in 139 entries. And the keyword list is
+  already known to be brittle in a specific way: 9PI2 is titled *"Ancylobacter lacus LanM"*, so the
+  keyword "lanmodulin" dropped a structurally confirmed lanthanide binder into the unclassified
+  pile — the same failure mode as §3.11's HMM miss, reached by a different route. The shortened
+  key is pinned by a test. Site 11 of 8FNR (CN = 4, 2 carboxylates, no water) remains the worked
+  example of an artefact the classifier must reject; sites 1–3 of the same entry (CN = 9, 3
+  bidentate) are what it must keep.
 - Build the matched Ca²⁺ contrast set from 1CLL and comparable EF-hand structures. Where a protein
   appears in both sets — troponin C with Ca and with Tb, calmodulin with Ca and with Tb — you have
   a *paired* same-protein comparison, which is the strongest evidence in the corpus. Extract these
-  pairs explicitly.
-- Ship as `data/lanthanide_sites.parquet` + a provenance manifest.
+  pairs explicitly. **§3.13's Q2 is the argument for doing this properly:** the 225 calcium sites
+  already in the table are Ca in entries that also contain a rare earth, which is not a matched
+  contrast, and using them as one inverts the chemistry.
+- ✅ **Ship as `data/lanthanide_sites.parquet` + a provenance manifest.** **Done 2026-10-19.**
+  `.cache/corpus/_manifest.json` records source, fetch date and a per-entry sha256.
 
 **Done when:** a single local query returns every known lanthanide protein site with geometry and a
 curation label, and the CN distributions for biological Ln sites versus Ca sites separate visibly.
+**Status: geometry and provenance done, curation label outstanding.** The CN distributions do
+separate — 9.00 (9.00–10.00) for titled biology against 4.00 (2.00–7.00) for everything untitled,
+83.6% balanced accuracy — but §3.13 shows that comparison is mostly real-site-versus-surface-soak,
+not Ln-versus-Ca, and the Ln-versus-Ca split on this uncurated corpus runs backwards for the reason
+given there. The curation step is what the rest of M2's claim rests on.
 
 ### M3 — A descriptor that actually discriminates (3–5 days)
 
@@ -1285,7 +1409,16 @@ parts are now contradicted by evidence:
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python -m pytest -q                      # 73 passed
+.venv/bin/python -m pytest -q                      # 96 passed
+
+# §3.13 Corpus A end to end: download, parse to one table, then measure.
+# The parquet is committed, so steps 1-2 are only needed to rebuild it.
+.venv/bin/python -I scripts/download_corpus.py     # 636 entries -> .cache/corpus/, 186 MB
+.venv/bin/python -I scripts/build_site_table.py    # -> data/lanthanide_sites.parquet, 2795 sites
+.venv/bin/python -I scripts/corpus_descriptors.py  # Q0-Q3 tables
+
+# §3.13 the independent check on the parser (needs network)
+.venv/bin/python -I scripts/crosscheck_metalpdb.py # 65/65 ions agree with MetalPDB
 
 # §3.4 Argo: model list, the OpenAPI tool-calling schema, and the silent auth failure
 curl -s https://apps.inside.anl.gov/argoapi/v1/models | python3 -m json.tool | head -40
@@ -1380,6 +1513,18 @@ the five cached structures and needs no network. Every figure in its closing par
 on each run rather than transcribed, so the prose cannot drift from the table above it. The negative
 result is pinned by `tests/test_structure.py` — charge near-constant across the fold, both families
 in the same classes — so that it has to be argued with rather than quietly overturned.
+
+§3.13's corpus measurements run in three steps, each resumable and each writing its own provenance:
+`scripts/download_corpus.py` fetches all 636 entries as gzipped mmCIF into `.cache/corpus/` (186 MB,
+gitignored, with a sha256 per entry), `scripts/build_site_table.py` parses them into
+`data/lanthanide_sites.parquet`, and `scripts/corpus_descriptors.py` prints the Q0–Q3 tables. The
+parquet is small enough to commit, so the tables can be re-derived without the 186 MB download.
+`scripts/crosscheck_metalpdb.py` is the independent check on the parser and is the one script here
+that needs the network; it compares per metal ion rather than per MetalPDB site, since MetalPDB
+groups nearby ions into one polymetallic site while this repo emits one site per ion, and it
+anchors each ion on its own element and residue number so that site matching never depends on the
+distances under test. `tests/test_corpus.py` pins the parts that are pure logic, including the
+corpus-wide charge variance that §3.12's explanation predicted.
 
 §3.9's donor-chemistry comparison, including the 9PI2 internal control and the finding that
 backbone-carbonyl count carries zero information *within* the EF-hand family, is reproduced by the

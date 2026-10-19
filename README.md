@@ -83,12 +83,17 @@ REE-Finder/
 │   ├── validate_motif.py         # Validate the loop pattern on 694 sequences, not six
 │   ├── loop_detector.py          # Build the balanced *instrument*, vs the biased classifier
 │   ├── sequence_hallmarks.py     # EF-hand period and Pro-at-2, measured through the instrument
-│   └── burial_and_charge.py      # The Dudev descriptors, and why they do not separate here
+│   ├── burial_and_charge.py      # The Dudev descriptors, and why they do not separate here
+│   ├── download_corpus.py        # Fetch all 636 entries as gzipped mmCIF, resumable
+│   ├── build_site_table.py       # Parse them into one 2795-site table
+│   ├── corpus_descriptors.py     # Re-test the descriptors on the corpus, not on one fold
+│   └── crosscheck_metalpdb.py    # Validate the parser against an independent implementation
 ├── data/reference_proteins.json  # 6 authentic UniProt sequences, checksummed
 ├── data/synthetic_examples.json  # Synthetic fixtures, used only by tests
 ├── data/structures/              # Prefetched coordinates + manifest
 ├── data/ree_pdb_entries.json     # All 636 rare-earth PDB entries, uncurated
-├── tests/                        # Offline regression tests (73, no network)
+├── data/lanthanide_sites.parquet # 2795 metal sites from those entries, with geometry
+├── tests/                        # Offline regression tests (96, no network)
 ├── docs/SCIENTIFIC_CONTRACT.md   # Scientific claims and evidence gates
 ├── ROADMAP.md                    # Verified state, defects, milestones M0-M6
 ├── IMPLEMENTATION_PLAN.md        # Earlier aspirational plan, superseded in part
@@ -141,6 +146,16 @@ pytest -q
   so the rule's condition is met by 30 of 36 lanthanide sites *and 2 of 6 calcium*. Coordination
   number, already shipped, separates better than either. Measure it yourself:
   `python scripts/burial_and_charge.py`.
+- **The full rare-earth structure corpus, measured.** All 636 entries parsed into
+  `data/lanthanide_sites.parquet` — **2795 sites, 2570 lanthanide and 225 calcium**, 33 columns of
+  geometry each. The parser is checked against MetalPDB, an independent implementation: **65 of 65
+  metal ions agree on every donor it reports**, and the 26 extra donors this repo finds all lie in
+  the 3.00–3.18 Å band between the two cutoffs. Two results worth knowing before using the table:
+  **69.8% of lanthanide sites have two protein donors or fewer**, which is what a phasing soak
+  looks like, and consequently the corpus-wide lanthanide-versus-calcium contrast *runs backwards*
+  — it measures which ion was soaked in, not which the protein prefers. Build it with
+  `python scripts/download_corpus.py && python scripts/build_site_table.py`, measure it with
+  `python scripts/corpus_descriptors.py`.
 - Argo text explanations constrained to screening output, with rejected credentials failing closed.
 
 ## Measured baseline
