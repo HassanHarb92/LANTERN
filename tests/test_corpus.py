@@ -117,3 +117,45 @@ def test_title_pass_catches_the_abbreviated_lanmodulin():
         "Nd(III) and Ca(II)")
     assert label == "natural_ln_biology", basis
     assert title_first_pass("lanmodulin (LanM) with La")[0] == "natural_ln_biology"
+
+
+@pytest.mark.skipif(not TABLE.exists(), reason="site table not built")
+def test_site_signature_strips_chain_but_keeps_identity():
+    """The signature is what makes a matched Ln/Ca pair findable.
+
+    It must drop the chain -- otherwise two NCS copies of one site never
+    compare equal and the within-entry tier is empty by construction -- while
+    keeping residue name and number, which is what stops two unrelated sites
+    from matching on shape alone.
+    """
+    import pandas as pd
+    frame = pd.read_parquet(TABLE)
+    for column in ("first_shell_protein_residues", "site_signature"):
+        assert column in frame.columns, column
+
+    with_donors = frame[frame["protein_donor_count"] > 0]
+    assert len(with_donors), "no site has a protein donor; parser is broken"
+    assert (with_donors["site_signature"].str.len() > 0).all()
+    # A chain id would survive as a colon; the signature uses none.
+    assert not with_donors["site_signature"].str.contains(":").any()
+    # The per-residue column keeps the chain, and must still carry it.
+    assert with_donors["first_shell_protein_residues"].str.contains(":").all()
+
+    # A site with no protein donors must produce an empty signature rather
+    # than a token that would match every other such site.
+    bare = frame[frame["protein_donor_count"] == 0]
+    if len(bare):
+        assert (bare["site_signature"].str.len() == 0).all()
+
+
+@pytest.mark.skipif(not TABLE.exists(), reason="site table not built")
+def test_signature_residue_count_never_exceeds_donor_count():
+    """One residue can donate two atoms -- a bidentate carboxylate -- so
+    residues <= donors. The reverse would mean the signature invented a
+    residue, which is the failure that would silently corrupt every pair.
+    """
+    import pandas as pd
+    frame = pd.read_parquet(TABLE)
+    sized = frame[frame["site_signature"].str.len() > 0]
+    residues = sized["site_signature"].str.count(";") + 1
+    assert (residues <= sized["protein_donor_count"]).all()

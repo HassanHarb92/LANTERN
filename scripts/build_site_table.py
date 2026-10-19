@@ -102,6 +102,21 @@ def site_rows(pdb_id: str, text: str, meta: dict) -> list[dict]:
             and d["residue"].strip().upper() not in WATER_RESNAMES})
         coordination = site["coordination_number"] or 1
 
+        # Which residues actually hold the ion, as CHAIN:RESNAME:NUMBER. Two
+        # uses, and the second is the one that justifies the column. A curator
+        # reading "ASP20;ASN22;ASP24;THR26;GLU31" can recognise an EF-hand
+        # loop at a glance where "5 protein donors" tells them nothing. And
+        # stripped of its chain this is a *site signature*: the same signature
+        # appearing once with a lanthanide and once with a calcium is the
+        # same site holding two different ions, which is the only contrast in
+        # this corpus that controls for the fold (S3.13 Q2 is what happens
+        # without that control). Sorted by chain then number so the string is
+        # stable across runs and comparable across entries.
+        protein_residues = sorted({
+            (d["chain"].strip(), d["residue"].strip().upper(),
+             int(d["residue_number"])) for d in site["donors"]
+            if d["kind"] == "protein"}, key=lambda r: (r[0], r[2], r[1]))
+
         rows.append({
             "pdb_id": pdb_id,
             "metal": site["metal"].strip(),
@@ -135,6 +150,21 @@ def site_rows(pdb_id: str, text: str, meta: dict) -> list[dict]:
             # curator can see *what* it was before trusting the flag.
             "chelator_flagged": site["other_ligand_donor_count"] >= coordination / 2,
             "first_shell_ligands": ",".join(shell_ligands),
+            "first_shell_protein_residues": ";".join(
+                f"{chain}:{name}:{number}" for chain, name, number
+                in protein_residues),
+            # The same string with the chain dropped, which is what makes two
+            # NCS copies -- or the same protein in two depositions -- compare
+            # equal. Kept as its own column rather than derived at read time
+            # so that every consumer matches sites the same way. Ordered from
+            # the (number, name) pairs rather than by re-parsing the joined
+            # token: slicing a name off the front assumes every residue name
+            # is three characters, which is true of the standard twenty and
+            # not guaranteed of whatever a 636-entry corpus contains.
+            "site_signature": ";".join(
+                f"{name}{number}" for number, name in
+                sorted({(number, name) for _, name, number
+                        in protein_residues})),
             # Semicolon, not comma: "pyridine-2,6-dicarboxylate" has a comma
             # in its name, and a comma-joined column splits it into two
             # fictitious chelators on the way back out.
@@ -153,9 +183,14 @@ def main() -> int:
     parser.add_argument("--corpus", type=Path, default=CORPUS)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--limit", type=int, default=None)
+    # The matched-calcium corpus is a second set of entries with its own
+    # manifest; without this it would parse fine but lose every title, and
+    # the title is what the class first pass runs on.
+    parser.add_argument("--enumeration", type=Path, default=ENUMERATION,
+                        help="JSON with {'entries': {PDB_ID: {'title': ...}}}")
     args = parser.parse_args()
 
-    enumeration = json.loads(ENUMERATION.read_text())["entries"]
+    enumeration = json.loads(args.enumeration.read_text())["entries"]
     files = sorted(args.corpus.glob("*.cif.gz"))
     if args.limit:
         files = files[:args.limit]

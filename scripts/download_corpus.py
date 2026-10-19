@@ -57,8 +57,8 @@ USER_AGENT = "REE-Finder/0.1 (research; contact via repository)"
 _print_lock = threading.Lock()
 
 
-def entry_ids() -> list[str]:
-    payload = json.loads(ENUMERATION.read_text())
+def entry_ids(enumeration: Path = ENUMERATION) -> list[str]:
+    payload = json.loads(enumeration.read_text())
     return sorted(payload["entries"])
 
 
@@ -100,9 +100,14 @@ def main() -> int:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--limit", type=int, default=None,
                         help="download only the first N entries (sampling)")
+    # The matched-calcium counterparts are a second corpus in the same
+    # shape. They must land in their own empty directory, so --out and
+    # --enumeration are set together or not at all.
+    parser.add_argument("--enumeration", type=Path, default=ENUMERATION,
+                        help="JSON with an 'entries' mapping of PDB IDs")
     args = parser.parse_args()
 
-    ids = entry_ids()
+    ids = entry_ids(args.enumeration)
     if args.limit:
         ids = ids[:args.limit]
     args.out.mkdir(parents=True, exist_ok=True)
@@ -130,7 +135,9 @@ def main() -> int:
             "format": "gzipped mmCIF (see module docstring for why not bcif)",
             "retrieved": time.strftime("%Y-%m-%d"),
             "entries_requested": len(ids),
-            "enumeration": str(ENUMERATION.relative_to(ROOT)),
+            "enumeration": str(args.enumeration.relative_to(ROOT)
+                               if args.enumeration.is_relative_to(ROOT)
+                               else args.enumeration),
             "curation_status": "uncurated -- raw deposited coordinates",
         },
         "counts": {k: len(v) for k, v in sorted(by_status.items())},

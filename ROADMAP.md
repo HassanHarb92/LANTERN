@@ -846,6 +846,68 @@ Reproduce: `python scripts/download_corpus.py`, then `python scripts/build_site_
 `python scripts/corpus_descriptors.py`. Validate the parser with
 `python scripts/crosscheck_metalpdb.py`.
 
+### 3.14 The matched Ca²⁺ contrast, measured: Corpus A cannot supply one
+
+§3.13's Q2 established that comparing the corpus's 2570 lanthanide sites against its 225 calcium
+sites measures provenance, not chemistry — the lanthanides come out *more* exposed because most were
+soaked in, and any descriptor fitted to that contrast learns the soak and inverts the preference.
+The fix is to hold the protein fixed: compare the **same site** holding each ion.
+
+**The mechanism.** `build_site_table.py` now emits two columns per site. `first_shell_protein_residues`
+names the coordinating residues as `CHAIN:RESNAME:NUMBER`, which is what lets a curator recognise
+`ASP20;ASP22;ASP24;THR26;GLU31` as an EF-hand loop where "5 protein donors" tells them nothing.
+`site_signature` is the same string with the chain dropped, so two NCS copies — or two depositions of
+one protein — compare equal. Two sites sharing a signature are the same site; if one holds a
+lanthanide and the other a calcium, the only difference is the ion.
+
+**What a matched pair can and cannot show.** Same signature means the same residues, so the charge
+descriptors are identical *by construction*. Net charge cannot discriminate inside a pair and should
+not be expected to — this is §3.13's reconciliation seen in a mirror, and the charge columns are kept
+in the output precisely as a control that must read zero. What is free to move is geometry: Ln³⁺ is
+more charge-dense than Ca²⁺, so the testable prediction is higher coordination number and more
+bidentate carboxylates on the lanthanide side.
+
+**The measured answer is that this corpus cannot run the test.** At ≥3 signature residues:
+
+| Tier | Matched signatures | Usable |
+|---|---:|---|
+| Within-entry (same deposition, same site, different ion) | 3 | 5G6U ×1, 9R0Q ×2 |
+| Cross-entry (same signature, any deposition) | 4 | adds the 1AK8/2K0J/2K61 EF-hand |
+
+**475 of 481 lanthanide sites (98.8%) have no calcium partner at all**, and every descriptor delta
+across the pairs that do exist is 0.00. This is not a weak result; it is a structural property of
+Corpus A, which is *defined* as entries containing a rare earth and therefore excludes by
+construction the Ca-only depositions that would make the contrast.
+
+> **A near miss worth recording.** Run without the residue-count filter, the cross-entry tier showed
+> 10 matched signatures and a coordination-number delta of **+0.75 with 6 of 7 pairs in the predicted
+> direction** — exactly the result the hypothesis wants. It was an artefact. Those matches were
+> one-residue signatures: `GLU113` recurring across 2V15, 4LL7, 6FRM and 6FRN, four unrelated
+> proteins sharing a string. A single residue is not a site. `--min-residues 3` removes them and the
+> delta collapses to 0.00. The lesson generalises past this script — the looser the matching key, the
+> more confidently a corpus this size will hand back the answer you were hoping for.
+
+**So the contrast set has to be fetched, and by sequence rather than by name.** `matched_calcium.py`
+resolves each Corpus A entry holding a plausible lanthanide site to its UniProt accession through the
+SIFTS mapping, asks RCSB for the other entries on that accession containing `CA`, and subtracts
+Corpus A. Accession, not title: a title cannot tell a point mutant from a different protein.
+
+Two selection rules, and the first is chemistry rather than bandwidth. Counterparts refined worse
+than **2.5 Å are dropped**, because coordination number and donor distance are exactly what a matched
+pair measures and both are refinement artefacts below that — a "7-coordinate" site may be an
+8-coordinate one with a missing density peak. NMR entries go too: their metal–donor distances come
+from a restraint set, not from density. Second, at most **five counterparts per accession**, best
+resolution first; human calmodulin alone offers 229 and the 229th adds nothing the best five did not.
+
+The manifest is a manifest, not a conclusion. Same accession means same sequence, not same construct,
+ligand state or oligomeric form, and `curation_status` in the output says so. Downloads land in
+`.cache/calcium/`, their own empty directory, and are parsed by path.
+
+Reproduce: `python scripts/paired_sites.py` for the in-corpus tiers, then
+`python scripts/matched_calcium.py`, `python scripts/download_corpus.py --out .cache/calcium
+--enumeration data/calcium_counterparts.json`, and `python scripts/build_site_table.py --corpus
+.cache/calcium --enumeration data/calcium_counterparts.json --out data/calcium_sites.parquet`.
+
 ---
 
 ## 4. The strategic reframe: three finite corpora
