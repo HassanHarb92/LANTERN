@@ -31,6 +31,32 @@ from .models import Protein, Candidate
 # the share of family members scoring zero motifs falls from 1.1% to 0.0%.
 EF_HAND_HINT = re.compile(r"[DN].[DN].[DN]..[ILV][DE]..E")
 
+# The *instrument*, as distinct from the classifier above. Never used for
+# scoring -- scripts/loop_detector.py and anything measuring loop properties
+# across both families uses this instead, and tests pin the separation.
+#
+# EF_HAND_HINT is deliberately biased: it recovers 83.3% of lanthanide loops
+# read off deposited coordinates but only 20.4% of 1421 curated calcium
+# EF-loops. That 63-point gap is exactly what makes it discriminate, and
+# exactly what makes it useless for measuring anything. Freeing position 9 in
+# it put Glu-at-9 in calcium loops at 3.3%; a neutral definition put the same
+# proteins at 13.3%.
+#
+# This pattern keeps only the three positions that are invariant in BOTH
+# families, measured over those 1421 curated loops rather than assumed:
+#   position 1  -> [DN]   Asp 91% (and Asn in lanmodulins; see below)
+#   position 8  -> [ILV]  Ile 69% + Val 16% + Leu 7%
+#   position 12 -> E      Glu 87%, the invariant bidentate anchor
+# Everything else is free, including position 9 -- the most variable ligand
+# position of the six (Asp 24%, Ser 19%, Thr 15%, Glu 13%, Asn 13%).
+#
+# Recall 83.0% calcium / 91.7% lanthanide, an 8.7-point gap, at 0.88 matches
+# per curated loop. Tightening position 1 from [DN] to [D] collapses
+# lanthanide recall to 33.3% while leaving calcium at 82.8% -- an independent
+# reconstruction of the §3.6 defect, from curated annotations rather than
+# from the four structures that first exposed it.
+EF_LOOP_INSTRUMENT = re.compile(r"[DN].{6}[ILV].{3}E")
+
 # The loop is 12 residues and the pattern above spans exactly those 12, so a
 # match *is* a loop and can be indexed by position directly.
 LOOP_LENGTH = 12
@@ -65,17 +91,22 @@ METALS = {
     "Ca2+": {"name": "Calcium(II)", "kind": "competitor", "notes": "Divalent competitor for oxygen-rich binding sites."},
 }
 
-def ef_hand_loops(sequence: str) -> list[dict]:
-    """Every loop the classifier matches, with its ligand positions named.
+def ef_hand_loops(sequence: str, pattern: re.Pattern = EF_HAND_HINT) -> list[dict]:
+    """Every loop `pattern` matches, with its ligand positions named.
 
     Returns the residue sitting at each of the six coordinating positions, so
     the thing doing the discriminating is inspectable instead of buried in a
     regex. Non-overlapping, in sequence order, consistent with the motif
     count used by the score.
+
+    Defaults to the classifier. Pass EF_LOOP_INSTRUMENT to *measure* loop
+    properties across both families -- the default will under-report calcium
+    loops by roughly 4x, which is intended behaviour for a classifier and a
+    silent error for a measurement.
     """
     seq = sequence.upper().replace(" ", "").replace("\n", "")
     loops = []
-    for match in EF_HAND_HINT.finditer(seq):
+    for match in pattern.finditer(seq):
         loop = match.group(0)
         loops.append({
             "start": match.start() + 1,       # 1-based residue number

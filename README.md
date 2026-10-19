@@ -80,7 +80,8 @@ REE-Finder/
 │   ├── build_ree_corpus.py       # Rebuild Corpus A; discovers ligand codes, never guesses them
 │   ├── prefetch_structures.py    # Cache 8FNS/8FNR/8DQ2/9PI2/1CLL for an offline demo
 │   ├── analyze_motifs.py         # Reproduce the ROADMAP §3.6 / §3.8 findings
-│   └── validate_motif.py         # Validate the loop pattern on 694 sequences, not six
+│   ├── validate_motif.py         # Validate the loop pattern on 694 sequences, not six
+│   └── loop_detector.py          # Build the balanced *instrument*, vs the biased classifier
 ├── data/reference_proteins.json  # 6 authentic UniProt sequences, checksummed
 ├── data/synthetic_examples.json  # Synthetic fixtures, used only by tests
 ├── data/structures/              # Prefetched coordinates + manifest
@@ -113,6 +114,15 @@ pytest -q
 - Live retrieval for three families, including the full lanmodulin family via InterPro.
 - Sequence acid fraction and limited EF-hand-like motif hints.
 - Transparent, deterministic score (not metal-specific and not selectivity).
+- **Two EF-loop patterns, deliberately, with the separation enforced by test.** `EF_HAND_HINT` is
+  the *classifier*: it is biased on purpose, recovering 83.3% of lanthanide loops read off
+  coordinates against 20.4% of 1421 curated calcium loops, and that 63-point gap is the
+  discrimination. `EF_LOOP_INSTRUMENT` is the *measuring instrument*: 83.0% / 91.7%, an 8.7-point
+  gap, for measuring loop properties across both families without the detector deciding the
+  answer. It finds all four of calmodulin's loops where the classifier finds one. Scoring never
+  uses it, and `test_scoring_never_uses_the_measuring_instrument` inspects the source to keep it
+  that way — swapping it in would look like a recall improvement and would destroy the score.
+  Build and validate: `python scripts/loop_detector.py`.
 - Interactive result table, workflow trace, downloadable JSON.
 - Structure retrieval with automatic mmCIF fallback (RCSB publishes no legacy `.pdb` for large
   entries such as 6EK0, 7K00, 3J3Q); pinned 3Dmol.js viewer, which still needs CDN connectivity.

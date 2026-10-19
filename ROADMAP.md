@@ -490,6 +490,10 @@ Mex-LanM loops. Across the 189 family members the median period is **24.0**.
 > deliberately neutral loop definition (§3.8.1) — not a validated balanced detector, but enough to
 > catch that the biased pattern was understating Glu in calcium loops by 4× (3.3% → 13.3%). Where
 > the biased detector can be checked against a neutral one, it should be.
+>
+> **Unblocked, 2026-10-19.** The balanced detector now exists (§3.10, `EF_LOOP_INSTRUMENT`), so
+> spacing and Pro-at-2 can be measured. Measure them through it, never through `EF_HAND_HINT`,
+> which finds 1 of calmodulin's 4 loops where the instrument finds all 4.
 
 ### 3.9 Which structural features actually discriminate — and one that does not, here
 
@@ -580,6 +584,67 @@ they are a publishable result if the survey is re-run cleanly and the code relea
 worth weighing when sequencing the work. The survey above was produced by a research agent in this
 session and has **not** been independently re-run; treat it as a strong prior and a specification
 for M2, not as a verified repo artefact, until M2 reproduces it.
+
+### 3.10 The classifier cannot be used as a measuring instrument, so there are now two
+
+§3.8.1 exposed a methodological problem larger than the position-9 question it came from. Freeing
+position 9 in the shipped pattern put Glu-at-9 in calcium loops at **3.3%**; a neutral loop
+definition put the *same proteins* at **13.3%**. Same question, same data, 4× apart — the
+difference was entirely the detector. Every loop property this project still needs to measure
+(EF-hand period, Pro-at-position-2, per-position composition) was exposed to the same error.
+
+**Ground truth, and the asymmetry in it.** UniProt annotates EF-hand domains from PROSITE PS50222.
+Within an annotated domain the 12-residue loop sits at a fixed offset — **position 14**, recovered
+from residue composition rather than assumed, and re-derived on every run by `validate_offset()`:
+
+| offset | 10 | 11 | 12 | 13 | **14** | 15 | 16 | 17 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| pos 1 = Asp | 0.7% | 6.8% | 4.3% | 1.3% | **91.3%** | 1.0% | 71.1% | 1.3% |
+| pos 12 = Glu | 1.1% | 13.0% | 8.2% | 22.2% | **86.7%** | 0.6% | 2.1% | 6.6% |
+
+That annotation is **not** usable as ground truth on the lanmodulin side, and the reason is the
+same defect one level up: the profile is calcium-trained. It finds **2.82 domains per calcium
+protein** but only **1.59 per lanmodulin**, where lanmodulins have four. So the calcium side uses
+1421 curated loops, and the lanthanide side uses **12 distinct loops read off deposited
+coordinates** — derived by `structural_loops()` from the lowest-numbered protein donor of each
+metal site, not transcribed, and reproducing the §3.8 loop table exactly.
+
+**What the curated loops say about which positions are structural** (n=1421):
+
+| pos | 1 | 3 | 5 | 6 | 8 | 9 | 12 |
+|---|---|---|---|---|---|---|---|
+| | D 91% | D 71% N 15% | D 50% N 24% S 14% | **G 87%** | I 69% V 16% L 7% | D 24% S 19% T 15% E 13% N 13% | E 87% |
+
+Two things fall out that were previously argued from four structures. **Gly at position 6 is 87%
+conserved — in calcium loops.** §3.6 removed it because no lanmodulin has it; this confirms from
+1421 curated loops that the canonical regex was encoding the competitor's architecture. And
+**position 9 is the most variable of the six ligand positions**, independently reproducing
+§3.8.1's 39.7% carboxylate figure by a completely different route.
+
+**The instrument.** `EF_LOOP_INSTRUMENT = [DN].{6}[ILV].{3}E` keeps only the three positions
+invariant in both families (1, 8, 12) and frees everything else, including position 9:
+
+| detector | Ca recall | Ln recall | gap | matches/loop |
+|---|---:|---:|---:|---:|
+| `EF_HAND_HINT` (shipped classifier) | 20.4% | 83.3% | **+62.9** | 0.21 |
+| PROSITE PS00018 | 82.2% | 0.0% | −82.2 | 0.83 |
+| neutral `D.{6}[ILVMFC].{3}E` (§3.8.1) | 83.4% | 33.3% | −50.1 | 0.88 |
+| **`EF_LOOP_INSTRUMENT`** | **83.0%** | **91.7%** | **+8.7** | **0.88** |
+| same, position 1 tightened to `[D]` | 82.8% | 33.3% | −49.5 | 0.87 |
+
+Recall alone does not qualify a detector: matches-per-curated-loop must stay near 1, or spacing
+measured between spurious hits looks like data. The last row is the §3.6 defect reconstructed from
+curated annotations rather than from the four structures that first exposed it — tightening
+position 1 from `[DN]` to `[D]` costs **58 points of lanthanide recall and 0.2 of calcium**.
+
+> **These are two instruments with opposite objectives and they must never be swapped.** The
+> classifier *wants* the 62.9-point gap; that gap is the discrimination. The instrument wants the
+> gap at zero. The likely future mistake is someone noticing the classifier's 20.4% calcium recall,
+> calling it a bug, and "fixing" it — which would look like an improvement and would destroy the
+> score. `test_scoring_never_uses_the_measuring_instrument` inspects the source of
+> `score_sequence` to prevent exactly that.
+
+Reproduce: `python scripts/loop_detector.py`.
 
 ---
 
@@ -745,7 +810,7 @@ raising; no query returns endocytosis proteins.
 **Done when:** ~~the default demo runs offline on authentic sequences, every record carries a
 verified checksum and provenance, and the ranking — including its known inversion — is pinned by
 test.~~ — ✅ **DONE 2026-10-19.** All of that, plus the inversion resolved rather than merely
-pinned: 73 tests, no xfail, five structures cached (8FNS, 8FNR, 8DQ2, 9PI2, 1CLL), both lanthanide
+pinned: 80 tests, no xfail, five structures cached (8FNS, 8FNR, 8DQ2, 9PI2, 1CLL), both lanthanide
 binders above both calcium proteins.
 
 ### M2 — The lanthanide structure corpus (3–5 days) ← *the core asset*
@@ -849,16 +914,19 @@ These are cheap, they are what unblocks the headline screen, and none of them ne
 - ✅ **Gate: `A0A4V2JDD3` must rank above both calcium proteins.** **Met** — 71.1 vs 69.0 and 57.0.
   **But the margin is 2.1 points and the gate should not be read as more than it is.** It confirms
   the ordering is no longer inverted; it does not establish a calibrated descriptor.
-- **Build a loop detector with balanced recall.** *Still open, and now the limiting item.* The
-  shipped pattern is deliberately biased — it finds 1 of calmodulin's 4 loops, which is what makes
-  it discriminate, but it means it cannot be used to *measure* calcium EF-hands. Anything that needs
-  to compare loop properties across both families (spacing, Pro-at-2 frequency, per-position
-  composition) needs a second, unbiased detector. Keep the two separate and never swap one for the
-  other: one is a classifier, the other is an instrument.
+- ✅ **Build a loop detector with balanced recall.** **Done** — `EF_LOOP_INSTRUMENT`,
+  `[DN].{6}[ILV].{3}E`, built and validated against external ground truth in §3.10. The shipped
+  classifier recovers **20.4%** of 1421 curated calcium EF-loops against **83.3%** of lanthanide
+  loops read off coordinates; the instrument gets **83.0% / 91.7%**, cutting the family gap from
+  **62.9 to 8.7 points** at 0.88 matches per curated loop. The two are kept separate in code and
+  the separation is pinned by `test_scoring_never_uses_the_measuring_instrument` — swapping the
+  instrument into the score would look like a recall improvement and would silently destroy the
+  discrimination the score depends on. One is a classifier, the other is an instrument.
 - **Implement the remaining sequence hallmarks** from Mattocks et al. 2023: EF-hand period (24–25 vs
   ~36) and Pro at loop position 2 — the latter is quantified, the 4P2A mutant tightens Ln³⁺ by only
-  5–10× but Ca²⁺ by ~300×, so Pro at 2 is almost pure Ca²⁺ rejection. Both need the balanced
-  detector above first. **Only then** may a spacing term enter the score.
+  5–10× but Ca²⁺ by ~300×, so Pro at 2 is almost pure Ca²⁺ rejection. **Unblocked**: the balanced
+  detector they were waiting on now exists (§3.10). Measure both through `EF_LOOP_INSTRUMENT`, never
+  through `EF_HAND_HINT`. **Only then** may a spacing term enter the score.
 - ✅ **Encode position 9 explicitly** rather than leaving it implicit in the regex (§3.8). **Done**
   — `ef_hand_loops()` returns every matched loop with all six ligand positions named, and
   `Candidate.position_9` reports the composition. It is *not* a score term: the matched loops
@@ -1169,6 +1237,14 @@ Glu-at-9 is a calcium signal rather than a lanthanide one. It reports the compos
 detectors, the shipped pattern with position 9 freed and a neutral `D.{6}[ILVMFC].{3}E`, because
 the headline number (Glu 0.5% vs 13.3%) depends on not letting the biased pattern define the loop
 population it is being measured on.
+
+§3.10's detector comparison — the loop-offset derivation, the PROSITE annotation asymmetry, the
+per-position composition of 1421 curated calcium loops, and the recall table — is reproduced by
+`scripts/loop_detector.py`. It fetches EF-hand domain annotations for both sets (cached under
+`.cache/`), re-derives the loop offset from composition on every run and asserts it, and reads the
+lanthanide loops off the five cached structures with this repo's own `binding_neighborhood()`
+rather than transcribing them. The classifier/instrument separation itself is pinned by
+`tests/test_chemistry.py`, which does not need the network.
 
 §3.9's donor-chemistry comparison, including the 9PI2 internal control and the finding that
 backbone-carbonyl count carries zero information *within* the EF-hand family, is reproduced by the
