@@ -1,7 +1,13 @@
 """Fetch and inspect publicly deposited PDB structures."""
 import io
+from pathlib import Path
+
 import requests
 from Bio.PDB import PDBParser, MMCIFParser
+
+# Structures prefetched by scripts/prefetch_structures.py, so the demo runs
+# without a network. Cached files are verbatim RCSB downloads, never edited.
+STRUCTURE_CACHE = Path(__file__).resolve().parent.parent / "data" / "structures"
 
 # Verified PDB chemical-component codes for rare-earth ions, mapped to element.
 # Several elements carry two codes that must be merged, erbium is ER3 with no
@@ -32,8 +38,22 @@ def _valid_id(pdb_id: str) -> str:
     return pdb_id.upper()
 
 
-def fetch_structure(pdb_id: str, timeout: int = 25) -> tuple[str, str]:
+def cached_structure(pdb_id: str) -> tuple[str, str] | None:
+    """Return a prefetched structure, or None if it was never cached."""
+    code = _valid_id(pdb_id)
+    for fmt in ("pdb", "cif"):
+        path = STRUCTURE_CACHE / f"{code}.{fmt}"
+        if path.exists():
+            return path.read_text(), fmt
+    return None
+
+
+def fetch_structure(pdb_id: str, timeout: int = 25,
+                    use_cache: bool = True) -> tuple[str, str]:
     """Return (coordinate text, format) for a PDB entry, preferring mmCIF.
+
+    Checks the local prefetch cache first so the bundled demo works offline,
+    then falls back to RCSB.
 
     RCSB does not generate legacy .pdb files for large structures: 6EK0, 7K00
     and 3J3Q all answer 404 for .pdb and 200 for .cif. Trying .pdb first and
@@ -41,6 +61,10 @@ def fetch_structure(pdb_id: str, timeout: int = 25) -> tuple[str, str]:
     ones work at all.
     """
     code = _valid_id(pdb_id)
+    if use_cache:
+        hit = cached_structure(code)
+        if hit is not None:
+            return hit
     errors = []
     for suffix, fmt in (("pdb", "pdb"), ("cif", "cif")):
         try:

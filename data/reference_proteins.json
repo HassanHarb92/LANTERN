@@ -1,0 +1,105 @@
+{
+  "_provenance": {
+    "description": "Authentic reference proteins for the default screening view.",
+    "source": "UniProtKB REST API",
+    "retrieved": "2026-10-19",
+    "record_count": 6,
+    "sequence_sha256": {
+      "C5B164": "59c81c77c852df4108ad1571848a48dc2a5ec4ba6fb7e7dc38b166a11d27dffe",
+      "A0A4V2JDD3": "90e052bba0c0eabc029d0e7d7779296d161c382aeb7371a96e760499de912605",
+      "P0DP23": "4a9f2f38a0afe61f9cd35d05788764536c1b394551a521687d0e537ad2760ff5",
+      "P02585": "ed632463a4c10479995536be212a4596d1034900cdb371857d6c07e1f7d65dfd",
+      "P69905": "14725a10598943a7aa719eed7d24c7fee599192a6c63c75b051ee6f156341242",
+      "P00766": "430105fda0f3959453bc2e627d140061ace59225b816d501e3de9202cd7d5a52"
+    },
+    "roles": {
+      "C5B164": "lanthanide binder",
+      "A0A4V2JDD3": "lanthanide binder",
+      "P0DP23": "calcium protein",
+      "P02585": "calcium protein",
+      "P69905": "true negative",
+      "P00766": "true negative"
+    },
+    "warning": "These are real sequences. Do not describe heuristic scores over them as measured binding or selectivity."
+  },
+  "proteins": [
+    {
+      "accession": "C5B164",
+      "name": "Lanmodulin",
+      "uniprot_name": "Lanmodulin",
+      "name_is_curated": false,
+      "organism": "Methylorubrum extorquens (strain ATCC 14718 / DSM 1338 / JCM 2805 / NCIMB 9133 / AM1)",
+      "sequence": "MAFRLSSAVLLAALVAAPAYAAPTTTTKVDIAAFDPDKDGTIDLKEALAAGSAAFDKLDPDKDGTLDAKELKGRVSEADLKKLDPDNDGTLDKKEYLAAVEAQFKAANPDNDGTIDARELASPAGSALVNLIR",
+      "pdb_id": "8FNS",
+      "source": "UniProt reference set (authentic sequence)",
+      "evidence": "experimentally characterized; Nd3+ sites resolved in PDB 8FNS",
+      "source_url": "https://www.uniprot.org/uniprotkb/C5B164/entry",
+      "notes": "Lanmodulin from Methylorubrum extorquens AM1. The one reviewed member of the family and the positive control for the pipeline."
+    },
+    {
+      "accession": "A0A4V2JDD3",
+      "name": "Lanmodulin (Hansschlegelia quercus)",
+      "uniprot_name": "EF-hand domain-containing protein",
+      "name_is_curated": true,
+      "organism": "Hansschlegelia quercus",
+      "sequence": "MKLSLKAGAAITAFVFAASPVLAASGADALKALNKDNDDSLEIAEVIHAGATTFTAINPDGDTTLESGETKGRLTEKDWARANKDGDQTLEMDEWLKILRTRFKRADANKDGKLTAAELDSKAGQGVLVMIMK",
+      "pdb_id": "8FNR",
+      "source": "UniProt reference set (authentic sequence)",
+      "evidence": "structure with bound Dy3+ deposited as PDB 8FNR",
+      "source_url": "https://www.uniprot.org/uniprotkb/A0A4V2JDD3/entry",
+      "notes": "Lanmodulin from Hansschlegelia quercus. A distinct site architecture from 8FNS: CN 9 with three bidentate carboxylates and no coordinating water."
+    },
+    {
+      "accession": "P0DP23",
+      "name": "Calmodulin-1",
+      "uniprot_name": "Calmodulin-1",
+      "name_is_curated": false,
+      "organism": "Homo sapiens",
+      "sequence": "MADQLTEEQIAEFKEAFSLFDKDGDGTITTKELGTVMRSLGQNPTEAELQDMINEVDADGNGTIDFPEFLTMMARKMKDTDSEEEIREAFRVFDKDGNGYISAAELRHVMTNLGEKLTDEEVDEMIREADIDGDGQVNYEEFVQMMTAK",
+      "pdb_id": "1CLL",
+      "source": "UniProt reference set (authentic sequence)",
+      "evidence": "experimentally characterized calcium sensor; Ca2+ sites in PDB 1CLL",
+      "source_url": "https://www.uniprot.org/uniprotkb/P0DP23/entry",
+      "notes": "Human calmodulin. Four EF-hands at coordination number 7. The key negative: it is calcium-selective, not lanthanide-selective."
+    },
+    {
+      "accession": "P02585",
+      "name": "Troponin C, skeletal muscle",
+      "uniprot_name": "Troponin C, skeletal muscle",
+      "name_is_curated": false,
+      "organism": "Homo sapiens",
+      "sequence": "MTDQQAEARSYLSEEMIAEFKAAFDMFDADGGGDISVKELGTVMRMLGQTPTKEELDAIIEEVDEDGSGTIDFEEFLVMMVRQMKEDAKGKSEEELAECFRIFDRNADGYIDPEELAEIFRASGEHVTDEEIESLMKDGDKNNDGRIDFDEFLKMMEGVQ",
+      "pdb_id": null,
+      "source": "UniProt reference set (authentic sequence)",
+      "evidence": "experimentally characterized calcium-binding protein",
+      "source_url": "https://www.uniprot.org/uniprotkb/P02585/entry",
+      "notes": "Human fast skeletal troponin C. A second EF-hand calcium protein, included because the sequence heuristic ranks it almost level with lanmodulin."
+    },
+    {
+      "accession": "P69905",
+      "name": "Hemoglobin subunit alpha",
+      "uniprot_name": "Hemoglobin subunit alpha",
+      "name_is_curated": false,
+      "organism": "Homo sapiens",
+      "sequence": "MVLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR",
+      "pdb_id": null,
+      "source": "UniProt reference set (authentic sequence)",
+      "evidence": "no EF-hand domain; oxygen transport via haem iron",
+      "source_url": "https://www.uniprot.org/uniprotkb/P69905/entry",
+      "notes": "Human haemoglobin subunit alpha. Binds a metal, but through a porphyrin rather than a carboxylate-rich EF-hand."
+    },
+    {
+      "accession": "P00766",
+      "name": "Chymotrypsinogen A",
+      "uniprot_name": "Chymotrypsinogen A",
+      "name_is_curated": false,
+      "organism": "Bos taurus",
+      "sequence": "CGVPAIQPVLSGLSRIVNGEEAVPGSWPWQVSLQDKTGFHFCGGSLINENWVVTAAHCGVTTSDVVVAGEFDQGSSSEKIQKLKIAKVFKNSKYNSLTINNDITLLKLSTAASFSQTVSAVCLPSASDDFAAGTTCVTTGWGLTRYTNANTPDRLQQASLPLLSNTNCKKYWGTKIKDAMICAGASGVSSCMGDSGGPLVCKKNGAWTLVGIVSWGSSTCSTSTPGVYARVTALVNWVQQTLAAN",
+      "pdb_id": null,
+      "source": "UniProt reference set (authentic sequence)",
+      "evidence": "serine protease zymogen; no characterized metal site",
+      "source_url": "https://www.uniprot.org/uniprotkb/P00766/entry",
+      "notes": "Bovine chymotrypsinogen A. Included as an unrelated protein that should rank at the bottom."
+    }
+  ]
+}

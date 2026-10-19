@@ -70,10 +70,31 @@ neither of which is currently computed.
 This is consistent with the underlying chemistry: Ln³⁺ and Ca²⁺ have similar ionic radii, so size
 does not discriminate; charge density and the resulting higher coordination number do.
 
-The empirical consequence is visible in the ranking: real LanM (74.7) barely edges out troponin C
-(69.0). A 5.7-point gap between the canonical REE binder and a pure calcium protein is noise. **The
-heuristic is a competent EF-hand detector and not a REE detector**, and the app should say so until
-§5.3 lands.
+The empirical consequence is worse than a narrow margin. Scoring the authentic M1 reference set:
+
+| Rank | Protein | Accession | Role | Score | Motifs |
+|---|---|---|---|---|---|
+| 1 | Lanmodulin, *M. extorquens* | C5B164 | **lanthanide binder** | 74.7 | 3 |
+| 2 | Troponin C, human | P02585 | calcium protein | 69.0 | 2 |
+| 3 | Calmodulin, human | P0DP23 | calcium protein | 57.0 | 1 |
+| 4 | Lanmodulin, *H. quercus* | A0A4V2JDD3 | **lanthanide binder** | **35.1** | **0** |
+| 5 | Haemoglobin α, human | P69905 | true negative | 23.4 | 0 |
+| 6 | Chymotrypsinogen A, bovine | P00766 | true negative | 19.1 | 0 |
+
+**The ranking does not merely fail to discriminate — it inverts.** A structurally confirmed Dy³⁺
+binder with two deposited structures (8DQ2 La³⁺, 8FNR Dy³⁺) lands below both calcium proteins, one
+rank above haemoglobin. The cause is a specific, reproducible motif-detection failure, §3.6.
+
+So the claim "the heuristic is a competent EF-hand detector and not a REE detector" was too
+generous: it is **not reliably an EF-hand detector either**. It is a detector for one *sub-type* of
+EF-hand, and the lanthanide protein that falls outside that sub-type is scored as a non-binder.
+
+> **Refinement, 2026-10-19.** §3.1 originally implied no sequence-only feature can separate Ln³⁺
+> from Ca²⁺ proteins. That is true of *acidic fraction* and *EF-hand presence*, the two things the
+> current score measures. It is **not** true in general: EF-hand **spacing** is a published,
+> sequence-only discriminator, and it works on the reference set where the current score fails. See
+> §3.8. This changes M3 from "structure is mandatory" to "structure is mandatory for affinity;
+> sequence can do useful triage first."
 
 ### 3.2 `uniprot.py` — the "ef-hand" search returns endocytosis proteins
 
@@ -180,6 +201,136 @@ Four concrete bugs behind an otherwise solid module:
   unavoidable user-facing warning rather than a bug to fix. Fall back to mmCIF, and prefer
   BinaryCIF (`https://models.rcsb.org/{ID}.bcif`) for bulk work — it is far smaller over the wire.
 
+### 3.6 The EF-hand regex is structurally blind to a confirmed lanthanide site
+
+`EF_HAND_HINT = D.[DN].[DN]G.[ILV][DE]..E` hard-codes **Asp at loop position 1** and **Gly at
+position 6**. I took the three Dy³⁺-coordinating loops of *H. quercus* lanmodulin — not predicted
+loops, the residue ranges whose donors are resolved in **8FNR** — and checked them position by
+position against the equivalent *M. extorquens* loops from **8FNS**:
+
+| Protein | Loop | Sequence | Pos 1 | Pos 6 | Regex |
+|---|---|---|---|---|---|
+| Hans-LanM `A0A4V2JDD3` | 34–45 | `NKDNDDSLEIAE` | **N** | **D** | ✗ |
+| | 58–69 | `NPDGDTTLESGE` | **N** | **T** | ✗ |
+| | 83–94 | `NKDGDQTLEMDE` | **N** | **Q** | ✗ |
+| Mex-LanM `C5B164` | 35–46 | `DPDKDGTIDLKE` | D | G | ✓ |
+| | 59–70 | `DPDKDGTLDAKE` | D | G | ✓ |
+| | 84–95 | `DPDNDGTLDKKE` | D | G | ✓ |
+
+**Two independent violations, both in every Hans-LanM site.** The Asn is not a degraded Asp: Asn34,
+Asn58 and Asn83 are confirmed first-shell Dy³⁺ donors in 8FNR, contributing one monodentate amide
+oxygen each. The pattern cannot express a site that nature uses.
+
+Scale, measured over the 189 LanM-family sequences (`.cache/lanm_family.json`):
+
+| Pattern | Loops found |
+|---|---|
+| Canonical `D.[DN].[DN]G.[ILV][DE]..E` | 470 |
+| …allowing Asn at position 1 | 525 (+55) |
+| …also allowing non-Gly at position 6 | 557 (+32) |
+
+**87 of 557 metal-binding loops — 16% — are invisible to the canonical pattern.** Position 1 is Asp
+488× and Asn 69×; position 6 is Gly 525× and something else 32× (D 9, A 8, K 6, S 4, N 3, R 1, Q 1).
+
+Recall is poor on calcium proteins too: the regex finds **1 of calmodulin's 4** known EF-hands
+(`P0DP23`, motif count 1) and 2 of troponin C's. So the motif term is not a precision instrument
+pointed at the wrong target — it is a low-recall instrument in both directions, and the small score
+differences it produces between proteins are not meaningful.
+
+> **The curated pattern is worse — it selects against the sites we want.** PROSITE **PS00018**, the
+> pattern InterPro actually uses to annotate these proteins, fires on Hans-LanM at **exactly one
+> position: 107**, covering **0 of the 3** confirmed Dy³⁺ loops. Parsing 8FNR shows what sits at
+> 107. All four Dy sites in chain A, with their protein donor residues:
+>
+> | Site | Donor residues | CN | Water | PS00018 |
+> |---|---|---|---|---|
+> | Dy 201 (EF1) | 34, 36, 38, 40, 42, 45 | **9** | 0 | ✗ |
+> | Dy 202 (EF2) | 58, 60, 62, 64, 66, 69 | **9** | 0 | ✗ |
+> | Dy 203 (EF3) | 83, 85, 87, 89, 91, 94 | **9** | 0 | ✗ |
+> | Dy 204 (EF4) | 107, 109, 111, 113, 118 | **7** | **1** | **✓** |
+>
+> **PS00018 detects exactly the one EF-hand with calcium-like coordination — CN 7 with a water — and
+> misses all three with lanthanide-like coordination.** The pattern is named "EF-hand *calcium*-binding
+> domain" and it does precisely what the name says. Its single hit is also why InterPro annotates
+> this protein at all (§3.7): the evidence that makes Hans-LanM look like an EF-hand protein comes
+> from its least lanthanide-like site. On Mex-LanM it fires at 59 and 84, covering 2 of 3.
+>
+> **Do not treat PS00018, or any calcium-derived consensus, as ground truth here.** This is the
+> clearest single piece of evidence in the document that the project needs a lanthanide-derived
+> descriptor rather than a borrowed one.
+
+The same four sites are also the sharpest available statement of §3.1: **one protein, one metal, one
+crystal, and coordination number still separates the three real lanthanide sites (CN 9, no water)
+from the one that behaves like a calcium site (CN 7, one water)** — which is consistent with the
+*Nature* 2023 authors modelling the equivalent position as Na⁺ in the La³⁺ structure. CN is doing
+real work at a resolution no sequence feature can reach.
+
+**Fix (M3):** derive the pattern from the structures in Corpus A rather than importing a
+calcium-derived consensus. Until then the motif count is not a usable ranking term.
+
+### 3.7 Both retrieval routes miss the best-characterised non-prototype lanthanide binder
+
+Hans-LanM is not merely mis-scored — **it cannot be retrieved at all.** Both shipped routes, tested
+directly:
+
+| Route | Returns | Contains `A0A4V2JDD3`? |
+|---|---|---|
+| `protein_name:lanmodulin` | 1 accession | **No** |
+| InterPro NCBIfam `NF053806` → UniProt | 189 accessions | **No** |
+
+The cause is in the annotation. Hans-LanM's complete InterPro entry list contains **no lanmodulin
+family term** — no `NF053806`, no Pfam `PF13202`, no PANTHER family:
+
+```
+A0A4V2JDD3   IPR002048 EF-hand domain · IPR011992 EF-hand domain pair
+             IPR018247 EF-Hand 1, calcium-binding site · PS00018 · PS50222 · SSF47473 · G3DSA:1.10.238.10
+C5B164       (all of the above) + NF053806 "lanmodulin LanM" + PF13202 + PTHR23050 + IPR050145
+```
+
+Every term Hans-LanM carries is a **generic EF-hand term that calmodulin carries too**, and the one
+binding-site term it has is named *"EF-Hand 1, **calcium**-binding site."* A protein whose Dy³⁺
+complex is in the PDB is annotated in the databases as a calcium protein.
+
+**This compounds with §3.6 into the central risk for M4.** The pipeline misses this protein twice:
+retrieval cannot reach it, and if handed it directly the score ranks it below haemoglobin. Any claim
+that the system "discovers REE-binding proteins" is untestable until at least one of these is fixed,
+because the one available held-out positive control is invisible to both ends.
+
+> Consistent with Mattocks et al. 2023, which describes a remote **"Hans cluster"** separate from the
+> main 642-member group at 65% identity. Family-annotation-based retrieval is structurally biased
+> toward the prototype. **M4 must retrieve by sequence criteria, not by family label** (§3.8).
+
+### 3.8 There *is* a sequence-only discriminator: EF-hand spacing
+
+Mattocks et al. 2023 (*Nature* **618**:87–93) state three "hallmarks of a LanM", quoted verbatim:
+
+> "First, LanMs possess four EF-hand motifs. … Second, adjacent EF hands in LanMs are separated by
+> **12–13 residues** — rather than the typical ≈25 residues in Ca^II-responsive EF-hand proteins —
+> resulting in an unusual three-helix bundle architecture with the metal-binding sites on the
+> periphery. Third, at least one EF hand contains **proline at the second position**."
+
+Hallmarks 2 and 3 are pure sequence features, require no structure, and the current score uses
+neither. Measured on the reference set (loop-start period; the paper's "12–13 residue separation" is
+the inter-loop linker, i.e. period minus the 12-residue loop):
+
+| Protein | Loop starts | Periods | Verdict |
+|---|---|---|---|
+| `C5B164` Mex-LanM | 35, 59, 84, 108 | **24, 25, 24** | LanM-like |
+| `A0A4V2JDD3` Hans-LanM | 34, 58, 83 | **24, 25** | LanM-like |
+| `P02585` troponin C | 104, 140 | **36** | Ca-like |
+| `P69905`, `P00766` negatives | — | — | no loops |
+
+**This separates both lanmodulins from the calcium protein, including the one the current score
+ranks 4th of 6.** Hallmark 3 corroborates: Pro sits at position 2 in `NPDGDTTLESGE` and in all three
+Mex-LanM loops. Across the 189 family members the median period is **24.0**.
+
+> **Not yet validated, and I will not claim it is.** The permissive loop finder used above has poor
+> recall on calcium EF-hands — it fired only 5 times across 300 reviewed calmodulins, and catches
+> just 1 of calmodulin's 4 known loops, because its positions 8–9 constraints are too tight. The
+> LanM-vs-CaM comparison at scale is therefore **not a valid test yet**. The n=6 reference-set result
+> and the published hallmark are what support this; a detector with balanced recall must be built and
+> re-tested before the spacing term enters the score. That is the first task of M3.
+
 ---
 
 ## 4. The strategic reframe: three finite corpora
@@ -283,11 +434,21 @@ raising; no query returns endocytosis proteins.
 - Keep the synthetic records in a separate `data/synthetic_examples.json` used **only** by tests.
   The §3.3 tie disappears; the existing provenance-labelling tests get stronger, not weaker.
 - Add a prefetch script caching 8FNS, 8FNR, 1CLL coordinates locally so the demo is network-free.
-- Tests: sequence checksums, and an acceptance test asserting real LanM outranks both calcium
-  proteins and both negatives.
+- Tests: sequence checksums, provenance labelling, reference/synthetic separation, and a
+  **regression test pinning the measured ranking including the inversion** (§3.1) so that M3 can
+  demonstrate it has fixed it.
 
-**Done when:** the default demo runs offline on authentic sequences and produces a non-degenerate,
-chemically defensible ranking.
+> **Acceptance criterion corrected, 2026-10-19.** This milestone originally said "an acceptance test
+> asserting real LanM outranks both calcium proteins and both negatives." **That test is not
+> achievable and should not be written.** Measured: `A0A4V2JDD3`, a confirmed Dy³⁺ binder, scores
+> **35.1** against troponin C's 69.0 and calmodulin's 57.0, because the motif regex cannot see any
+> of its three metal sites (§3.6). Writing the test as originally specified would mean either
+> failing M1 on a defect that belongs to M3, or tuning the heuristic until a known-broken descriptor
+> produced the desired answer — fitting the metric to the conclusion. **M1 pins the honest ranking;
+> M3 owns fixing it.** The "LanM outranks calcium proteins" assertion moves to M3's done-when.
+
+**Done when:** the default demo runs offline on authentic sequences, every record carries a verified
+checksum and provenance, and the ranking — including its known inversion — is pinned by test.
 
 ### M2 — The lanthanide structure corpus (3–5 days) ← *the core asset*
 
@@ -297,6 +458,30 @@ Build Corpus A as a versioned local database.
 > entry IDs with their rare-earth elements and structure titles, plus a provenance block. It is
 > explicitly marked `"curation_status": "uncurated"`. M2 begins by downloading and classifying
 > these, not by rediscovering them.
+
+> **Second head start: do not parse 617 structures from scratch.** **MetalPDB**
+> (`metalpdb.cerm.unifi.it`, *NAR* 2018, 10.1093/nar/gkx989) has already decomposed every PDB metal
+> site into donors, coordination number and geometry — 399,625 sites as of 2026-09-16 — and it
+> indexes all 15 lanthanides *and* Ca²⁺ in one schema, which is exactly the matched contrast M2
+> needs. Working REST API: `/api?query=metal:Nd&columns=donors,coordination,geometry,ligands`,
+> returning per-donor distances. Bulk: `/download?t=cspheres`. Two cautions: the API returns ~86–90%
+> of the sites `/stats` reports (it appears to expose only protein-chain sites — Nd via API 2 sites,
+> via stats 6), so **never mix the two sources in one table**; and no terms-of-use statement exists
+> anywhere on the site, so check licensing before redistributing derived data.
+>
+> Companion **MetalS3** ranks sites by 3D similarity of the coordinating-residue arrangement,
+> fold- and sequence-independent — i.e. "find proteins whose site geometry resembles a known Ln
+> site", which is M4's question asked structurally. HTML form only, results emailed; no API.
+>
+> **Validate every site you keep.** The *Nature* 2023 Hans-LanM paper used **CheckMyMetal**
+> (`cmm.minorlab.org`) to decide whether an EF4 site was Na⁺ or Ca²⁺. If a *Nature* paper needs CMM
+> to assign a metal, so does this project — lanthanide sites are frequently low-occupancy soaks.
+>
+> Scale check, from MetalPDB, which sharpens §4's artefact problem: **Nd has 6 sites in 2 entries
+> and zero non-redundant representative sites; Dy has 38 sites in 2 entries.** Ca²⁺ has 39,686 sites
+> in 13,274 entries. The two commercially critical REEs are essentially absent from structural
+> biology, and most of the lanthanide set that does exist is phasing apparatus (Gd 179, Yb 118,
+> Tb 64 entries are classic MAD/SAD heavy atoms).
 
 - Download mmCIF for all 617, parse with `MMCIFParser`, extract every rare-earth site with full
   first-shell geometry. (If you re-derive the list, use the **full ligand-code set in §4**.) Use
@@ -320,6 +505,23 @@ curation label, and the CN distributions for biological Ln sites versus Ca sites
 
 ### M3 — A descriptor that actually discriminates (3–5 days)
 
+**M3.0 — the sequence-level fixes, first, because M4's retrieval depends on them (§3.6, §3.8).**
+These are cheap, they are what unblocks the headline screen, and none of them needs M2:
+
+- **Build a loop detector with balanced recall.** The current regex misses 16% of LanM-family loops
+  and 100% of Hans-LanM's; the permissive variant used in §3.8 misses 3 of calmodulin's 4. A
+  detector biased toward either family invalidates every comparison built on it. Calibrate recall on
+  both families *before* using it, and report per-family recall as a test.
+- **Re-derive the motif from structure, not from a calcium consensus.** Positions 1 and 6 must admit
+  what Corpus A actually shows (Asn at 1; non-Gly at 6). Treat PS00018 as a *negative* example —
+  §3.6 shows it annotates the one Hans-LanM loop that is not a lanthanide site.
+- **Implement the two sequence hallmarks** from Mattocks et al. 2023: EF-hand period (24–25 vs ~36)
+  and Pro at loop position 2. Validate on the reference set, then on the 189 against a matched
+  calmodulin-family control set. **Only then** may the spacing term enter the score.
+- Gate: `A0A4V2JDD3` must rank above both calcium proteins. It currently ranks below both.
+
+**M3.1 — the geometric descriptor.**
+
 - Implement the geometric descriptor from §3.1 — CN, bidentate carboxylate count, donor-atom
   composition, carboxylate-oxygen density, site burial — scored on structures, not sequences.
 - Calibrate thresholds on M2's curated Ln sites versus the Ca contrast set. With ~tens of
@@ -327,18 +529,54 @@ curation label, and the CN distributions for biological Ln sites versus Ca sites
   learning** — do not train a model on this sample size and do not call the output a probability.
 - Version it (`score_version: "geometry-v1"`) and keep the sequence heuristic alongside, clearly
   labelled as triage only.
+
+> **Two external baselines to beat, both verified to exist.** A descriptor that cannot outperform
+> these is not worth shipping.
+>
+> - **MIB2** (`bioinfo.cmu.edu.tw/MIB2/`, *Bioinformatics* 2022) is the **only** published
+>   metal-site predictor with any lanthanide support — its 18 metals include **Sm³⁺** *and* Ca²⁺.
+>   That makes a **Sm³⁺-score minus Ca²⁺-score differential an immediately available, zero-training
+>   baseline discriminator.** Compute it first; it costs nothing and it is the honest comparator.
+>   Web form only, no API, and it serves a certificate for `combio.life.nctu.edu.tw`, so HTTPS
+>   clients need `verify=False`.
+> - **Metal1D** (`github.com/lcbc-epfl/metal-site-prediction`, MIT) is a residue-propensity map
+>   mined from PDB `LINK` records plus geometric scoring. It ships Zn²⁺-only maps, but it is
+>   **trivially re-parameterisable for Ln³⁺** from M2's coordination statistics — and that is far
+>   more defensible than training a CNN on 29 entries.
+>
+> **Do not plan on transfer learning from Zn models.** Surveyed 2024–2026 predictors — PrOMet,
+> PRIME, BiteNetI, MetalBind, SuperMetal, ZincSight, AllMetal3D — **none covers lanthanides**, and
+> ZincSight's own out-of-distribution tests show Zn-trained models generalise to transition metals,
+> weakly to alkaline-earth, and fail on alkali. Ln³⁺ are hard, oxophilic and trivalent; every
+> natural Ln first shell examined is **100% oxygen**, with no N or S donors at all. The His/Cys/Met
+> chemistry those models are built on is simply not present here.
 - Missing geometry must yield `not_scored`, never 0 and never an imputed mean.
 - **Sanity gate:** the descriptor must rank engineered lanthanide-binding-tag sites (known
   high-affinity, from M2) above phasing-derivative surface sites. If it does not, stop and fix it
   before touching M4.
 
 **Done when:** on held-out structures the descriptor separates biological lanthanide sites from
-calcium sites with a reported ROC/AUC and an honest confidence interval, and LanM's margin over
-calmodulin is large rather than the current 5.7 points of noise.
+calcium sites with a reported ROC/AUC and an honest confidence interval; **both** lanmodulins
+outrank **both** calcium proteins on the M1 reference set, with `A0A4V2JDD3` no longer inverted; and
+LanM's margin over calmodulin is large rather than the current 5.7 points of noise.
 
 ### M4 — Screen the 188 (2–3 days) ← *the headline result*
 
-- Pull all 189 LanM-family sequences and their AlphaFold models.
+> **Blocker found 2026-10-19, read §3.7 before starting.** "The 188" is the wrong corpus. Retrieval
+> by family label cannot reach `A0A4V2JDD3` — it carries no lanmodulin annotation, only generic
+> EF-hand terms identical to calmodulin's — so the one available held-out positive control is
+> outside the set being screened. A screen that cannot recover a known binder it never saw is not
+> evidence of discovery. **Fix retrieval before running the screen:**
+>
+> - Reproduce the Nature 2023 selection criteria — four EF-hands, 12–13 residue separation, length
+>   < 200 aa — which recovered **696** putative LanMs, against this project's 189. The gap is the
+>   measure of how much family-label retrieval misses.
+> - Hold out `A0A4V2JDD3` as the validation target: a correct pipeline retrieves it *and* ranks it
+>   highly, having been given only its sequence.
+> - Keep `C5B164` as the positive control, but note it is the prototype the family profile was built
+>   from, so recovering it is necessary and **not sufficient**.
+
+- Pull all LanM-family sequences and their AlphaFold models.
 - Run the M3 descriptor over predicted structures. Gate on local pLDDT: a low-confidence region
   yields `not_scored`, not a low score.
 - Rank, and produce per-candidate evidence cards: identifiers, organism, predicted site residues,
@@ -351,9 +589,50 @@ exists, with the known binder recovered as a control. **This is the result the p
 
 ### M5 — Evidence ledger and honest selectivity (2–3 days)
 
+> **The corpus is smaller than "tens". It is four.** A literature sweep (Europe PMC full text, 2026-10-19)
+> found that matched-condition Kd values for **both a lanthanide and Ca²⁺ on the same construct**
+> exist for exactly **four** proteins:
+>
+> | Protein | Ln Kd | Ca²⁺ Kd | Ratio | Method |
+> |---|---|---|---|---|
+> | Hans-LanM `A0A4V2JDD3` | La 68 pM · Nd 91 pM · Dy 2.6 nM | 60 µM | **8.8×10⁵** (La) | CD 222 nm, chelator-buffered, pH 5.0 |
+> | Lanpepsy `Q1H2G7` | La ≈1 µM; La/Nd/Eu 5±1 µM | 14±11 µM | ~3–14× (error swamps it) | ITC, pH 7.2 |
+> | SPL2 `E3 ligase` | La 0.945 µM | 1.21 µM | **1.3×** — Ca²⁺ binds *tighter* in the MBP fusion | CD, Hill fit |
+> | Al-LanM (PDB 9PI2) | Nd and Ca in one 0.99 Å structure | — | Kd table paywalled (JACS 2026) | X-ray |
+>
+> Three consequences, each of which changes a design decision:
+>
+> 1. **Mex-LanM's Ca²⁺ Kd is not publicly available as a number.** Cotruvo 2018 (*JACS*
+>    10.1021/jacs.8b09842) is paywalled with no repository copy; every open-access source describes
+>    it only as "millimolar". Do not put a figure in the ledger for it.
+> 2. **The famous 10⁸ selectivity is not an affinity ratio.** Cotruvo's own 2019 review states
+>    "only 10⁶ derives from affinity differences; the rest appears to derive from a conformational
+>    effect." A binding-site descriptor predicts *binding*, so **calibrate against 10⁶**. The
+>    independently measured Hans-LanM La/Ca ratio of 8.8×10⁵ lands on exactly that figure — a real
+>    consistency check and the single best calibration anchor available.
+> 3. **A calibrated Ln-vs-Ca regressor is not feasible on public data, and the roadmap should stop
+>    implying otherwise.** n=4 is a validation set, never a training set. REE-Finder is a
+>    *ranked-hypothesis generator* with a physics/propensity score. The 621-ortholog SpyCI-LAMBS
+>    dataset (*Nat Chem Biol* 2026) does not rescue this: it measures RE-vs-RE, calcium is never
+>    assayed, and all 621 are one 133-residue family. It is excellent for a *different* question —
+>    given a LanM, which REE does it prefer.
+>
+> **Highest-leverage experimental gap in the field, worth stating in the write-up:** the SpyCI-LAMBS
+> assay already exists; measuring Ca²⁺ across even 50 of its 621 orthologs would take n from 4 to 50
+> and make calibrated regression plausible. Nobody has done it.
+
 - Hand-curate a literature table of measured lanthanide and Ca²⁺ affinities with assay conditions
-  (pH, buffer, method, construct). Expect **tens of entries, not hundreds** — the matched-condition
-  Ln-vs-Ca literature is small, which is itself a finding worth stating in the UI.
+  (pH, buffer, method, construct). **Four matched-condition entries, not tens** — state the number
+  in the UI; the scarcity is itself a finding.
+- **Never pool Kd values across methods.** CD-derived lanmodulin values are *apparent* constants for
+  a metal-dependent conformational change; ITC, UV-vis dye competition and CD do not measure the
+  same quantity. Record method and pH as required fields, and refuse to display a ratio across two
+  methods. Mex-LanM's quoted affinity moves from ~21 pM at pH 5 to low pM at pH 7 — a scraped Kd
+  without its pH is unusable.
+- **Do not build a size-matching term.** Ca²⁺ at CN 8 is 1.12 Å, sitting *mid-series* among Ln³⁺
+  (La 1.16 → Lu 0.98 Å), so radius cannot separate them; and *Chem Sci* 2022 reports LanM's affinity
+  trend "does not follow the lanthanide contraction", so a radius-driven score will also get the
+  intra-series order wrong. Charge density and coordination number do the work (§3.1).
 - Display `log10(Kd_Ca / Kd_REE)` **only** where both values exist for the same construct under
   comparable conditions; otherwise show "no matched measurement", distinct from "does not bind".
 - Wire UniProt binding-site annotations (C5B164 already carries 20) as corroborating evidence.
@@ -491,7 +770,23 @@ curl -s -X POST https://search.rcsb.org/rcsbsearch/v2/query -H 'Content-Type: ap
 # §4 Corpus B, the 189 LanM-family proteins
 curl -s 'https://www.ebi.ac.uk/interpro/api/protein/uniprot/entry/ncbifam/NF053806/?page_size=5' \
   -H 'Accept: application/json'
+
+# §3.7 Hans-LanM carries NO lanmodulin family term -- only generic EF-hand terms.
+# Compare the two entry lists; NF053806 and PF13202 appear for C5B164 and not for A0A4V2JDD3.
+for ACC in A0A4V2JDD3 C5B164; do echo "== $ACC"; curl -s \
+  "https://www.ebi.ac.uk/interpro/api/entry/all/protein/uniprot/$ACC/?page_size=100" \
+  -H 'Accept: application/json' | python3 -c \
+  'import json,sys; [print(" ", e["metadata"]["source_database"], e["metadata"]["accession"]) \
+   for e in json.load(sys.stdin)["results"]]'; done
+
+# §3.7 and neither retrieval route returns it
+curl -s 'https://rest.uniprot.org/uniprotkb/search?query=protein_name:lanmodulin&fields=accession' \
+  | python3 -c 'import json,sys; print([r["primaryAccession"] for r in json.load(sys.stdin)["results"]])'
 ```
+
+§3.6's motif audit and §3.8's spacing table are reproduced by
+`scripts/analyze_motifs.py`, which caches the 189 family sequences under `.cache/`
+(gitignored) and prints every table in those two sections.
 
 §3.1's coordination comparison and §3.3's demo-ranking table are reproduced by scoring the real
 UniProt sequences and parsing 8FNS/8FNR/1CLL with the repo's own `structure.py`, filtered to O/N/S

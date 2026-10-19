@@ -1,0 +1,50 @@
+{
+  "_provenance": {
+    "description": "Synthetic teaching sequences. NOT real proteins.",
+    "purpose": "Unit tests and UI fixtures only. These are deliberately not the default screening set: three of the four score identically and none matches the EF-hand pattern the tool searches for, so they demonstrate the tool failing rather than working.",
+    "record_count": 4,
+    "warning": "No record here may be presented as a naturally occurring protein or an authentic PDB sequence (SCIENTIFIC_CONTRACT.md rule 8)."
+  },
+  "proteins": [
+    {
+      "accession": "DEMO-LANM",
+      "name": "Lanmodulin (demonstration reference)",
+      "organism": "Methylorubrum extorquens",
+      "sequence": "MADTDKDLAGIDGDEDEEEAAKAALELGADTDKDGDGLDGDEDEEEAAKAALELGADTDKDGKGIDGDEDEEEAAKAALEL",
+      "pdb_id": "8FNS",
+      "source": "educational synthetic sequence + real PDB reference",
+      "evidence": "experimentally established protein family; demo sequence is synthetic",
+      "source_url": "https://www.rcsb.org/structure/8FNS",
+      "notes": "IMPORTANT: The sequence is synthetic for UI testing; it is NOT the sequence of PDB 8FNS. Never report its computed score as evidence about native lanmodulin."
+    },
+    {
+      "accession": "DEMO-CALM",
+      "name": "Calmodulin (demonstration comparator)",
+      "organism": "Generic comparator",
+      "sequence": "MADQLTEEQIAEFKEAFSLFDKDGDGTITTKELEEAIAEFKEAFSLFDKDGDGTITTKELEEAIAEFKEAFSLF",
+      "pdb_id": "1CLL",
+      "source": "educational synthetic sequence + real PDB reference",
+      "evidence": "known calcium-binding protein family; demo sequence is synthetic",
+      "source_url": "https://www.rcsb.org/structure/1CLL",
+      "notes": "IMPORTANT: Synthetic sequence, NOT the authentic calmodulin sequence."
+    },
+    {
+      "accession": "DEMO-HYP1",
+      "name": "Hypothetical oxygen-rich candidate A",
+      "organism": "Synthetic test candidate",
+      "sequence": "MAAADEDEDEDEAAAGLKELAAADEDEDEDEAAAGLKELEEEEEEEEAA",
+      "source": "synthetic",
+      "evidence": "none",
+      "notes": "Synthetic sequence for screening unit demo. Not a discovered natural protein."
+    },
+    {
+      "accession": "DEMO-HYP2",
+      "name": "Hypothetical candidate B",
+      "organism": "Synthetic test candidate",
+      "sequence": "MAAAVVVLLLKKKAAAVVVLLLKKKAAAVVVLLLKKKAAAVVVLLLKKK",
+      "source": "synthetic",
+      "evidence": "none",
+      "notes": "Synthetic control sequence, not a discovered protein."
+    }
+  ]
+}

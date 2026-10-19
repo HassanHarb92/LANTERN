@@ -1,7 +1,7 @@
 """Offline tests for coordination-shell measurement. No network access."""
 import pytest
 from reefinder.structure import (REE_LIGAND_CODES, DONOR_ELEMENTS, binding_neighborhood,
-                                 fetch_structure, _valid_id)
+                                 cached_structure, fetch_structure, _valid_id)
 
 
 def _atom(serial, name, resname, chain, resseq, x, y, z, element, hetatm=False):
@@ -100,3 +100,55 @@ def test_fetch_structure_rejects_bad_id_before_any_request():
     # Validation must happen before the network call, so this stays offline.
     with pytest.raises(ValueError):
         fetch_structure("nope!")
+
+
+# --- Regression tests over the prefetched real structures (M1) --------------
+# These use data/structures/, populated by scripts/prefetch_structures.py, so
+# they stay offline while testing against authentic deposited coordinates
+# rather than a hand-written fixture.
+
+CACHED = pytest.mark.skipif(cached_structure("8FNR") is None,
+                            reason="run scripts/prefetch_structures.py first")
+
+
+@CACHED
+def test_8fns_neodymium_sites_match_documented_coordination():
+    # ROADMAP 3.1: three Nd sites at CN 9 (7 protein O + 2 water), one at 10.
+    text, fmt = cached_structure("8FNS")
+    sites = binding_neighborhood(text, fmt)
+    assert {s["element"] for s in sites} == {"Nd"}
+    counts = sorted(s["coordination_number"] for s in sites)
+    assert counts == [9, 9, 9, 10]
+    for site in sites:
+        assert site["water_donor_count"] == 2
+        assert 2.4 <= site["mean_donor_distance_A"] <= 2.7
+
+
+@CACHED
+def test_8fnr_dysprosium_sites_separate_by_coordination_number():
+    # ROADMAP 3.6: EF1-3 are CN 9 with no water; EF4 is CN 7 with one water,
+    # i.e. calcium-like, and is the only loop PROSITE PS00018 detects.
+    text, fmt = cached_structure("8FNR")
+    chain_a = [s for s in binding_neighborhood(text, fmt) if s["chain"] == "A"]
+    assert len(chain_a) == 4
+
+    by_site = {s["site"]: s for s in chain_a}
+    for site_id in ("201", "202", "203"):
+        site = by_site[site_id]
+        assert site["coordination_number"] == 9
+        assert site["water_donor_count"] == 0
+
+    ef4 = by_site["204"]
+    assert ef4["coordination_number"] == 7
+    assert ef4["water_donor_count"] == 1
+    # EF4's donors start at 107 -- the single position PS00018 matches.
+    assert min(d["residue_number"] for d in ef4["donors"]
+               if d["kind"] == "protein") == 107
+
+
+@CACHED
+def test_calmodulin_has_no_rare_earth_sites():
+    # 1CLL is the calcium contrast set; finding a lanthanide in it would mean
+    # the ion table had started matching unrelated components.
+    text, fmt = cached_structure("1CLL")
+    assert binding_neighborhood(text, fmt) == []

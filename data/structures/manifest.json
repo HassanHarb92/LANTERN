@@ -1,0 +1,30 @@
+{
+  "_provenance": {
+    "description": "Verbatim RCSB downloads cached for offline demo use.",
+    "source": "https://files.rcsb.org/download/",
+    "retrieved": "2026-10-19"
+  },
+  "structures": {
+    "8FNS": {
+      "file": "8FNS.pdb",
+      "format": "pdb",
+      "sha256": "46475f0e73c7481694d0497560366f0175f4284076d12f786328670ea76f5f08",
+      "description": "Lanmodulin (M. extorquens, C5B164) with Nd3+; CN 9-10",
+      "bytes": 177471
+    },
+    "8FNR": {
+      "file": "8FNR.pdb",
+      "format": "pdb",
+      "sha256": "b7da288458075fe269820a8dfdd6bc371bfadd9c9f07a59e03a096cc46677c88",
+      "description": "Lanmodulin (H. quercus, A0A4V2JDD3) with Dy3+; CN 9",
+      "bytes": 687771
+    },
+    "1CLL": {
+      "file": "1CLL.pdb",
+      "format": "pdb",
+      "sha256": "54c094c7c337d7b5829bb9d865cd0042f9e5557478d1528f76c1e7b691f8ce37",
+      "description": "Calmodulin (human, P0DP23) with Ca2+; CN 7 -- the contrast set",
+      "bytes": 144504
+    }
+  }
+}

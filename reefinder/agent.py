@@ -8,7 +8,7 @@ an agent today would advertise capability the code does not have.
 import json
 from .argo import ArgoClient
 from .chemistry import screen
-from .catalog import load_demo
+from .catalog import load_reference
 from .uniprot import search_proteins
 
 PIPELINE_KIND = "fixed sequence of two steps; no planner, no tool selection"
@@ -33,17 +33,16 @@ def run_campaign(topic="lanmodulin", target="Nd3+", competitor="Ca2+", live=Fals
         proteins = search_proteins(topic, limit=limit)
         mode = "live database"
     else:
-        trace.append("Load bundled synthetic educational sequences")
-        proteins = load_demo()
-        mode = "synthetic demo"
+        trace.append("Load bundled reference sequences (authentic, from UniProt)")
+        proteins = load_reference()
+        mode = "curated reference set"
     trace.append("Run deterministic sequence-only heuristic screening")
     candidates = screen(proteins)
     trace.append("Label all unverified properties as hypotheses")
     return {"topic": topic, "target": target, "competitor": competitor, "mode": mode,
             "pipeline": PIPELINE_KIND,
             "candidates": [c.as_dict() for c in candidates], "trace": trace,
-            "disclaimer": SCORE_LIMITATION + (
-                " Demo sequences are synthetic." if not live else "")}
+            "disclaimer": SCORE_LIMITATION}
 
 
 def explain_campaign(campaign: dict, client: ArgoClient, question: str = "Summarize the findings") -> str:

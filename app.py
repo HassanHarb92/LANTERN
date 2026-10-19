@@ -8,6 +8,7 @@ import streamlit.components.v1 as components
 from dotenv import load_dotenv
 from reefinder.agent import run_campaign, explain_campaign, SCORE_LIMITATION
 from reefinder.argo import ArgoClient, ArgoError
+from reefinder.catalog import load_reference
 from reefinder.chemistry import METALS
 from reefinder.structure import fetch_structure, binding_neighborhood
 from reefinder.uniprot import TOPICS
@@ -38,13 +39,13 @@ with st.sidebar:
     st.header("⚗️ Discovery settings")
     target = st.selectbox("Target rare earth", ["Nd3+", "Dy3+", "La3+", "Ce3+"])
     competitor = st.selectbox("Compare against", ["Ca2+", "Nd3+", "Dy3+", "La3+", "Ce3+"], index=0)
-    mode = st.radio("Source", ["Offline demo", "Live database"], index=0,
-                    help="Demo uses synthetic educational sequences. Live fetches real sequences.")
+    mode = st.radio("Source", ["Reference set", "Live database"], index=0,
+                    help="Reference set screens six authentic sequences offline. Live fetches from UniProt/InterPro.")
     topic = st.selectbox("Protein search family", list(TOPICS),
-                         disabled=mode == "Offline demo",
+                         disabled=mode == "Reference set",
                          help="lanm-family resolves the lanmodulin family through InterPro, "
                               "then fetches sequences from UniProt.")
-    limit = st.slider("Maximum proteins", 5, 50, 20, step=5, disabled=mode == "Offline demo")
+    limit = st.slider("Maximum proteins", 5, 50, 20, step=5, disabled=mode == "Reference set")
     st.divider()
     st.caption("Argo model and username are read from .env. Never paste credentials into chat.")
     argo = ArgoClient()
@@ -64,15 +65,17 @@ if st.button("🔎 Run protein discovery", type="primary", width='stretch'):
                                                      live=mode == "Live database", limit=limit)
             st.session_state.pop("explanation", None)
     except Exception as exc:
-        st.error(f"Discovery failed ({type(exc).__name__}). Check the internet or switch to Offline demo.")
+        st.error(f"Discovery failed ({type(exc).__name__}). Check the internet or switch to the Reference set.")
 
 if "campaign" not in st.session_state:
     st.markdown("### Get started")
     a,b,c=st.columns(3)
-    a.metric("Demo proteins", "4", help="All demo protein sequences are synthetic")
-    b.metric("Supported targets", "4")
+    a.metric("Reference proteins", str(len(load_reference())),
+             help="Authentic UniProt sequences: 2 lanmodulins, 2 calcium proteins, 2 negatives")
+    b.metric("Supported targets", str(sum(1 for m in METALS.values() if m["kind"] == "lanthanide")))
     c.metric("Cloud LLM", "Argonne Argo")
-    st.markdown("Click **Run protein discovery** to see a ranked exploratory shortlist. Use **Live database** for real sequences, then explore a known PDB structure.")
+    st.markdown("Click **Run protein discovery** to screen the reference set, or switch to "
+                "**Live database** to pull the lanmodulin family, then explore a known structure.")
     st.stop()
 
 campaign = st.session_state.campaign
