@@ -705,6 +705,59 @@ label; this is the measured instance of the failure it predicted.
 
 Reproduce: `python scripts/sequence_hallmarks.py`.
 
+### 3.12 Burial and net charge: implemented, measured, and deliberately not scored
+
+M3.1 named these two as the descriptors not yet built, with the Dudev rule as the published form:
+*"buried active centers with net charge of −4 or −3 are characterized by higher Ln³⁺ over Ca²⁺
+selectivity, whereas it is the opposite for sites with overall charge of −1"* (Nikolova & Dudev,
+*IJMS* 2023, **24**:6297). Both are now implemented in `reefinder/structure.py` — `site_net_charge()`
+counts first-shell charge, `_burial()` reports metal SASA plus a heavy-atom count — and attached to
+every site dict. Measured across the 42 cached sites (36 lanthanide, 6 calcium):
+
+| Descriptor | Lanthanide (median, IQR) | Calcium (median, IQR) | Balanced acc. | Ln recall | Ca recall |
+|---|---|---|---:|---|---|
+| net charge, first shell | −4.00 (−4.00 … −4.00) | −3.00 (−4.00 … −3.00) | 75.0% | 83% (30/36) | 67% (4/6) |
+| metal SASA Å² | 0.00 (0.00 … 0.00) | 1.73 (0.00 … 3.46) | 77.8% | 89% (32/36) | 67% (4/6) |
+| protein atoms <8 Å | 85.0 (83.3 … 98.3) | 86.5 (82.5 … 88.8) | 63.9% | 28% (10/36) | 100% (6/6) |
+| shell net charge <8 Å | −3.00 (−4.00 … −3.00) | −1.50 (−4.00 … 0.00) | 73.6% | 81% (29/36) | 67% (4/6) |
+| **coordination number** *(already shipped)* | 10.0 (9.0 … 10.0) | 7.0 (6.5 … 7.0) | **93.1%** | 86% (31/36) | 100% (6/6) |
+
+Balanced accuracy — the mean of the two per-family recalls — is used because the sample is 36 against
+6, so plain accuracy starts at 85.7% for a rule that reads nothing and calls everything lanthanide.
+Thresholds are fitted on the same data they are scored on, so every figure is an upper bound.
+
+**Neither new descriptor beats the coordination number already in the score**, and the reason is
+structural rather than a shortcoming of the measurement:
+
+> **Net charge is near-constant inside this fold, so it has nothing to rank with.** 97.6% of the 42
+> sites carry −3 or −4 — 35 of 36 lanthanide sites and 6 of 6 calcium. An EF-hand loop places
+> carboxylates at fixed loop positions, so its first-shell charge is a property of the twelve-residue
+> grammar and not of the bound ion. The Dudev rule needs charge to *vary* before it can discriminate;
+> within one fold it does not. This is the same lesson §3.9 recorded for backbone-carbonyl count —
+> the second time a published PDB-wide discriminator has turned out to carry no information inside
+> the EF-hand family, and the reason is identical both times: the loop grammar fixes it.
+
+The cross-tabulation makes the failure concrete. The rule's Ln-selective condition — buried **and**
+−3/−4 — is met by 32 of 42 sites, of which **30 are Ln-bound and 2 are Ca-bound**. Calmodulin's
+calcium sites are buried −3/−4 centres too. The condition describes an EF-hand, not a lanthanide
+preference.
+
+> **What this sample can and cannot settle.** The Dudev rule is a claim about which ion a *given*
+> site prefers. Every site here already has its preferred ion bound, so the sample cannot test the
+> rule at all — only the weaker thing the score would need, whether the descriptors separate
+> Ln-bound from Ca-bound sites. And **six calcium sites set the ceiling on all of it**: each Ca
+> recall above is a count out of six, one site is 17 percentage points, and no threshold fitted
+> against six points should ship. Both the positive and contrast sets are a single protein family
+> each, so a descriptor that *did* separate here might be reading the fold rather than the chemistry.
+
+**Neither descriptor enters the score.** They are implemented, attached to every site, and pinned by
+tests — including one that pins the negative result itself, so that a future contributor who sees
+charge "working" is prompted to suspect their contrast set first. Unblocking them is M2's corpus:
+Ln sites outside the EF-hand fold, where charge actually varies, are the only sample that could
+either calibrate these or retire them.
+
+Reproduce: `python scripts/burial_and_charge.py`.
+
 ---
 
 ## 4. The strategic reframe: three finite corpora
@@ -869,7 +922,7 @@ raising; no query returns endocytosis proteins.
 **Done when:** ~~the default demo runs offline on authentic sequences, every record carries a
 verified checksum and provenance, and the ranking — including its known inversion — is pinned by
 test.~~ — ✅ **DONE 2026-10-19.** All of that, plus the inversion resolved rather than merely
-pinned: 82 tests, no xfail, five structures cached (8FNS, 8FNR, 8DQ2, 9PI2, 1CLL), both lanthanide
+pinned: 88 tests, no xfail, five structures cached (8FNS, 8FNR, 8DQ2, 9PI2, 1CLL), both lanthanide
 binders above both calcium proteins.
 
 ### M2 — The lanthanide structure corpus (3–5 days) ← *the core asset*
@@ -1013,9 +1066,13 @@ These are cheap, they are what unblocks the headline screen, and none of them ne
   **Use the §3.9 feature ranking, and select features against calcium EF-hands rather than against
   all calcium sites** — the strongest PDB-wide feature (backbone carbonyl count) carries exactly
   zero information inside this family. `donor_chemistry()` already computes the within-family
-  survivors: bidentate carboxylate count, carboxylate O count, Glu/Asp split. Burial and net charge
-  are the two not yet implemented, and the Dudev rule (buried, −3/−4 ⇒ Ln-selective) is the
-  published form to implement.
+  survivors: bidentate carboxylate count, carboxylate O count, Glu/Asp split. ✅ **Burial and net
+  charge are now implemented and measured** (§3.12) — `site_net_charge()` and `_burial()`, attached
+  to every site dict. **Neither is scored.** The Dudev condition (buried, −3/−4) is met by 30 of 36
+  Ln sites *and 2 of 6 Ca sites*, because an EF-hand loop is a −3/−4 buried centre whichever ion it
+  holds: 97.6% of cached sites fall in that class. Coordination number, already shipped, separates
+  better than either (93.1% vs 77.8% and 75.0% balanced accuracy). Calibrating them needs Ln sites
+  from **outside** this fold, where charge varies — i.e. M2's corpus.
 - Calibrate thresholds on M2's curated Ln sites versus the Ca contrast set. With ~tens of
   genuine biological Ln sites this is **threshold calibration and ROC reporting, not machine
   learning** — do not train a model on this sample size and do not call the output a probability.
@@ -1317,6 +1374,12 @@ rather than transcribing them. The classifier/instrument separation itself is pi
 hallmark under both detectors so the classifier's error is visible rather than described. The
 parts that can be checked without the network — calmodulin's ~36-residue period, Pro-at-2 on the
 coordinate-derived loops — are also pinned in `tests/test_chemistry.py`.
+
+§3.12's burial and net-charge tables are reproduced by `scripts/burial_and_charge.py`, which reads
+the five cached structures and needs no network. Every figure in its closing paragraph is computed
+on each run rather than transcribed, so the prose cannot drift from the table above it. The negative
+result is pinned by `tests/test_structure.py` — charge near-constant across the fold, both families
+in the same classes — so that it has to be argued with rather than quietly overturned.
 
 §3.9's donor-chemistry comparison, including the 9PI2 internal control and the finding that
 backbone-carbonyl count carries zero information *within* the EF-hand family, is reproduced by the

@@ -76,6 +76,18 @@ BACKBONE_CARBONYL_ATOMS = {"O", "OXT"}
 # first shell without reaching the second.
 FIRST_SHELL_ANGSTROM = 3.2
 
+# Burial shell. 8 A around the ion reaches roughly two residue layers past the
+# first shell, which is the scale the Dudev selectivity argument operates on:
+# a buried site cannot reorganise solvent to pay the desolvation penalty that
+# discriminates Ln3+ from Ca2+.
+BURIAL_RADIUS_ANGSTROM = 8.0
+
+# Residues whose side chains carry formal charge at pH ~7, used for the
+# second-shell charge count. First-shell charge is counted from donor
+# chemistry instead -- see site_net_charge().
+ANIONIC_RESIDUES = {"ASP", "GLU"}
+CATIONIC_RESIDUES = {"LYS", "ARG"}
+
 
 def _valid_id(pdb_id: str) -> str:
     if not pdb_id or len(pdb_id) != 4 or not pdb_id.isalnum():
@@ -197,6 +209,113 @@ def donor_chemistry(donors: list[dict]) -> dict:
     }
 
 
+def site_net_charge(chemistry: dict) -> dict:
+    """Formal charge of the first shell, for the Dudev selectivity rule.
+
+    Nikolova & Dudev (IJMS 2023, 24, 6297, DFT/PCM): "buried active centers
+    with net charge of -4 or -3 are characterized by higher Ln3+ over Ca2+
+    selectivity, whereas it is the opposite for sites with overall charge of
+    -1." Charge and burial are a conjunction in that sentence, so both are
+    computed and neither is reported alone.
+
+    Counts carboxylate *residues*, not carboxylate oxygens. A bidentate Glu
+    donates two oxygens and still carries one negative charge; counting atoms
+    would double it and push every bidentate-rich lanthanide site into a
+    charge class it does not occupy.
+
+    Backbone carbonyls, side-chain amides, hydroxyls and waters are neutral.
+    `unassigned_donors` counts first-shell donors whose charge this function
+    does not model -- non-water heteroatom ligands, and anything `other`
+    (His N, Cys S). When it is non-zero the charge is a model of part of the
+    shell, not of the shell, and callers should say so rather than round it.
+    """
+    return {
+        "net_charge": -chemistry["carboxylate_residues"],
+        "anionic_groups": chemistry["carboxylate_residues"],
+        "neutral_donors": (chemistry["backbone_carbonyl"]
+                           + chemistry["sidechain_amide"]
+                           + chemistry["hydroxyl"] + chemistry["water"]),
+        "unassigned_donors": chemistry["ligand"] + chemistry["other"],
+    }
+
+
+def _burial(model, ion, radius_angstrom: float = BURIAL_RADIUS_ANGSTROM) -> dict:
+    """How enclosed one ion is, by two independent measures.
+
+    Solvent accessibility is computed with waters and non-metal heteroatoms
+    removed. Leaving them in would be backwards: an exposed site attracts
+    *more* ordered waters, so each one would shield the ion and make the most
+    solvent-exposed sites score as the most buried.
+
+    The heavy-atom count is reported alongside because SASA depends on the
+    radius assigned to an element the table may not know, while a count does
+    not. Two measures that can be checked against each other beat one that
+    cannot.
+    """
+    from numpy.linalg import norm
+
+    neighbours = sum(
+        1 for atom in model.get_atoms()
+        if atom is not ion
+        and atom.parent.id[0] == " "
+        and (atom.element or "").strip().upper() != "H"
+        and float(norm(atom.coord - ion.coord)) <= radius_angstrom)
+    charged = {"anionic": 0, "cationic": 0}
+    for residue in model.get_residues():
+        name = residue.resname.strip().upper()
+        if name not in ANIONIC_RESIDUES and name not in CATIONIC_RESIDUES:
+            continue
+        if any(float(norm(a.coord - ion.coord)) <= radius_angstrom for a in residue):
+            charged["anionic" if name in ANIONIC_RESIDUES else "cationic"] += 1
+    return {
+        "protein_atoms_within_8A": neighbours,
+        "shell_anionic_residues": charged["anionic"],
+        "shell_cationic_residues": charged["cationic"],
+        "shell_net_charge": charged["cationic"] - charged["anionic"],
+    }
+
+
+def _sasa_by_ion(model, table: dict) -> dict:
+    """Solvent-accessible surface area of every metal ion in the model.
+
+    Returns {} if SASA cannot be computed, rather than failing the whole
+    analysis -- burial is one descriptor among several and the atom count
+    survives on its own.
+    """
+    import copy
+
+    try:
+        from Bio.PDB.SASA import ShrakeRupley
+    except ImportError:                                   # pragma: no cover
+        return {}
+    stripped = copy.deepcopy(model)
+    for chain in list(stripped):
+        for residue in list(chain):
+            if residue.id[0] == " ":
+                continue
+            if residue.resname.strip().upper() not in table:
+                chain.detach_child(residue.id)
+    try:
+        ShrakeRupley().compute(stripped, level="A")
+    except Exception:                                     # pragma: no cover
+        return {}
+    out = {}
+    for chain in stripped:
+        for residue in chain:
+            if residue.id[0] == " ":
+                continue
+            if residue.resname.strip().upper() not in table:
+                continue
+            atoms = [a for a in residue if (a.element or "").strip().upper() != "H"]
+            if atoms:
+                # float() deliberately: Bio.PDB hands back numpy scalars, and a
+                # numpy float in a site dict survives every in-process check and
+                # then fails at json.dump() in whatever writes the sites out.
+                out[(chain.id, residue.id[1])] = round(
+                    float(max(a.sasa for a in atoms)), 2)
+    return out
+
+
 def binding_neighborhood(coordinate_text: str, fmt: str = "pdb",
                          radius_angstrom: float = FIRST_SHELL_ANGSTROM,
                          metals: dict[str, str] | None = None) -> list[dict]:
@@ -218,6 +337,11 @@ def binding_neighborhood(coordinate_text: str, fmt: str = "pdb",
     atoms = list(model.get_atoms())
     ions = [a for a in atoms
             if a.parent.id[0] != " " and a.parent.resname.strip().upper() in table]
+
+    # Once per model, not once per ion: ShrakeRupley rolls a probe over every
+    # atom in the structure, so calling it per site would repeat the whole
+    # calculation for each ion in it.
+    sasa = _sasa_by_ion(model, table) if ions else {}
 
     sites = []
     for ion in ions:
@@ -246,6 +370,9 @@ def binding_neighborhood(coordinate_text: str, fmt: str = "pdb",
 
         donors.sort(key=lambda d: d["distance_A"])
         counts = {k: sum(1 for d in donors if d["kind"] == k) for k in ("protein", "water", "ligand")}
+        chemistry = donor_chemistry(donors)
+        burial = _burial(model, ion, BURIAL_RADIUS_ANGSTROM)
+        burial["metal_sasa_A2"] = sasa.get((ion.parent.parent.id, ion.parent.id[1]))
         sites.append({
             "metal": ion.parent.resname.strip(),
             "element": table[resname],
@@ -256,7 +383,9 @@ def binding_neighborhood(coordinate_text: str, fmt: str = "pdb",
             "water_donor_count": counts["water"],
             "other_ligand_donor_count": counts["ligand"],
             "mean_donor_distance_A": round(sum(d["distance_A"] for d in donors) / len(donors), 2) if donors else None,
-            "chemistry": donor_chemistry(donors),
+            "chemistry": chemistry,
+            "charge": site_net_charge(chemistry),
+            "burial": burial,
             "donors": donors,
         })
     return sites

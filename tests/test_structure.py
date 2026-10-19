@@ -1,9 +1,11 @@
 """Offline tests for coordination-shell measurement. No network access."""
+import statistics
+
 import pytest
 from reefinder.structure import (REE_LIGAND_CODES, ALL_METAL_CODES, DONOR_ELEMENTS,
                                  CHELATED_REE_CODES, binding_neighborhood,
                                  donor_chemistry, cached_structure,
-                                 fetch_structure, _valid_id)
+                                 fetch_structure, site_net_charge, _valid_id)
 
 
 def _atom(serial, name, resname, chain, resseq, x, y, z, element, hetatm=False):
@@ -302,3 +304,133 @@ def test_donor_chemistry_classifies_atoms_by_residue_and_name():
     assert chem["backbone_carbonyl"] == 1     # Lys12 main-chain O
     assert chem["water"] == 1
     assert chem["glu_carboxylate_O"] == 2 and chem["asp_carboxylate_O"] == 1
+
+
+# --- burial and net charge: the Dudev descriptors (M3.1) -------------------
+
+def test_net_charge_counts_residues_not_oxygens():
+    """A bidentate carboxylate donates two oxygens and carries one charge.
+
+    Counting donor atoms instead of donor residues would read the synthetic
+    site's Glu as -2 and push every bidentate-rich lanthanide site a full
+    charge class too negative -- straight into the -4 bucket the Dudev rule
+    treats as the Ln-selective one, by an arithmetic error rather than by
+    chemistry.
+    """
+    donors = [
+        {"kind": "protein", "chain": "A", "residue_number": 5, "residue": "GLU",
+         "atom": "OE1", "element": "O", "distance_A": 2.4},
+        {"kind": "protein", "chain": "A", "residue_number": 5, "residue": "GLU",
+         "atom": "OE2", "element": "O", "distance_A": 2.5},
+        {"kind": "protein", "chain": "A", "residue_number": 9, "residue": "ASP",
+         "atom": "OD1", "element": "O", "distance_A": 2.4},
+        {"kind": "water", "chain": "A", "residue_number": 301, "residue": "HOH",
+         "atom": "O", "element": "O", "distance_A": 2.5},
+    ]
+    charge = site_net_charge(donor_chemistry(donors))
+    assert charge["anionic_groups"] == 2        # one Glu, one Asp
+    assert charge["net_charge"] == -2           # not -3, which atom-counting gives
+    assert charge["neutral_donors"] == 1        # the water
+    assert charge["unassigned_donors"] == 0
+
+
+def test_unassigned_donors_flags_charge_the_model_does_not_cover():
+    """His and non-water heteroatom ligands are not in the charge model.
+
+    Reporting -1 for a site whose shell is half unmodelled would be a number
+    with no error bar attached. The count is what tells a caller the figure
+    is partial.
+    """
+    donors = [
+        {"kind": "protein", "chain": "A", "residue_number": 5, "residue": "ASP",
+         "atom": "OD1", "element": "O", "distance_A": 2.4},
+        {"kind": "protein", "chain": "A", "residue_number": 7, "residue": "HIS",
+         "atom": "NE2", "element": "N", "distance_A": 2.5},
+        {"kind": "ligand", "chain": "A", "residue_number": 400, "residue": "EDO",
+         "atom": "O1", "element": "O", "distance_A": 2.6},
+    ]
+    charge = site_net_charge(donor_chemistry(donors))
+    assert charge["net_charge"] == -1
+    assert charge["unassigned_donors"] == 2, "His N and the ligand O are unmodelled"
+
+
+def test_burial_is_measured_with_waters_removed():
+    """Ordered waters must not be allowed to shield the ion.
+
+    An exposed site attracts more ordered water, so counting waters as
+    occluders inverts the descriptor: the most solvent-exposed sites would
+    report the smallest SASA. Checked on real coordinates, where the four
+    Nd sites of 8FNS each carry two first-shell waters.
+    """
+    cached = cached_structure("8FNS")
+    if cached is None:
+        pytest.skip("8FNS not in the structure cache")
+    sites = binding_neighborhood(*cached)
+    assert sites, "no Nd sites found in 8FNS"
+    for site in sites:
+        assert site["chemistry"]["water"] >= 1, "expected first-shell waters here"
+        assert site["burial"]["metal_sasa_A2"] is not None
+        # Buried or nearly so despite those waters, which is only possible
+        # because they were stripped before the probe was rolled.
+        assert site["burial"]["metal_sasa_A2"] < 10.0
+
+
+def test_burial_reports_a_count_alongside_sasa():
+    """Two measures that can be checked against each other.
+
+    SASA depends on a per-element radius table that may not know an exotic
+    lanthanide; a heavy-atom count does not. If the two ever disagree
+    wildly, the radius table is the thing to suspect.
+    """
+    cached = cached_structure("8FNS")
+    if cached is None:
+        pytest.skip("8FNS not in the structure cache")
+    for site in binding_neighborhood(*cached):
+        burial = site["burial"]
+        assert burial["protein_atoms_within_8A"] > 20, "an EF-hand site is enclosed"
+        assert burial["shell_net_charge"] == (burial["shell_cationic_residues"]
+                                              - burial["shell_anionic_residues"])
+
+
+def test_site_dicts_are_json_serialisable():
+    """numpy scalars from Bio.PDB must not reach a site dict.
+
+    A numpy float passes every in-process assertion and then fails at
+    json.dump() in whatever writes the corpus out, which is a long way from
+    where it was introduced.
+    """
+    import json
+    cached = cached_structure("8FNS")
+    if cached is None:
+        pytest.skip("8FNS not in the structure cache")
+    json.dumps(binding_neighborhood(*cached, metals=ALL_METAL_CODES))
+
+
+def test_net_charge_does_not_separate_lanthanide_from_calcium_ef_hands():
+    """The measured M3.1 result, pinned so it cannot be quietly overturned.
+
+    An EF-hand loop puts carboxylates at fixed loop positions, so first-shell
+    charge is near-constant across the fold: 97.6% of cached sites are -3 or
+    -4 whichever ion is bound. The Dudev rule needs charge to vary to have
+    anything to say, so this descriptor cannot rank within the family -- and
+    anyone who later sees it "working" should suspect their contrast set
+    before believing it.
+    """
+    charges = {"lanthanide": [], "calcium": []}
+    for code in ("8FNS", "8FNR", "8DQ2", "9PI2", "1CLL"):
+        cached = cached_structure(code)
+        if cached is None:
+            continue
+        for site in binding_neighborhood(*cached, metals=ALL_METAL_CODES):
+            family = ("lanthanide" if site["metal"].strip().upper() in REE_LIGAND_CODES
+                      else "calcium")
+            charges[family].append(site["charge"]["net_charge"])
+
+    assert len(charges["calcium"]) >= 6 and len(charges["lanthanide"]) >= 30
+    pooled = charges["lanthanide"] + charges["calcium"]
+    in_class = sum(1 for c in pooled if c in (-3, -4)) / len(pooled)
+    assert in_class > 0.95, "charge stopped being near-constant across the fold"
+    # Both families occupy the same classes; the medians differ by at most one.
+    assert set(charges["calcium"]) <= {-3, -4}
+    assert abs(statistics.median(charges["lanthanide"])
+               - statistics.median(charges["calcium"])) <= 1

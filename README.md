@@ -82,7 +82,8 @@ REE-Finder/
 │   ├── analyze_motifs.py         # Reproduce the ROADMAP §3.6 / §3.8 findings
 │   ├── validate_motif.py         # Validate the loop pattern on 694 sequences, not six
 │   ├── loop_detector.py          # Build the balanced *instrument*, vs the biased classifier
-│   └── sequence_hallmarks.py     # EF-hand period and Pro-at-2, measured through the instrument
+│   ├── sequence_hallmarks.py     # EF-hand period and Pro-at-2, measured through the instrument
+│   └── burial_and_charge.py      # The Dudev descriptors, and why they do not separate here
 ├── data/reference_proteins.json  # 6 authentic UniProt sequences, checksummed
 ├── data/synthetic_examples.json  # Synthetic fixtures, used only by tests
 ├── data/structures/              # Prefetched coordinates + manifest
@@ -133,6 +134,13 @@ pytest -q
 - **Donor-chemistry classification** per site — carboxylate, backbone carbonyl, side-chain amide,
   hydroxyl and water oxygens, with bidentate/monodentate and Glu/Asp splits. Bidentate carboxylate
   count separates lanthanide from calcium EF-hand sites; backbone carbonyl count does not (above).
+- **Site burial and first-shell net charge**, the two descriptors the Dudev selectivity rule is
+  written in — metal SASA with waters stripped, a heavy-atom count as an independent check, and
+  charge counted per carboxylate *residue* rather than per oxygen. **Measured and deliberately not
+  scored:** an EF-hand loop is a buried −3/−4 centre whichever ion it holds (97.6% of cached sites),
+  so the rule's condition is met by 30 of 36 lanthanide sites *and 2 of 6 calcium*. Coordination
+  number, already shipped, separates better than either. Measure it yourself:
+  `python scripts/burial_and_charge.py`.
 - Argo text explanations constrained to screening output, with rejected credentials failing closed.
 
 ## Measured baseline
