@@ -1,34 +1,47 @@
 {
  "_provenance": {
-  "description": "Complete enumeration of PDB entries containing at least one rare-earth ion. Seed corpus for ROADMAP.md milestone M2. NOT yet curated: contains phasing derivatives, Ln-substituted Ca sites, engineered lanthanide-binding tags, and genuine Ln biology, all unlabelled.",
+  "description": "Complete enumeration of PDB entries containing at least one bare rare-earth ion. Seed corpus for ROADMAP.md milestone M2. NOT yet curated: contains phasing derivatives, Ln-substituted Ca sites, engineered lanthanide-binding tags, and genuine Ln biology, all unlabelled.",
   "source": "RCSB Search API v2, attribute rcsb_nonpolymer_entity_container_identifiers.nonpolymer_comp_id",
-  "retrieved_at_utc": "2026-10-19T19:40:31Z",
+  "component_discovery": "RCSB chemical formula search (match_subset) over the 17 IUPAC rare earths, so the code list is enumerated rather than recalled",
+  "retrieved_at_utc": "2026-10-19T20:37:59Z",
   "ligand_codes_queried": [
-   "LA",
    "CE",
-   "PR",
-   "ND",
-   "SM",
+   "DY",
+   "ER3",
    "EU",
    "EU3",
    "GD",
    "GD3",
-   "TB",
-   "DY",
    "HO",
    "HO3",
-   "ER3",
+   "LA",
+   "LU",
+   "ND",
+   "PR",
+   "SM",
+   "TB",
+   "Y1",
    "YB",
    "YB2",
-   "LU",
    "YT3"
   ],
+  "ligand_codes_excluded": {
+   "7MT": "Tb-Xo4 crystallophore (nucleating/phasing agent)",
+   "WRT": "TbXo4-OH, same crystallophore family",
+   "7PR": "praseodymium triacetate",
+   "JGH": "Ce-substituted Keggin polyoxometalate",
+   "K93": "Lu(III) macrocyclic cage complex",
+   "T7K": "neutral Yb(III) caged complex",
+   "YBT": "yttrium bis-tris, i.e. a buffer component",
+   "SFL": "scandium tetrafluoride"
+  },
+  "components_discovered": 27,
   "elements_with_zero_entries": [
-   "Sc",
    "Pm",
+   "Sc",
    "Tm"
   ],
-  "entry_count": 617,
+  "entry_count": 636,
   "curation_status": "uncurated"
  },
  "entries": {
@@ -98,6 +111,12 @@
    ],
    "title": "CRYSTAL STRUCTURE OF THE ECTODOMAIN OF HUMAN TRANSFERRIN RECEPTOR"
   },
+  "1DDE": {
+   "elements": [
+    "Y"
+   ],
+   "title": "STRUCTURE OF THE DNAG CATALYTIC CORE"
+  },
   "1DJG": {
    "elements": [
     "La"
@@ -145,6 +164,24 @@
     "Ce"
    ],
    "title": "STRUCTURE OF DICERIC HUMAN LACTOFERRIN"
+  },
+  "1FS7": {
+   "elements": [
+    "Y"
+   ],
+   "title": "CYTOCHROME C NITRITE REDUCTASE FROM WOLINELLA SUCCINOGENES"
+  },
+  "1FS8": {
+   "elements": [
+    "Y"
+   ],
+   "title": "CYTOCHROME C NITRITE REDUCTASE FROM WOLINELLA SUCCINOGENES-SULFATE COMPLEX"
+  },
+  "1FS9": {
+   "elements": [
+    "Y"
+   ],
+   "title": "CYTOCHROME C NITRITE REDUCTASE FROM WOLINELLA SUCCINOGENES-AZIDE COMPLEX"
   },
   "1GA7": {
    "elements": [
@@ -247,6 +284,12 @@
     "Sm"
    ],
    "title": "Oxidized Homo sapiens betaine-homocysteine S-methyltransferase in complex with four Sm(III) ions"
+  },
+  "1LVA": {
+   "elements": [
+    "Y"
+   ],
+   "title": "Crystal structure of a C-terminal fragment of Moorella thermoacetica elongation factor SelB"
   },
   "1LVC": {
    "elements": [
@@ -362,6 +405,12 @@
    ],
    "title": "HUMAN PSORIASIN (S100A7)"
   },
+  "1PY0": {
+   "elements": [
+    "Y"
+   ],
+   "title": "Crystal structure of E51C/E54C Psaz from A.faecalis with CLaNP probe"
+  },
   "1QAT": {
    "elements": [
     "Sm"
@@ -385,6 +434,18 @@
     "Sm"
    ],
    "title": "Carbohydrate recognition and neck domains of surfactant protein A (Sp-A) containing samarium"
+  },
+  "1R6O": {
+   "elements": [
+    "Y"
+   ],
+   "title": "ATP-dependent Clp protease ATP-binding subunit clpA/ATP-dependent Clp protease adaptor protein clpS"
+  },
+  "1R6Q": {
+   "elements": [
+    "Y"
+   ],
+   "title": "ClpNS with fragments"
   },
   "1RER": {
    "elements": [
@@ -541,6 +602,12 @@
     "Ho"
    ],
    "title": "The Kedge Holmium Derivative of Hen Egg-White Lysozyme at high resolution from Single Wavelength Anomalous Diffraction"
+  },
+  "2C1C": {
+   "elements": [
+    "Y"
+   ],
+   "title": "Structural basis of the resistance of an insect carboxypeptidase to plant protease inhibitors"
   },
   "2E0Y": {
    "elements": [
@@ -908,6 +975,30 @@
    ],
    "title": "Crystal structure of truncated FimG (FimGt) in complex with the donor strand peptide of FimF (DSF)"
   },
+  "3BNF": {
+   "elements": [
+    "Y"
+   ],
+   "title": "W. succinogenes NrfA Sulfite Complex"
+  },
+  "3BNG": {
+   "elements": [
+    "Y"
+   ],
+   "title": "W. succinogenes NrfA Y218F"
+  },
+  "3BNH": {
+   "elements": [
+    "Y"
+   ],
+   "title": "W. succinogenes NrfA Y218F Nitrite Complex"
+  },
+  "3BNJ": {
+   "elements": [
+    "Y"
+   ],
+   "title": "W. succinogenes NrfA Y218F Sulfite Complex"
+  },
   "3BOF": {
    "elements": [
     "Y"
@@ -1136,6 +1227,12 @@
    ],
    "title": "Leukotriene A4 hydrolase in complex with {4-[(2R)-pyrrolidin-2-ylmethoxy]phenyl}(4-thiophen-3-ylphenyl)methanone"
   },
+  "3H1W": {
+   "elements": [
+    "Y"
+   ],
+   "title": "Crystal structure of mannose 6-phosphate isomerase bound with zinc and yttrium"
+  },
   "3H9V": {
    "elements": [
     "Gd"
@@ -1315,6 +1412,12 @@
     "Yb"
    ],
    "title": "Structure of human Leukotriene A4 hydrolase in complex with inhibitor sc57461A"
+  },
+  "3UF3": {
+   "elements": [
+    "Y"
+   ],
+   "title": "Crystal Structure of Multidrug Resistant HIV-1 Protease Clinical isolate PR20"
   },
   "3UKJ": {
    "elements": [
@@ -1765,6 +1868,18 @@
     "Lu"
    ],
    "title": "Crystal structure of Thosea asigna virus RNA-dependent RNA polymerase (RdRP) complexed with Lu3+"
+  },
+  "4YE3": {
+   "elements": [
+    "Y"
+   ],
+   "title": "Crystal Structure of Multidrug Resistant HIV-1 Protease Clinical Isolate PR20 with Inhibitor GRL-4410A"
+  },
+  "4YHQ": {
+   "elements": [
+    "Y"
+   ],
+   "title": "Crystal structure of multidrug resistant clinical isolate PR20 with GRL-5010A"
   },
   "4YHU": {
    "elements": [
@@ -2414,6 +2529,12 @@
    ],
    "title": "RHODOCETIN IN COMPLEX WITH THE INTEGRIN ALPHA2-A DOMAIN WITH PRASEDYMIUM"
   },
+  "6NDG": {
+   "elements": [
+    "Y"
+   ],
+   "title": "RHODOCETIN IN COMPLEX WITH THE INTEGRIN ALPHA2-A DOMAIN WITH YTTRIUM BOUND"
+  },
   "6NFQ": {
    "elements": [
     "Y"
@@ -2587,6 +2708,12 @@
     "Gd"
    ],
    "title": "Structure of human endothelial nitric oxide synthase heme domain in complex with 7-(3-(Aminomethyl)-4-(pyridin-3-ylmethoxy)phenyl)-4-methylquinolin-2-amine"
+  },
+  "6PRF": {
+   "elements": [
+    "Y"
+   ],
+   "title": "HIV-1 Protease multiple drug resistant clinical isolate mutant PR20 with GRL-14213A"
   },
   "6QSS": {
    "elements": [

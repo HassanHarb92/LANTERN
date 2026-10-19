@@ -77,13 +77,15 @@ REE-Finder/
 │   └── agent.py                  # Fixed retrieve-then-score pipeline (not a planner)
 ├── scripts/
 │   ├── build_reference_data.py   # Rebuild the reference set from UniProt
-│   ├── prefetch_structures.py    # Cache 8FNS/8FNR/1CLL for an offline demo
-│   └── analyze_motifs.py         # Reproduce the ROADMAP §3.6 / §3.8 findings
+│   ├── build_ree_corpus.py       # Rebuild Corpus A; discovers ligand codes, never guesses them
+│   ├── prefetch_structures.py    # Cache 8FNS/8FNR/8DQ2/9PI2/1CLL for an offline demo
+│   ├── analyze_motifs.py         # Reproduce the ROADMAP §3.6 / §3.8 findings
+│   └── validate_motif.py         # Validate the loop pattern on 694 sequences, not six
 ├── data/reference_proteins.json  # 6 authentic UniProt sequences, checksummed
 ├── data/synthetic_examples.json  # Synthetic fixtures, used only by tests
 ├── data/structures/              # Prefetched coordinates + manifest
-├── data/ree_pdb_entries.json     # All 617 rare-earth PDB entries, uncurated
-├── tests/                        # Offline regression tests (62, no network)
+├── data/ree_pdb_entries.json     # All 636 rare-earth PDB entries, uncurated
+├── tests/                        # Offline regression tests (73, no network)
 ├── docs/SCIENTIFIC_CONTRACT.md   # Scientific claims and evidence gates
 ├── ROADMAP.md                    # Verified state, defects, milestones M0-M6
 ├── IMPLEMENTATION_PLAN.md        # Earlier aspirational plan, superseded in part
@@ -105,8 +107,9 @@ pytest -q
   two true negatives), each carrying an accession, a SHA-256 checksum and a retrieval date. Rebuild
   with `python scripts/build_reference_data.py`. Synthetic records are kept in a separate file used
   only by tests.
-- **Offline structure demo.** `python scripts/prefetch_structures.py` caches 8FNS, 8FNR and 1CLL
-  under `data/structures/`; `fetch_structure()` reads the cache before touching the network.
+- **Offline structure demo.** `python scripts/prefetch_structures.py` caches 8FNS, 8FNR, 8DQ2,
+  9PI2 and 1CLL under `data/structures/`; `fetch_structure()` reads the cache before the network.
+  9PI2 is the key one: Nd³⁺ and Ca²⁺ in a single 0.99 Å crystal.
 - Live retrieval for three families, including the full lanmodulin family via InterPro.
 - Sequence acid fraction and limited EF-hand-like motif hints.
 - Transparent, deterministic score (not metal-specific and not selectivity).
@@ -115,19 +118,23 @@ pytest -q
   entries such as 6EK0, 7K00, 3J3Q); pinned 3Dmol.js viewer, which still needs CDN connectivity.
 - **First-shell coordination analysis** of *experimentally deposited* rare-earth ions: O/N/S donors
   within 3.2 Å, waters included and labelled, reported as coordination number with a protein/water
-  split. Verified against 8FNS (4 Nd sites, CN 9–10) and 8FNR (Dy).
+  split. Verified against 8FNS (4 Nd sites, CN 9–10), 8FNR (Dy), 8DQ2 (La) and 9PI2 (Nd + Ca).
+- **Donor-chemistry classification** per site — carboxylate, backbone carbonyl, side-chain amide,
+  hydroxyl and water oxygens, with bidentate/monodentate and Glu/Asp splits. Bidentate carboxylate
+  count separates lanthanide from calcium EF-hand sites; backbone carbonyl count does not (above).
 - Argo text explanations constrained to screening output, with rejected credentials failing closed.
 
 ## Measured baseline
 
 Coordination descriptors computed by this repo on real structures:
 
-| Structure | Ion | Coordination number | Protein donors | Waters |
-|---|---|---:|---:|---:|
-| 8FNS lanmodulin | Nd³⁺ (×3) | 9 | 7 | 2 |
-| 8FNS lanmodulin | Nd³⁺ (site 204) | 10 | 8 | 2 |
-| 8FNR lanmodulin | Dy³⁺ (biological) | 9 | 9 | 0 |
-| 1CLL calmodulin | Ca²⁺ (×4) | 7 | 6 | 1 |
+| Structure | Ion | CN | Protein donors | Waters | Bidentate carboxylates |
+|---|---|---:|---:|---:|---:|
+| 8DQ2 lanmodulin | La³⁺ (×12) | 10 | 10 | 0 | 4 |
+| 8FNS lanmodulin | Nd³⁺ (×3) | 9 | 7 | 2 | 2 |
+| 8FNS lanmodulin | Nd³⁺ (site 204) | 10 | 8 | 2 | 3 |
+| 8FNR lanmodulin | Dy³⁺ (biological) | 9 | 9 | 0 | 3 |
+| 1CLL calmodulin | Ca²⁺ (×4) | 7 | 6 | 1 | 1 |
 
 This is the discriminating signal: biological lanthanide sites sit at CN 9–10, calcium sites at
 CN 7. **Acidic-residue content, which the sequence score measures, is identical between them** —
@@ -145,44 +152,87 @@ Sharper still, inside a single structure. All four Dy³⁺ sites of 8FNR chain A
 One protein, one metal, one crystal — and coordination number still separates the three genuine
 lanthanide sites from the one that behaves like a calcium site.
 
-### The sequence score currently inverts
+**Sharpest of all: 9PI2**, *A. lacus* lanmodulin at 0.99 Å, which resolves Nd³⁺ **and** Ca²⁺ in the
+same crystal — the cleanest internal control this project could ask for, since every variable
+except the ion is held fixed:
 
-Scoring the reference set exposes the defect the roadmap's M3 exists to fix:
+| Chain A site | Ion | CN | Protein donors | Waters | Bidentate carboxylates |
+|---|---|---:|---:|---:|---:|
+| 201, 202, 203 | **Nd³⁺** | **10** | 10 | **0** | **4** |
+| 204 | **Ca²⁺** | **7** | 6 | **1** | **1** |
 
-| Protein | Role | Score | Motifs |
-|---|---|---:|---:|
-| Lanmodulin, *M. extorquens* (C5B164) | **lanthanide binder** | 74.7 | 3 |
-| Troponin C, human (P02585) | calcium protein | 69.0 | 2 |
-| Calmodulin, human (P0DP23) | calcium protein | 57.0 | 1 |
-| Lanmodulin, *H. quercus* (A0A4V2JDD3) | **lanthanide binder** | **35.1** | **0** |
-| Haemoglobin α (P69905) | true negative | 23.4 | 0 |
-| Chymotrypsinogen A (P00766) | true negative | 19.1 | 0 |
+One crystal, one protein, two ions, and the split is total. The 0.99 Å resolution means this is
+measured, not modelled.
 
-A structurally confirmed Dy³⁺ binder ranks below both calcium proteins. The cause is specific and
-reproducible: the EF-hand regex requires Asp at loop position 1 and Gly at position 6, and all three
-of this protein's Dy-binding loops have Asn and a non-Gly — so it scores zero motifs. The same blind
-spot hides 16% of all metal-binding loops in the lanmodulin family. Reproduce with
-`python scripts/analyze_motifs.py`; full analysis in ROADMAP.md §3.6–§3.8.
+> **A negative result worth more than the positives.** Across all **42** metal sites in the five
+> cached structures — three lanthanide elements and calcium, CN 4 to 10 — the backbone-carbonyl
+> donor count is **exactly 1, every time**. In a PDB-wide survey, carboxylate-vs-backbone-carbonyl
+> ratio is the single strongest Ln/Ca discriminator (p = 1.6×10⁻⁴¹). *Inside the EF-hand family it
+> carries zero information*, because the loop grammar fixes position 7 as a backbone carbonyl
+> regardless of which ion binds. Features for M3 must be selected against calcium **EF-hand**
+> proteins, not against all calcium sites, or they will encode the fold and not the ion.
+> ROADMAP.md §3.9.
 
-**This is published in the README on purpose.** The ranking is pinned by test
-(`tests/test_reference_data.py`) so that fixing it is a visible event rather than a quiet one.
+### The sequence score used to invert. It no longer does.
+
+Until 2026-10-19 this section reported a defect: *Lanmodulin, H. quercus* (A0A4V2JDD3) — a
+structurally confirmed Dy³⁺ binder — scored **zero** EF-hand motifs and ranked **below both calcium
+proteins**, at 35.1. The ranking is pinned by test precisely so that fixing it would be a visible
+event rather than a quiet one. Here is the event.
+
+| Protein | Role | Score | Motifs | |
+|---|---|---:|---:|---|
+| Lanmodulin, *M. extorquens* (C5B164) | **lanthanide binder** | 86.7 | 4 | ↑ from 74.7 / 3 |
+| Lanmodulin, *H. quercus* (A0A4V2JDD3) | **lanthanide binder** | **71.1** | **3** | ↑ from 35.1 / 0 |
+| Troponin C, human (P02585) | calcium protein | 69.0 | 2 | — |
+| Calmodulin-1, human (P0DP23) | calcium protein | 57.0 | 1 | — |
+| Haemoglobin α (P69905) | true negative | 23.4 | 0 | — |
+| Chymotrypsinogen A (P00766) | true negative | 19.1 | 0 | — |
+
+The cause of the inversion was that the EF-hand regex encoded the **calcium** consensus: it demanded
+Asp at loop position 1 and Gly at position 6. Reading resolved coordinates in 8FNR, 8DQ2 and 9PI2
+shows both demands are wrong for lanthanide loops — Asn Oδ1 at position 1 is a genuine first-shell
+donor, and Gly at 6 is a backbone-flexibility requirement of the 7-coordinate *calcium* geometry,
+not a donor at all. Relaxing exactly those two positions makes the three Dy³⁺ loops visible.
+
+**The fix is not a tuning exercise, and three things keep it honest:**
+
+1. **The discriminating constraint was inherited, not added.** Position 9's `[DE]` was already in
+   the calcium consensus and was left untouched. It turns out to be the position doing the work —
+   Glu at 9 is a bidentate first-shell ligand that expels water, Asp at 9 works second-sphere.
+2. **It was validated before it shipped, on 694 sequences, not six.** Against 505 reviewed calcium
+   EF-hand proteins, sensitivity for the 189-member lanmodulin family rises **91.0% → 96.8%** while
+   specificity holds at ~91% (balanced accuracy 91.0% → 93.9%), and the share of family members
+   scoring zero motifs falls from 1.1% to **0.0%**. Reproduce: `python scripts/validate_motif.py`.
+3. **It still discriminates.** A0A4V2JDD3 scores **3** motifs, not 4 — the pattern finds its three
+   genuine lanthanide loops and correctly skips EF4, which is CN 7 with a bound water and behaves
+   like a calcium site. Calmodulin, with four EF-hands, still scores 1.
+
+**What this does *not* mean.** A0A4V2JDD3 clears troponin C by **2.1 points on a 100-point scale** —
+one motif's worth of nothing. The ordering is now right; the margin is not evidence of a calibrated
+descriptor, and `test_the_separation_is_thin_and_the_test_says_so` pins it as thin on purpose. A
+motif count is a triage filter, not an affinity. M3 remains open. Full analysis in ROADMAP.md
+§3.6–§3.9.
 
 ## What remains for a credible discovery claim
 
 - ~~Verified real positive/negative reference sequences~~ — done; see *Measured baseline*.
-- A motif descriptor derived from lanthanide structures rather than a calcium consensus, and
-  retrieval that does not depend on family labels (both block the headline screen).
+- ~~A motif descriptor derived from lanthanide structures rather than a calcium consensus~~ —
+  done, and validated on 694 sequences; see *The sequence score used to invert*. It is a triage
+  filter, not a calibrated descriptor, so M3 remains open.
+- Retrieval that does not depend on family labels (still blocks the headline screen — see the
+  known retrieval gap above).
 - Experimental protein–metal binding constants. Note the ceiling: matched-condition Kd values for
   both a lanthanide **and** Ca²⁺ on the same construct exist for only **four** proteins, so this is
   a validation set, never a training set.
 - PDB↔UniProt residue mapping and accessible metal-site detection for structures without deposited ions.
-- A curated corpus of all 617 rare-earth PDB entries, classified by site provenance.
+- A curated corpus of all 636 rare-earth PDB entries, classified by site provenance.
 - A calibrated geometric descriptor replacing the sequence heuristic for ranking.
 - Sequence homology and redundancy controls; hold-out evaluation.
 - A planner with bounded dynamic tool selection, provenance and source citation aggregation.
 - Robust security, UI and automated integration tests.
 
-**Read `ROADMAP.md`** for the verified state of the code, the five defects found by measurement,
+**Read `ROADMAP.md`** for the verified state of the code, the nine defects found by measurement,
 the three finite corpora the project actually spans, and milestones M0–M6. `IMPLEMENTATION_PLAN.md`
 is the earlier aspirational plan, retained for reference; `ROADMAP.md` §7 lists which parts of it
 evidence has since contradicted.

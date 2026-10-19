@@ -21,6 +21,8 @@ from reefinder.structure import STRUCTURE_CACHE, fetch_structure  # noqa: E402
 WANTED = {
     "8FNS": "Lanmodulin (M. extorquens, C5B164) with Nd3+; CN 9-10",
     "8FNR": "Lanmodulin (H. quercus, A0A4V2JDD3) with Dy3+; CN 9",
+    "8DQ2": "Lanmodulin (H. quercus, A0A4V2JDD3) with La3+; Glu at loop position 9",
+    "9PI2": "Lanmodulin (A. lacus) with Nd3+ AND Ca2+ in one crystal, 0.99 A",
     "1CLL": "Calmodulin (human, P0DP23) with Ca2+; CN 7 -- the contrast set",
 }
 

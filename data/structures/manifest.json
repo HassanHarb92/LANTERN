@@ -19,6 +19,20 @@
       "description": "Lanmodulin (H. quercus, A0A4V2JDD3) with Dy3+; CN 9",
       "bytes": 687771
     },
+    "8DQ2": {
+      "file": "8DQ2.pdb",
+      "format": "pdb",
+      "sha256": "ecf00657df9d1a27c6b3614b2fe58df58017aa6059007bc89c530bc43c0f889f",
+      "description": "Lanmodulin (H. quercus, A0A4V2JDD3) with La3+; Glu at loop position 9",
+      "bytes": 373653
+    },
+    "9PI2": {
+      "file": "9PI2.pdb",
+      "format": "pdb",
+      "sha256": "a898081aa84ef630c0eb839ee4bd02ff597c02ccdf307ba0de1a1d00605bab12",
+      "description": "Lanmodulin (A. lacus) with Nd3+ AND Ca2+ in one crystal, 0.99 A",
+      "bytes": 362394
+    },
     "1CLL": {
       "file": "1CLL.pdb",
       "format": "pdb",

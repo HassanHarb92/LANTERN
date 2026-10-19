@@ -99,17 +99,14 @@ def test_true_negatives_rank_last():
     assert set(ranked[-2:]) == {"P69905", "P00766"}
 
 
-@pytest.mark.xfail(reason="ROADMAP 3.6: the EF-hand regex requires Asp at loop "
-                          "position 1 and Gly at 6; all three Dy3+ loops of "
-                          "A0A4V2JDD3 have Asn and non-Gly, so it scores 0 "
-                          "motifs. M3 owns the fix.",
-                   strict=True)
 def test_both_lanthanide_binders_outrank_both_calcium_proteins():
     """The criterion M1 was originally specified to assert.
 
-    It is marked strict-xfail rather than deleted: it is the acceptance test
-    for M3, and strict mode means it will fail loudly the moment the descriptor
-    is fixed, forcing the marker off and the milestone closed honestly.
+    It shipped as a strict xfail while the loop pattern was the calcium
+    consensus, which scored A0A4V2JDD3 at zero motifs and ranked it below
+    calmodulin. Relaxing position 1 to Asp/Asn and freeing position 6 -- both
+    read off resolved donors in 8FNR/8DQ2/9PI2, not fitted to this assertion
+    -- made its three Dy3+ loops visible and turned the order the right way up.
     """
     scores = {c.protein.accession: c.score for c in screen(load_reference())}
     worst_lanthanide = min(scores["C5B164"], scores["A0A4V2JDD3"])
@@ -117,14 +114,32 @@ def test_both_lanthanide_binders_outrank_both_calcium_proteins():
     assert worst_lanthanide > best_calcium
 
 
-def test_the_inversion_is_pinned_until_m3_fixes_it():
-    """Documents the measured defect so a change in it cannot pass unnoticed."""
+def test_the_separation_is_thin_and_the_test_says_so():
+    """Pins how little headroom the corrected ordering actually has.
+
+    A0A4V2JDD3 clears troponin C by about two points on a 100-point scale,
+    which is one motif's worth of nothing. The ordering is right; the margin
+    is not evidence of a calibrated descriptor, and M3 should not be closed on
+    the strength of it. If a later change widens this, that is real progress
+    and this test should be updated deliberately rather than drift.
+    """
+    scores = {c.protein.accession: c.score for c in screen(load_reference())}
+    margin = scores["A0A4V2JDD3"] - scores["P02585"]
+    assert 0 < margin < 5, f"margin {margin} -- update this test deliberately"
+
+
+def test_hans_lanm_scores_its_three_lanthanide_loops_and_not_its_calcium_one():
+    """The mechanism behind the fix, pinned separately from the ranking.
+
+    8FNR resolves four Dy3+ sites in this protein but they are not equivalent:
+    EF1-3 are CN 9 with no water, EF4 is CN 7 with one water -- calcium-like,
+    and refined at roughly half the occupancy of the others. The pattern
+    should see the three genuine lanthanide loops and skip the fourth, so the
+    count is 3 rather than 4. Getting 4 here would mean it had stopped
+    discriminating; getting 0 would be the original defect returning.
+    """
     scored = {c.protein.accession: c for c in screen(load_reference())}
-    hans = scored["A0A4V2JDD3"]
-    # Zero motifs despite three structurally confirmed Dy3+ sites in 8FNR.
-    assert hans.motif_count == 0
-    # And consequently ranked below both calcium proteins.
-    assert hans.score < scored["P0DP23"].score
-    assert hans.score < scored["P02585"].score
-    # But still above the true negatives, so the signal is not pure noise.
-    assert hans.score > scored["P69905"].score
+    assert scored["A0A4V2JDD3"].motif_count == 3
+    # Calmodulin has four EF-hands and should still score well under three:
+    # the pattern is deliberately a poor detector of calcium loops.
+    assert scored["P0DP23"].motif_count < 3
