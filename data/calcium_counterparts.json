@@ -1,0 +1,2052 @@
+{
+  "_provenance": {
+    "accessions": 190,
+    "basis": "UniProt accessions of Corpus A entries holding a lanthanide site with >= 3 protein donors and no chelator flag; RCSB entries sharing an accession and containing CA; Corpus A subtracted; kept at <= 2.5 A, best 5 per accession",
+    "candidates_before_selection": 739,
+    "curation_status": "uncurated -- same UniProt accession is the same sequence, not the same construct, ligand state or oligomeric form",
+    "generated": "2026-10-19T22:13:37.589590+00:00",
+    "script": "scripts/matched_calcium.py",
+    "source_entries": 257
+  },
+  "entries": {
+    "1AFB": {
+      "accessions": [
+        "P19999"
+      ],
+      "matched_to": [
+        "1BUU",
+        "1MSB",
+        "1YTT"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.9,
+      "title": "STRUCTURAL BASIS OF GALACTOSE RECOGNITION IN C-TYPE ANIMAL LECTINS"
+    },
+    "1AVS": {
+      "accessions": [
+        "P02588"
+      ],
+      "matched_to": [
+        "1NCZ"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.75,
+      "title": "X-RAY CRYSTALLOGRAPHIC STUDY OF CALCIUM-SATURATED N-TERMINAL DOMAIN OF TROPONIN C"
+    },
+    "1AWB": {
+      "accessions": [
+        "P29218"
+      ],
+      "matched_to": [
+        "1IMA",
+        "1IMB",
+        "2HHM"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.5,
+      "title": "HUMAN MYO-INOSITOL MONOPHOSPHATASE IN COMPLEX WITH D-INOSITOL-1-PHOSPHATE AND CALCIUM"
+    },
+    "1AZ0": {
+      "accessions": [
+        "P04390"
+      ],
+      "matched_to": [
+        "5F8A",
+        "5HLK"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.0,
+      "title": "ECORV ENDONUCLEASE/DNA COMPLEX"
+    },
+    "1B2V": {
+      "accessions": [
+        "Q54450"
+      ],
+      "matched_to": [
+        "1DKH"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.9,
+      "title": "HEME-BINDING PROTEIN A"
+    },
+    "1B94": {
+      "accessions": [
+        "P04390"
+      ],
+      "matched_to": [
+        "5F8A",
+        "5HLK"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.9,
+      "title": "RESTRICTION ENDONUCLEASE ECORV WITH CALCIUM"
+    },
+    "1BSU": {
+      "accessions": [
+        "P04390"
+      ],
+      "matched_to": [
+        "5F8A",
+        "5HLK"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.0,
+      "title": "STRUCTURAL AND ENERGETIC ORIGINS OF INDIRECT READOUT IN SITE-SPECIFIC DNA CLEAVAGE BY A RESTRICTION ENDONUCLEASE"
+    },
+    "1CDM": {
+      "accessions": [
+        "P62157"
+      ],
+      "matched_to": [
+        "1AK8"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.0,
+      "title": "MODULATION OF CALMODULIN PLASTICITY IN MOLECULAR RECOGNITION ON THE BASIS OF X-RAY STRUCTURES"
+    },
+    "1CEL": {
+      "accessions": [
+        "P62694"
+      ],
+      "matched_to": [
+        "4P1H",
+        "4P1J"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.8,
+      "title": "THE THREE-DIMENSIONAL CRYSTAL STRUCTURE OF THE CATALYTIC CORE OF CELLOBIOHYDROLASE I FROM TRICHODERMA REESEI"
+    },
+    "1CGE": {
+      "accessions": [
+        "P03956"
+      ],
+      "matched_to": [
+        "2TCL"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.9,
+      "title": "CRYSTAL STRUCTURES OF RECOMBINANT 19-KDA HUMAN FIBROBLAST COLLAGENASE COMPLEXED TO ITSELF"
+    },
+    "1CGF": {
+      "accessions": [
+        "P03956"
+      ],
+      "matched_to": [
+        "2TCL"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.1,
+      "title": "CRYSTAL STRUCTURES OF RECOMBINANT 19-KDA HUMAN FIBROBLAST COLLAGENASE COMPLEXED TO ITSELF"
+    },
+    "1CM1": {
+      "accessions": [
+        "P62157"
+      ],
+      "matched_to": [
+        "1AK8"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.0,
+      "title": "MOTIONS OF CALMODULIN-SINGLE-CONFORMER REFINEMENT"
+    },
+    "1DJI": {
+      "accessions": [
+        "P10688"
+      ],
+      "matched_to": [
+        "1DJG",
+        "1QAT"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.5,
+      "title": "PHOSPHOINOSITIDE-SPECIFIC PHOSPHOLIPASE C-DELTA1 FROM RAT COMPLEXED WITH CALCIUM"
+    },
+    "1DJW": {
+      "accessions": [
+        "P10688"
+      ],
+      "matched_to": [
+        "1DJG",
+        "1QAT"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.45,
+      "title": "PHOSPHOINOSITIDE-SPECIFIC PHOSPHOLIPASE C-DELTA1 FROM RAT COMPLEXED WITH INOSITOL-2-METHYLENE-1,2-CYCLIC-MONOPHOSPHONATE"
+    },
+    "1DJX": {
+      "accessions": [
+        "P10688"
+      ],
+      "matched_to": [
+        "1DJG",
+        "1QAT"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.3,
+      "title": "PHOSPHOINOSITIDE-SPECIFIC PHOSPHOLIPASE C-DELTA1 FROM RAT COMPLEXED WITH INOSITOL-1,4,5-TRISPHOSPHATE"
+    },
+    "1EVU": {
+      "accessions": [
+        "P00488"
+      ],
+      "matched_to": [
+        "1GGY"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.01,
+      "title": "HUMAN FACTOR XIII WITH CALCIUM BOUND IN THE ION SITE"
+    },
+    "1EX0": {
+      "accessions": [
+        "P00488"
+      ],
+      "matched_to": [
+        "1GGY"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.0,
+      "title": "HUMAN FACTOR XIII, MUTANT W279F ZYMOGEN"
+    },
+    "1F0O": {
+      "accessions": [
+        "P23657"
+      ],
+      "matched_to": [
+        "1K0Z"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.5,
+      "title": "PVUII ENDONUCLEASE/COGNATE DNA COMPLEX (GLUTARALDEHYDE-CROSSLINKED CRYSTAL) AT PH 7.5 WITH TWO CALCIUM IONS AT EACH ACTIVE SITE"
+    },
+    "1F6S": {
+      "accessions": [
+        "P00711"
+      ],
+      "matched_to": [
+        "6IP9"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.2,
+      "title": "CRYSTAL STRUCTURE OF BOVINE ALPHA-LACTALBUMIN"
+    },
+    "1FW4": {
+      "accessions": [
+        "P62157"
+      ],
+      "matched_to": [
+        "1AK8"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.7,
+      "title": "CRYSTAL STRUCTURE OF E. COLI FRAGMENT TR2C FROM CALMODULIN TO 1.7 A RESOLUTION"
+    },
+    "1GGU": {
+      "accessions": [
+        "P00488"
+      ],
+      "matched_to": [
+        "1GGY"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.1,
+      "title": "HUMAN FACTOR XIII WITH CALCIUM BOUND IN THE ION SITE"
+    },
+    "1GU6": {
+      "accessions": [
+        "P0ABK9"
+      ],
+      "matched_to": [
+        "3TOR"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.5,
+      "title": "Structure of the Periplasmic Cytochrome c Nitrite Reductase from Escherichia coli"
+    },
+    "1HFC": {
+      "accessions": [
+        "P03956"
+      ],
+      "matched_to": [
+        "2TCL"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.5,
+      "title": "1.56 ANGSTROM STRUCTURE OF MATURE TRUNCATED HUMAN FIBROBLAST COLLAGENASE"
+    },
+    "1HFZ": {
+      "accessions": [
+        "P00711"
+      ],
+      "matched_to": [
+        "6IP9"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.3,
+      "title": "ALPHA-LACTALBUMIN"
+    },
+    "1HT9": {
+      "accessions": [
+        "P02633"
+      ],
+      "matched_to": [
+        "1KQV",
+        "1KSM",
+        "1N65"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.76,
+      "title": "DOMAIN SWAPPING EF-HANDS"
+    },
+    "1IME": {
+      "accessions": [
+        "P29218"
+      ],
+      "matched_to": [
+        "1IMA",
+        "1IMB",
+        "2HHM"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.25,
+      "title": "STRUCTURAL STUDIES OF METAL BINDING BY INOSITOL MONOPHOSPHATASE: EVIDENCE FOR TWO-METAL ION CATALYSIS"
+    },
+    "1KWW": {
+      "accessions": [
+        "P19999"
+      ],
+      "matched_to": [
+        "1BUU",
+        "1MSB",
+        "1YTT"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.9,
+      "title": "Rat mannose protein A complexed with a-Me-Fuc."
+    },
+    "1KWZ": {
+      "accessions": [
+        "P19999"
+      ],
+      "matched_to": [
+        "1BUU",
+        "1MSB",
+        "1YTT"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.9,
+      "title": "Rat mannose protein A (H189V) complexed with Man-a13-Man"
+    },
+    "1NIW": {
+      "accessions": [
+        "P29474"
+      ],
+      "matched_to": [
+        "6NH7"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.05,
+      "title": "Crystal structure of endothelial nitric oxide synthase peptide bound to calmodulin"
+    },
+    "1O88": {
+      "accessions": [
+        "P11073"
+      ],
+      "matched_to": [
+        "1PLU"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.2,
+      "title": "Pectate Lyase C From Erwinia Chrysanthemi at pH 11.2 with 30mM Ca2+"
+    },
+    "1O8D": {
+      "accessions": [
+        "P11073"
+      ],
+      "matched_to": [
+        "1PLU"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.2,
+      "title": "Pectate Lyase C from Erwinia Chrysanthemi at pH 11.2 with 5mM CA2+"
+    },
+    "1O8E": {
+      "accessions": [
+        "P11073"
+      ],
+      "matched_to": [
+        "1PLU"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.2,
+      "title": "Pectate Lyase C from Erwinia Chrysanthemi at pH 11.2 with 1mM Ca2+"
+    },
+    "1O8F": {
+      "accessions": [
+        "P11073"
+      ],
+      "matched_to": [
+        "1PLU"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.2,
+      "title": "Pectate Lyase C from Erwinia Chrysanthemi at pH 9.5 with 30mM Ca2+"
+    },
+    "1O8G": {
+      "accessions": [
+        "P11073"
+      ],
+      "matched_to": [
+        "1PLU"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.2,
+      "title": "Pectate Lyase C from Erwinia Chrysanthemi at pH 9.5 with 5mM Ca2+"
+    },
+    "1PRW": {
+      "accessions": [
+        "P62157"
+      ],
+      "matched_to": [
+        "1AK8"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.7,
+      "title": "Crystal structure of bovine brain Ca++ calmodulin in a compact form"
+    },
+    "1Q2E": {
+      "accessions": [
+        "P62694"
+      ],
+      "matched_to": [
+        "4P1H",
+        "4P1J"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.75,
+      "title": "CELLOBIOHYDROLASE CEL7A WITH LOOP DELETION 245-252 AND BOUND NON-HYDROLYSABLE CELLOTETRAOSE"
+    },
+    "1QX2": {
+      "accessions": [
+        "P02633"
+      ],
+      "matched_to": [
+        "1KQV",
+        "1KSM",
+        "1N65"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.44,
+      "title": "X-ray Structure of Calcium-loaded Calbindomodulin (A Calbindin D9k Re-engineered to Undergo a Conformational Opening) at 1.44 A Resolution"
+    },
+    "1RTM": {
+      "accessions": [
+        "P19999"
+      ],
+      "matched_to": [
+        "1BUU",
+        "1MSB",
+        "1YTT"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.8,
+      "title": "TRIMERIC STRUCTURE OF A C-TYPE MANNOSE-BINDING PROTEIN"
+    },
+    "1SCF": {
+      "accessions": [
+        "P21583"
+      ],
+      "matched_to": [
+        "1EXZ"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.2,
+      "title": "HUMAN RECOMBINANT STEM CELL FACTOR"
+    },
+    "1SU3": {
+      "accessions": [
+        "P03956"
+      ],
+      "matched_to": [
+        "2TCL"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.2,
+      "title": "X-ray structure of human proMMP-1: New insights into collagenase action"
+    },
+    "1T61": {
+      "accessions": [
+        "Q7SIB2",
+        "Q7SIB3"
+      ],
+      "matched_to": [
+        "1M3D"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.5,
+      "title": "crystal structure of collagen IV NC1 domain from placenta basement membrane"
+    },
+    "1TOP": {
+      "accessions": [
+        "P02588"
+      ],
+      "matched_to": [
+        "1NCZ"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.78,
+      "title": "STRUCTURE OF CHICKEN SKELETAL MUSCLE TROPONIN-C AT 1.78 ANGSTROMS RESOLUTION"
+    },
+    "1UMN": {
+      "accessions": [
+        "P0CB53"
+      ],
+      "matched_to": [
+        "2V15"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.95,
+      "title": "Crystal structure of Dps-like peroxide resistance protein (Dpr) from Streptococcus suis"
+    },
+    "1UZJ": {
+      "accessions": [
+        "P35555"
+      ],
+      "matched_to": [
+        "1UZP"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.25,
+      "title": "Integrin binding cbEGF22-TB4-cbEGF33 fragment of human fibrillin-1, holo form."
+    },
+    "1UZK": {
+      "accessions": [
+        "P35555"
+      ],
+      "matched_to": [
+        "1UZP"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.35,
+      "title": "Integrin binding cbEGF22-TB4-cbEGF33 fragment of human fibrillin-1, Ca bound to cbEGF23 domain only"
+    },
+    "1V04": {
+      "accessions": [
+        "P27170"
+      ],
+      "matched_to": [
+        "9R0Q"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.2,
+      "title": "serum paraoxonase by directed evolution"
+    },
+    "1WC0": {
+      "accessions": [
+        "O32393"
+      ],
+      "matched_to": [
+        "1WC4"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.4,
+      "title": "Soluble adenylyl cyclase CyaC from S. platensis in complex with alpha, beta-methylene-ATP"
+    },
+    "1WC5": {
+      "accessions": [
+        "O32393"
+      ],
+      "matched_to": [
+        "1WC4"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.3,
+      "title": "Soluble adenylyl cyclase CyaC from S. platensis in complex with alpha, beta-methylene-ATP in presence of bicarbonate"
+    },
+    "1YYD": {
+      "accessions": [
+        "Q02567"
+      ],
+      "matched_to": [
+        "1YZR"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.45,
+      "title": "High Resolution Crystal Structure of Manganese Peroxidase"
+    },
+    "1YYG": {
+      "accessions": [
+        "Q02567"
+      ],
+      "matched_to": [
+        "1YZR"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.6,
+      "title": "Manganese peroxidase complexed with Cd(II) inhibitor"
+    },
+    "1YZP": {
+      "accessions": [
+        "Q02567"
+      ],
+      "matched_to": [
+        "1YZR"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.6,
+      "title": "Substrate-free manganese peroxidase"
+    },
+    "2B0D": {
+      "accessions": [
+        "P04390"
+      ],
+      "matched_to": [
+        "5F8A",
+        "5HLK"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.0,
+      "title": "EcoRV Restriction Endonuclease/GAATTC/Ca2+"
+    },
+    "2B0E": {
+      "accessions": [
+        "P04390"
+      ],
+      "matched_to": [
+        "5F8A",
+        "5HLK"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.9,
+      "title": "EcoRV Restriction Endonuclease/GAAUTC/Ca2+"
+    },
+    "2BW1": {
+      "accessions": [
+        "P0CB53"
+      ],
+      "matched_to": [
+        "2V15"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.81,
+      "title": "Iron-bound crystal structure of Dps-like peroxide resistance protein (Dpr) from Streptococcus suis."
+    },
+    "2BW7": {
+      "accessions": [
+        "O32393"
+      ],
+      "matched_to": [
+        "1WC4"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.3,
+      "title": "A novel mechanism for adenylyl cyclase inhibition from the crystal structure of its complex with catechol estrogen"
+    },
+    "2CCM": {
+      "accessions": [
+        "O76764"
+      ],
+      "matched_to": [
+        "5F6T"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.8,
+      "title": "X-ray structure of Calexcitin from Loligo pealeii at 1.8A"
+    },
+    "2CEL": {
+      "accessions": [
+        "P62694"
+      ],
+      "matched_to": [
+        "4P1H",
+        "4P1J"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.0,
+      "title": "ACTIVE-SITE MUTANT E212Q DETERMINED AT PH 6.0 WITH NO LIGAND BOUND IN THE ACTIVE SITE"
+    },
+    "2CF7": {
+      "accessions": [
+        "P0CB53"
+      ],
+      "matched_to": [
+        "2V15"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.5,
+      "title": "Asp74Ala mutant crystal structure for Dps-like peroxide resistance protein Dpr from Streptococcus suis."
+    },
+    "2DBX": {
+      "accessions": [
+        "P18956"
+      ],
+      "matched_to": [
+        "2E0Y"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.7,
+      "title": "Crystal Structure of Gamma-glutamyltranspeptidase from Escherichia coli Complexed with L-Glutamate"
+    },
+    "2DG5": {
+      "accessions": [
+        "P18956"
+      ],
+      "matched_to": [
+        "2E0Y"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.6,
+      "title": "Crystal Structure of Gamma-glutamyl transpeptidase from Escherichia coli in complex with hydrolyzed Glutathione"
+    },
+    "2E0X": {
+      "accessions": [
+        "P18956"
+      ],
+      "matched_to": [
+        "2E0Y"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.95,
+      "title": "Crystal Structure of Gamma-glutamyltranspeptidase from Escherichia coli (monoclinic form)"
+    },
+    "2G4N": {
+      "accessions": [
+        "P00711"
+      ],
+      "matched_to": [
+        "6IP9"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.3,
+      "title": "Anomalous substructure of alpha-lactalbumin"
+    },
+    "2GUY": {
+      "accessions": [
+        "P0C1B3"
+      ],
+      "matched_to": [
+        "3VX0"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.59,
+      "title": "Orthorhombic crystal structure (space group P21212) of Aspergillus niger alpha-amylase at 1.6 A resolution"
+    },
+    "2GVY": {
+      "accessions": [
+        "P0C1B3"
+      ],
+      "matched_to": [
+        "3VX0"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.8,
+      "title": "Monoclinic crystal form of Aspergillus niger alpha-amylase in complex with maltose at 1.8 A resolution"
+    },
+    "2HD4": {
+      "accessions": [
+        "P02788"
+      ],
+      "matched_to": [
+        "1FCK"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.15,
+      "title": "Crystal structure of proteinase K inhibited by a lactoferrin octapeptide Gly-Asp-Glu-Gln-Gly-Glu-Asn-Lys at 2.15 A resolution"
+    },
+    "2MSB": {
+      "accessions": [
+        "P19999"
+      ],
+      "matched_to": [
+        "1BUU",
+        "1MSB",
+        "1YTT"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.7,
+      "title": "STRUCTURE OF A C-TYPE MANNOSE-BINDING PROTEIN COMPLEXED WITH AN OLIGOSACCHARIDE"
+    },
+    "2NXQ": {
+      "accessions": [
+        "P38505"
+      ],
+      "matched_to": [
+        "2I18"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.4,
+      "title": "Crystal structure of calcium binding protein 1 from Entamoeba histolytica: a novel arrangement of EF hand motifs"
+    },
+    "2PSR": {
+      "accessions": [
+        "P31151"
+      ],
+      "matched_to": [
+        "1PSR"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.05,
+      "title": "HUMAN PSORIASIN (S100A7) CA2+ AND ZN2+ BOUND FORM (CRYSTAL FORM II)"
+    },
+    "2PWA": {
+      "accessions": [
+        "P06873"
+      ],
+      "matched_to": [
+        "5AVK",
+        "5WRC",
+        "6K2X",
+        "9KW1"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 0.83,
+      "title": "Crystal Structure of the complex of Proteinase K with Alanine Boronic acid at 0.83A resolution"
+    },
+    "2RDZ": {
+      "accessions": [
+        "P0ABK9"
+      ],
+      "matched_to": [
+        "3TOR"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.74,
+      "title": "High Resolution Crystal Structure of the Escherichia coli Cytochrome c Nitrite Reductase."
+    },
+    "2RF7": {
+      "accessions": [
+        "P0ABK9"
+      ],
+      "matched_to": [
+        "3TOR"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.04,
+      "title": "Crystal structure of the escherichia coli nrfa mutant Q263E"
+    },
+    "2UX1": {
+      "accessions": [
+        "P0CB53"
+      ],
+      "matched_to": [
+        "2V15"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.8,
+      "title": "Identification of two zinc-binding sites in the Streptococcus suis Dpr protein"
+    },
+    "2V8B": {
+      "accessions": [
+        "P06873"
+      ],
+      "matched_to": [
+        "5AVK",
+        "5WRC",
+        "6K2X",
+        "9KW1"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 0.94,
+      "title": "SAD Structure solution of Proteinase K grown in selenate solution"
+    },
+    "2W86": {
+      "accessions": [
+        "P35555"
+      ],
+      "matched_to": [
+        "1UZP"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.8,
+      "title": "Crystal structure of fibrillin-1 domains cbEGF9hyb2cbEGF10, calcium saturated form"
+    },
+    "2WND": {
+      "accessions": [
+        "P31151"
+      ],
+      "matched_to": [
+        "1PSR"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.6,
+      "title": "Structure of an S100A7 triple mutant"
+    },
+    "2WOR": {
+      "accessions": [
+        "P31151"
+      ],
+      "matched_to": [
+        "1PSR"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.7,
+      "title": "co-structure of S100A7 with 1,8 ANS"
+    },
+    "2WOS": {
+      "accessions": [
+        "P31151"
+      ],
+      "matched_to": [
+        "1PSR"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.7,
+      "title": "Structure of human S100A7 in complex with 2,6 ANS"
+    },
+    "2XJN": {
+      "accessions": [
+        "P0CB53"
+      ],
+      "matched_to": [
+        "2V15"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.1,
+      "title": "Crystal structure of Streptococcus suis Dpr with copper"
+    },
+    "2XJP": {
+      "accessions": [
+        "P38894"
+      ],
+      "matched_to": [
+        "4AHW",
+        "4AHX",
+        "4AHY",
+        "4AHZ",
+        "4AI0",
+        "4AI1",
+        "4AI2",
+        "4AI3"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 0.95,
+      "title": "X-ray structure of the N-terminal domain of the flocculin Flo5 from Saccharomyces cerevisiae in complex with calcium and mannose"
+    },
+    "2XJR": {
+      "accessions": [
+        "P38894"
+      ],
+      "matched_to": [
+        "4AHW",
+        "4AHX",
+        "4AHY",
+        "4AHZ",
+        "4AI0",
+        "4AI1",
+        "4AI2",
+        "4AI3"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.25,
+      "title": "X-ray structure of the N-terminal domain of the flocculin Flo5 from Saccharomyces cerevisiae in complex with calcium and Man5(D2-D3)"
+    },
+    "2XJS": {
+      "accessions": [
+        "P38894"
+      ],
+      "matched_to": [
+        "4AHW",
+        "4AHX",
+        "4AHY",
+        "4AHZ",
+        "4AI0",
+        "4AI1",
+        "4AI2",
+        "4AI3"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.3,
+      "title": "X-ray structure of the N-terminal domain of the flocculin Flo5 from Saccharomyces cerevisiae in complex with calcium and a1,2-mannobiose"
+    },
+    "2XJT": {
+      "accessions": [
+        "P38894"
+      ],
+      "matched_to": [
+        "4AHW",
+        "4AHX",
+        "4AHY",
+        "4AHZ",
+        "4AI0",
+        "4AI1",
+        "4AI2",
+        "4AI3"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.2,
+      "title": "X-ray structure of the N-terminal domain of the flocculin Flo5 from Saccharomyces cerevisiae in complex with calcium and Man5(D1)"
+    },
+    "2XJU": {
+      "accessions": [
+        "P38894"
+      ],
+      "matched_to": [
+        "4AHW",
+        "4AHX",
+        "4AHY",
+        "4AHZ",
+        "4AI0",
+        "4AI1",
+        "4AI2",
+        "4AI3"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.7,
+      "title": "X-ray structure of the N-terminal domain of the flocculin Flo5 from Saccharomyces cerevisiae with mutation S227A in complex with calcium and a1,2-mannobiose"
+    },
+    "2YGG": {
+      "accessions": [
+        "P19634"
+      ],
+      "matched_to": [
+        "2BEC"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.227,
+      "title": "Complex of CaMBR and CaM"
+    },
+    "2YKN": {
+      "accessions": [
+        "P03366"
+      ],
+      "matched_to": [
+        "4YE3",
+        "6PRF"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.12,
+      "title": "Crystal structure of HIV-1 Reverse Transcriptase (RT) in complex with a Difluoromethylbenzoxazole (DFMB) Pyrimidine Thioether derivative, a non-nucleoside RT inhibitor (NNRTI)"
+    },
+    "3C22": {
+      "accessions": [
+        "Q9UJ71"
+      ],
+      "matched_to": [
+        "5G6U"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.5,
+      "title": "Crystal structure of the carbohydrate recognition domain of human Langerin"
+    },
+    "3ICB": {
+      "accessions": [
+        "P02633"
+      ],
+      "matched_to": [
+        "1KQV",
+        "1KSM",
+        "1N65"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.3,
+      "title": "THE REFINED STRUCTURE OF VITAMIN D-DEPENDENT CALCIUM-BINDING PROTEIN FROM BOVINE INTESTINE. MOLECULAR DETAILS, ION BINDING, AND IMPLICATIONS FOR THE STRUCTURE OF OTHER CALCIUM-BINDING PROTEINS"
+    },
+    "3IF7": {
+      "accessions": [
+        "P62157"
+      ],
+      "matched_to": [
+        "1AK8"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.6,
+      "title": "Structure of Calmodulin complexed with its first endogenous inhibitor, sphingosylphosphorylcholine"
+    },
+    "3K36": {
+      "accessions": [
+        "Q3S340"
+      ],
+      "matched_to": [
+        "3K38",
+        "3K39",
+        "3K3A"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.2,
+      "title": "Crystal Structure of B/Perth Neuraminidase"
+    },
+    "3K37": {
+      "accessions": [
+        "Q3S340"
+      ],
+      "matched_to": [
+        "3K38",
+        "3K39",
+        "3K3A"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.0,
+      "title": "Crystal Structure of B/Perth Neuraminidase in complex with Peramivir"
+    },
+    "3L1T": {
+      "accessions": [
+        "P0ABK9"
+      ],
+      "matched_to": [
+        "3TOR"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.3,
+      "title": "E. coli NrfA sulfite ocmplex"
+    },
+    "3M5Q": {
+      "accessions": [
+        "Q02567"
+      ],
+      "matched_to": [
+        "1YZR"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 0.93,
+      "title": "0.93 A Structure of Manganese-Bound Manganese Peroxidase"
+    },
+    "3M8M": {
+      "accessions": [
+        "Q02567"
+      ],
+      "matched_to": [
+        "1YZR"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.05,
+      "title": "1.05 A Structure of Manganese-free Manganese Peroxidase"
+    },
+    "3P5G": {
+      "accessions": [
+        "Q9UJ71"
+      ],
+      "matched_to": [
+        "5G6U"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.6027,
+      "title": "Structure of the carbohydrate-recognition domain of human Langerin with Blood group B trisaccharide (Gal alpha1-3(Fuc alpha1-2)Gal)"
+    },
+    "3P7G": {
+      "accessions": [
+        "Q9UJ71"
+      ],
+      "matched_to": [
+        "5G6U"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.5,
+      "title": "Structure of the human Langerin carbohydrate recognition domain in complex with mannose"
+    },
+    "3PAK": {
+      "accessions": [
+        "P08427"
+      ],
+      "matched_to": [
+        "1R14"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.9,
+      "title": "Crystal Structure of Rat Surfactant Protein A neck and carbohydrate recognition domain (NCRD) complexed with Mannose"
+    },
+    "3PBF": {
+      "accessions": [
+        "P08427"
+      ],
+      "matched_to": [
+        "1R14"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.8,
+      "title": "Surfactant Protein-A neck and carbohydrate recognition domain (NCRD) complexed with glycerol"
+    },
+    "3ZNI": {
+      "accessions": [
+        "P0CG48"
+      ],
+      "matched_to": [
+        "2OJR"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.21,
+      "title": "Structure of phosphoTyr363-Cbl-b - UbcH5B-Ub - ZAP-70 peptide complex"
+    },
+    "4AK8": {
+      "accessions": [
+        "Q9UJ71"
+      ],
+      "matched_to": [
+        "5G6U"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.4,
+      "title": "Structure of F241L mutant of langerin carbohydrate recognition domain."
+    },
+    "4AQJ": {
+      "accessions": [
+        "P31151"
+      ],
+      "matched_to": [
+        "1PSR"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.6,
+      "title": "Structure of human S100A7 D24G bound to zinc and calcium"
+    },
+    "4CEL": {
+      "accessions": [
+        "P62694"
+      ],
+      "matched_to": [
+        "4P1H",
+        "4P1J"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.2,
+      "title": "ACTIVE-SITE MUTANT D214N DETERMINED AT PH 6.0 WITH NO LIGAND BOUND IN THE ACTIVE SITE"
+    },
+    "4DJC": {
+      "accessions": [
+        "P0DP23"
+      ],
+      "matched_to": [
+        "1K90",
+        "1LVC",
+        "1NKF",
+        "1PK0",
+        "1S26",
+        "1SK6",
+        "2K0J",
+        "2K61",
+        "5GGM"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.35,
+      "title": "1.35 A crystal structure of the NaV1.5 DIII-IV-Ca/CaM complex"
+    },
+    "4DK7": {
+      "accessions": [
+        "Q15788"
+      ],
+      "matched_to": [
+        "1K7L"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.45,
+      "title": "Crystal structure of LXR ligand binding domain in complex with full agonist 1"
+    },
+    "4EUL": {
+      "accessions": [
+        "P42212"
+      ],
+      "matched_to": [
+        "4L12",
+        "6XZF"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.35,
+      "title": "Crystal structure of enhanced Green Fluorescent Protein to 1.35A resolution reveals alternative conformations for Glu222"
+    },
+    "4GF6": {
+      "accessions": [
+        "P42212"
+      ],
+      "matched_to": [
+        "4L12",
+        "6XZF"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.1,
+      "title": "crystal structure of GFP with cuprum bound at the Incorporated metal Chelating Amino Acid PYZ151"
+    },
+    "4ICB": {
+      "accessions": [
+        "P02633"
+      ],
+      "matched_to": [
+        "1KQV",
+        "1KSM",
+        "1N65"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.6,
+      "title": "PROLINE CIS-TRANS ISOMERS IN CALBINDIN D9K OBSERVED BY X-RAY CRYSTALLOGRAPHY"
+    },
+    "4KTY": {
+      "accessions": [
+        "P00488"
+      ],
+      "matched_to": [
+        "1GGY"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.98,
+      "title": "Fibrin-stabilizing factor with a bound ligand"
+    },
+    "4L1I": {
+      "accessions": [
+        "P42212"
+      ],
+      "matched_to": [
+        "4L12",
+        "6XZF"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.2,
+      "title": "Crystal structure of EGFP-based Calcium Sensor CatchER complexed with Ca"
+    },
+    "4NDB": {
+      "accessions": [
+        "O76764"
+      ],
+      "matched_to": [
+        "5F6T"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.0,
+      "title": "X-ray structure of a mutant (T61D) of calexcitin - a neuronal calcium-signalling protein"
+    },
+    "4NDC": {
+      "accessions": [
+        "O76764"
+      ],
+      "matched_to": [
+        "5F6T"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.0,
+      "title": "X-ray structure of a mutant (T188D) of calexcitin - a neuronal calcium-signalling protein"
+    },
+    "4NUQ": {
+      "accessions": [
+        "P15116"
+      ],
+      "matched_to": [
+        "1NCG",
+        "1NCH"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.116,
+      "title": "Crystal structure of mouse N-cadherin EC1-2 W2F"
+    },
+    "4PEU": {
+      "accessions": [
+        "A3DHD2"
+      ],
+      "matched_to": [
+        "4PHB"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.8001,
+      "title": "Structure of the polysaccharide lyase-like protein Cthe_2159 from C. thermocellum, native form with Calcium bound"
+    },
+    "4PIG": {
+      "accessions": [
+        "P62987"
+      ],
+      "matched_to": [
+        "3VDZ"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.952,
+      "title": "Crystal structure of the ubiquitin K11S mutant"
+    },
+    "4PIH": {
+      "accessions": [
+        "P62987"
+      ],
+      "matched_to": [
+        "3VDZ"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.5,
+      "title": "X-ray crystal structure of the K33S mutant of ubiquitin"
+    },
+    "4TNC": {
+      "accessions": [
+        "P02588"
+      ],
+      "matched_to": [
+        "1NCZ"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.0,
+      "title": "REFINED STRUCTURE OF CHICKEN SKELETAL MUSCLE TROPONIN C IN THE TWO-CALCIUM STATE AT 2-ANGSTROMS RESOLUTION"
+    },
+    "4WJY": {
+      "accessions": [
+        "P0ABK9"
+      ],
+      "matched_to": [
+        "3TOR"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.15,
+      "title": "Esherichia coli nitrite reductase NrfA H264N"
+    },
+    "4WMO": {
+      "accessions": [
+        "Q5PPM0"
+      ],
+      "matched_to": [
+        "5ZC0"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.3,
+      "title": "Selenomethionine derivative of Xenopus laevis embryonic epidermal lectin carbohydrate-binding domain"
+    },
+    "4WN0": {
+      "accessions": [
+        "Q5PPM0"
+      ],
+      "matched_to": [
+        "5ZC0"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.2,
+      "title": "Xenopus laevis embryonic epidermal lectin in complex with glycerol phosphate"
+    },
+    "4WRC": {
+      "accessions": [
+        "P08427"
+      ],
+      "matched_to": [
+        "1R14"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.8,
+      "title": "Crystal Structure of Surfactant Protein-A DEDN Mutant (E171D/P175E/R197N/K203D)"
+    },
+    "4WRE": {
+      "accessions": [
+        "P08427"
+      ],
+      "matched_to": [
+        "1R14"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.751,
+      "title": "Crystal Structure of Surfactant Protein-A DEDN Mutant (E171D/P175E/R197N/K203D) Complexed with Inositol"
+    },
+    "5B5T": {
+      "accessions": [
+        "P18956"
+      ],
+      "matched_to": [
+        "2E0Y"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.7,
+      "title": "Crystal Structure of Escherichia coli Gamma-Glutamyltranspeptidase in Complex with peptidyl phosphonate inhibitor 1b"
+    },
+    "5FFS": {
+      "accessions": [
+        "P08427"
+      ],
+      "matched_to": [
+        "1R14"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.8,
+      "title": "Crystal Structure of Surfactant Protein-A Y164A Mutant"
+    },
+    "5HJ2": {
+      "accessions": [
+        "P17301"
+      ],
+      "matched_to": [
+        "6NDE",
+        "6NDG"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.153,
+      "title": "Integrin alpha2beta1 I-domain"
+    },
+    "5MHM": {
+      "accessions": [
+        "P00488"
+      ],
+      "matched_to": [
+        "1GGY"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.12,
+      "title": "FXIIIa in complex with the inhibitor ZED1630"
+    },
+    "5VPG": {
+      "accessions": [
+        "P08176"
+      ],
+      "matched_to": [
+        "1XKG"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.95,
+      "title": "CRYSTAL STRUCTURE OF DER P 1 COMPLEXED WITH FAB 4C1"
+    },
+    "5VPH": {
+      "accessions": [
+        "P08176"
+      ],
+      "matched_to": [
+        "1XKG"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.5,
+      "title": "CRYSTAL STRUCTURE OF DER P 1 COMPLEXED WITH FAB 4C1"
+    },
+    "5WN1": {
+      "accessions": [
+        "P27695"
+      ],
+      "matched_to": [
+        "1BIX",
+        "2O3H"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.3,
+      "title": "APE1 exonuclease product complex"
+    },
+    "5WN2": {
+      "accessions": [
+        "P27695"
+      ],
+      "matched_to": [
+        "1BIX",
+        "2O3H"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.288,
+      "title": "APE1 exonuclease substrate complex with phosphoglycolate"
+    },
+    "5WN3": {
+      "accessions": [
+        "P27695"
+      ],
+      "matched_to": [
+        "1BIX",
+        "2O3H"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.0,
+      "title": "APE1 F266A exonuclease substrate complex with a C/T mismatch"
+    },
+    "5WN4": {
+      "accessions": [
+        "P27695"
+      ],
+      "matched_to": [
+        "1BIX",
+        "2O3H"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.1,
+      "title": "APE1 exonuclease substrate complex with a C/T mismatch"
+    },
+    "5X7O": {
+      "accessions": [
+        "A0A193PKW5"
+      ],
+      "matched_to": [
+        "5X7S"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.0,
+      "title": "Crystal structure of Paenibacillus sp. 598K alpha-1,6-glucosyltransferase"
+    },
+    "5X7P": {
+      "accessions": [
+        "A0A193PKW5"
+      ],
+      "matched_to": [
+        "5X7S"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.4,
+      "title": "Crystal structure of Paenibacillus sp. 598K alpha-1,6-glucosyltransferase complexed with acarbose"
+    },
+    "5X7Q": {
+      "accessions": [
+        "A0A193PKW5"
+      ],
+      "matched_to": [
+        "5X7S"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.95,
+      "title": "Crystal structure of Paenibacillus sp. 598K alpha-1,6-glucosyltransferase complexed with maltohexaose"
+    },
+    "5X7R": {
+      "accessions": [
+        "A0A193PKW5"
+      ],
+      "matched_to": [
+        "5X7S"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.95,
+      "title": "Crystal structure of Paenibacillus sp. 598K alpha-1,6-glucosyltransferase complexed with isomaltohexaose"
+    },
+    "5YJD": {
+      "accessions": [
+        "Q5HK91"
+      ],
+      "matched_to": [
+        "6NBT"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.26,
+      "title": "Structural insights into the CRISPR-Cas-associated ribonuclease activity of Staphylococcus epidermidis Csm3"
+    },
+    "5YT7": {
+      "accessions": [
+        "P00282"
+      ],
+      "matched_to": [
+        "9L6D"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.66,
+      "title": "crystal structure of circularly permutated Azurin 3"
+    },
+    "6FSN": {
+      "accessions": [
+        "G0SB58"
+      ],
+      "matched_to": [
+        "6TRT"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.19,
+      "title": "Catalytic domain of UDP-Glucose Glycoprotein Glucosyltransferase from Chaetomium thermophilum in complex with UDP-glucose (conformation 1)"
+    },
+    "6GYI": {
+      "accessions": [
+        "P00282"
+      ],
+      "matched_to": [
+        "9L6D"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.6,
+      "title": "Azurin fom Pseudomonas aeruginosa treated with hydrosulfide"
+    },
+    "6IAV": {
+      "accessions": [
+        "P00282"
+      ],
+      "matched_to": [
+        "9L6D"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.0,
+      "title": "CO-AZURIN FROM PSEUDOMONAS AERUGINOSA TREATED WITH HYDROSULFIDE"
+    },
+    "6L6K": {
+      "accessions": [
+        "Q15788"
+      ],
+      "matched_to": [
+        "1K7L"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.8,
+      "title": "Crystal structure of dimeric RXRalpha-LBD complexed with partial agonist CBt-PMN and SRC1"
+    },
+    "6NKQ": {
+      "accessions": [
+        "P02754"
+      ],
+      "matched_to": [
+        "3PH5",
+        "3PH6"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.3,
+      "title": "The structure of bovine beta-lactoglobulin in novel crystals grown at pH 3.8"
+    },
+    "6NUC": {
+      "accessions": [
+        "P19634"
+      ],
+      "matched_to": [
+        "2BEC"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.9,
+      "title": "Structure of Calcineurin in complex with NHE1 peptide"
+    },
+    "6NUF": {
+      "accessions": [
+        "P19634"
+      ],
+      "matched_to": [
+        "2BEC"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.9,
+      "title": "Structure of Calcineurin in complex with NHE1 peptide"
+    },
+    "6NUU": {
+      "accessions": [
+        "P19634"
+      ],
+      "matched_to": [
+        "2BEC"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.3,
+      "title": "Structure of Calcineurin mutant in complex with NHE1 peptide"
+    },
+    "6QUH": {
+      "accessions": [
+        "P42212"
+      ],
+      "matched_to": [
+        "4L12",
+        "6XZF"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.5,
+      "title": "GHK tagged GFP variant crystal form II at 1.34A wavelength"
+    },
+    "6W3U": {
+      "accessions": [
+        "P27695"
+      ],
+      "matched_to": [
+        "1BIX",
+        "2O3H"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.4,
+      "title": "APE1 exonuclease substrate complex R237C"
+    },
+    "6WRV": {
+      "accessions": [
+        "P02786"
+      ],
+      "matched_to": [
+        "1CX8"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.47,
+      "title": "Crystal structure of computationally designed protein 3DS18 in complex with the human Transferrin receptor ectodomain"
+    },
+    "6XSJ": {
+      "accessions": [
+        "P0C1B3"
+      ],
+      "matched_to": [
+        "3VX0"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.4,
+      "title": "X-ray structure of a monoclinic form of alpha amylase from Aspergillus at 1.4 A resolution"
+    },
+    "6XSV": {
+      "accessions": [
+        "P0C1B3"
+      ],
+      "matched_to": [
+        "3VX0"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.65,
+      "title": "X-ray structure of a tetragonal crystal form of alpha amylase from Aspergillus oryzae (Tala-Amylase) at 1.65 A resolution"
+    },
+    "6XXX": {
+      "accessions": [
+        "P0DP23"
+      ],
+      "matched_to": [
+        "1K90",
+        "1LVC",
+        "1NKF",
+        "1PK0",
+        "1S26",
+        "1SK6",
+        "2K0J",
+        "2K61",
+        "5GGM"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.25,
+      "title": "1.25 Angstrom crystal structure of Ca/CaM A102V:RyR2 peptide complex"
+    },
+    "6YQ7": {
+      "accessions": [
+        "P0C1B3"
+      ],
+      "matched_to": [
+        "3VX0"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.58,
+      "title": "Taka-amylase"
+    },
+    "7BF1": {
+      "accessions": [
+        "P0DP23"
+      ],
+      "matched_to": [
+        "1K90",
+        "1LVC",
+        "1NKF",
+        "1PK0",
+        "1S26",
+        "1SK6",
+        "2K0J",
+        "2K61",
+        "5GGM"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.24,
+      "title": "Ca2+-Calmodulin in complex with peptide from brain-type creatine kinase in extended 1:2 binding mode"
+    },
+    "7BF2": {
+      "accessions": [
+        "P0DP23"
+      ],
+      "matched_to": [
+        "1K90",
+        "1LVC",
+        "1NKF",
+        "1PK0",
+        "1S26",
+        "1SK6",
+        "2K0J",
+        "2K61",
+        "5GGM"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.43,
+      "title": "Ca2+-Calmodulin in complex with human muscle form creatine kinase peptide in extended 1:2 binding mode"
+    },
+    "7F05": {
+      "accessions": [
+        "O14958"
+      ],
+      "matched_to": [
+        "6OWW"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.298,
+      "title": "Crystal structure of human cardiac calsequestrin bound with calcium"
+    },
+    "7KIO": {
+      "accessions": [
+        "P21327"
+      ],
+      "matched_to": [
+        "6WRO",
+        "6WRR",
+        "6WRY",
+        "6X25"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.4,
+      "title": "Crystal structure of inositol polyphosphate 1-phosphatase (INPP1) D54A mutant"
+    },
+    "7LRY": {
+      "accessions": [
+        "P03366"
+      ],
+      "matched_to": [
+        "4YE3",
+        "6PRF"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.45,
+      "title": "Structure of HIV-1 Reverse Transcriptase in complex with DNA, (-)FTC-TP, and CA(2+) ion"
+    },
+    "7LTD": {
+      "accessions": [
+        "P06873"
+      ],
+      "matched_to": [
+        "5AVK",
+        "5WRC",
+        "6K2X",
+        "9KW1"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 0.9,
+      "title": "X-ray radiation damage series on Proteinase K at 100K, crystal structure, dataset 1"
+    },
+    "7LTI": {
+      "accessions": [
+        "P06873"
+      ],
+      "matched_to": [
+        "5AVK",
+        "5WRC",
+        "6K2X",
+        "9KW1"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 0.91,
+      "title": "X-ray radiation damage series on Proteinase K at 100K, crystal structure, dataset 2"
+    },
+    "7LTV": {
+      "accessions": [
+        "P06873"
+      ],
+      "matched_to": [
+        "5AVK",
+        "5WRC",
+        "6K2X",
+        "9KW1"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 0.95,
+      "title": "X-ray radiation damage series on Proteinase K at 100K, crystal structure, dataset 3"
+    },
+    "7M3G": {
+      "accessions": [
+        "P41180"
+      ],
+      "matched_to": [
+        "5FBH"
+      ],
+      "method": "ELECTRON MICROSCOPY",
+      "resolution_A": 2.5,
+      "title": "Asymmetric Activation of the Calcium Sensing Receptor Homodimer"
+    },
+    "7YTQ": {
+      "accessions": [
+        "Q9UJ71"
+      ],
+      "matched_to": [
+        "5G6U"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.6,
+      "title": "Human langerin carbohydrate recognition domain in complex with an alpha-mannoside ligand"
+    },
+    "7ZHB": {
+      "accessions": [
+        "G0SB58"
+      ],
+      "matched_to": [
+        "6TRT"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.89,
+      "title": "Catalytic domain of UDP-Glucose Glycoprotein Glucosyltransferase from Chaetomium thermophilum in complex with UDP-glucose (conformation 2)"
+    },
+    "7ZKC": {
+      "accessions": [
+        "G0SB58"
+      ],
+      "matched_to": [
+        "6TRT"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.769,
+      "title": "Catalytic domain of UDP-Glucose Glycoprotein Glucosyltransferase from Chaetomium thermophilum (apo form)"
+    },
+    "7ZLE": {
+      "accessions": [
+        "G0SB58"
+      ],
+      "matched_to": [
+        "6TRT"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.823,
+      "title": "Catalytic domain of UDP-Glucose Glycoprotein Glucosyltransferase from Chaetomium thermophilum in complex with UDP"
+    },
+    "7ZLU": {
+      "accessions": [
+        "G0SB58"
+      ],
+      "matched_to": [
+        "6TRT"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.049,
+      "title": "Catalytic domain of UDP-Glucose Glycoprotein Glucosyltransferase from Chaetomium thermophilum in complex with UDP-2-deoxy-2-fluoro-D-glucose"
+    },
+    "966C": {
+      "accessions": [
+        "P03956"
+      ],
+      "matched_to": [
+        "2TCL"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.9,
+      "title": "CRYSTAL STRUCTURE OF FIBROBLAST COLLAGENASE-1 COMPLEXED TO A DIPHENYL-ETHER SULPHONE BASED HYDROXAMIC ACID"
+    },
+    "9ERZ": {
+      "accessions": [
+        "P0CG48"
+      ],
+      "matched_to": [
+        "2OJR"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.02,
+      "title": "Structure of CBL-TKBD bound to Ubiquitin-fused CBLock peptide"
+    },
+    "9GH7": {
+      "accessions": [
+        "P02786"
+      ],
+      "matched_to": [
+        "1CX8"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.079,
+      "title": "Complex of human TfR1 with a potent bicyclic peptide"
+    },
+    "9MXD": {
+      "accessions": [
+        "P0DP23"
+      ],
+      "matched_to": [
+        "1K90",
+        "1LVC",
+        "1NKF",
+        "1PK0",
+        "1S26",
+        "1SK6",
+        "2K0J",
+        "2K61",
+        "5GGM"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.17,
+      "title": "Human E104A calmodulin:MLCK RM20 complex"
+    },
+    "9NXE": {
+      "accessions": [
+        "P19634"
+      ],
+      "matched_to": [
+        "2BEC"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.09,
+      "title": "Crystal Structure of Calcineurin Clinical Variant E282K"
+    },
+    "9OZW": {
+      "accessions": [
+        "P00711"
+      ],
+      "matched_to": [
+        "6IP9"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 2.17,
+      "title": "Gradient equilibration of alpha-lactalbumin to a 25% glycerol solution over 40 minutes"
+    },
+    "9PQC": {
+      "accessions": [
+        "P42212"
+      ],
+      "matched_to": [
+        "4L12",
+        "6XZF"
+      ],
+      "method": "X-RAY DIFFRACTION",
+      "resolution_A": 1.4,
+      "title": "Room temperature crystal structure of enhanced Green Fluorescent Protein"
+    }
+  }
+}

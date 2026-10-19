@@ -87,13 +87,18 @@ REE-Finder/
 │   ├── download_corpus.py        # Fetch all 636 entries as gzipped mmCIF, resumable
 │   ├── build_site_table.py       # Parse them into one 2795-site table
 │   ├── corpus_descriptors.py     # Re-test the descriptors on the corpus, not on one fold
-│   └── crosscheck_metalpdb.py    # Validate the parser against an independent implementation
+│   ├── crosscheck_metalpdb.py    # Validate the parser against an independent implementation
+│   ├── matched_calcium.py        # Fetch Ca-only depositions of the same proteins, by UniProt
+│   ├── paired_sites.py           # Same site, both ions: the fold-controlled contrast
+│   └── selectivity_contrast.py   # Native Ln biology vs native Ca -- what actually separates
 ├── data/reference_proteins.json  # 6 authentic UniProt sequences, checksummed
 ├── data/synthetic_examples.json  # Synthetic fixtures, used only by tests
 ├── data/structures/              # Prefetched coordinates + manifest
 ├── data/ree_pdb_entries.json     # All 636 rare-earth PDB entries, uncurated
 ├── data/lanthanide_sites.parquet # 2795 metal sites from those entries, with geometry
-├── tests/                        # Offline regression tests (96, no network)
+├── data/calcium_sites.parquet    # 645 Ca sites in 172 Ca-only depositions of the same proteins
+├── data/calcium_counterparts.json# How those 172 were chosen, and from which accessions
+├── tests/                        # Offline regression tests (100, no network)
 ├── docs/SCIENTIFIC_CONTRACT.md   # Scientific claims and evidence gates
 ├── ROADMAP.md                    # Verified state, defects, milestones M0-M6
 ├── IMPLEMENTATION_PLAN.md        # Earlier aspirational plan, superseded in part
@@ -156,6 +161,25 @@ pytest -q
   — it measures which ion was soaked in, not which the protein prefers. Build it with
   `python scripts/download_corpus.py && python scripts/build_site_table.py`, measure it with
   `python scripts/corpus_descriptors.py`.
+- **The matched calcium contrast, and the two ways it can lie.** 172 Ca-only depositions of the
+  same proteins, found by UniProt accession rather than by title, give **645 calcium sites** to
+  compare against. Pairing them to Corpus A by *site signature* — the coordinating residues with
+  the chain dropped — yields 31 same-site Ln/Ca pairs. Two traps, both measured. The first run
+  capped the calcium side at 2.5 Å and not the lanthanide side, which left the Ln sites 0.17 Å
+  worse-resolved (p=0.0094) and manufactured a donor-distance difference that vanished under a
+  symmetric cutoff. The second is structural: a site seen with *both* ions is a site that is not
+  selective, so **no natural-lanthanide-biology site has a calcium partner at all** and all 19
+  clean pairs are calcium proteins with a lanthanide soaked in. Their geometry is indistinguishable
+  — which does establish that a pre-formed calcium site *does not deform* when it takes a
+  lanthanide. Run `python scripts/paired_sites.py --contrast data/calcium_sites.parquet`.
+- **What separates a lanthanide-selective site, measured native against native.** Comparing the
+  10 genuine Ln-biology entries to the 171 Ca-only entries, entry-level and resolution-matched:
+  **coordination number ≥8.5 (balanced accuracy 1.000, p=0.0016)** and **bidentate carboxylates
+  ≥1.5 (0.988, p<0.0001)** separate; **net charge does not (p=0.168)**, a third independent
+  confirmation that it belongs in triage and not in the selectivity score, and neither does SASA
+  (p=0.659). The honest *n* is **two families** — lanmodulin and the XoxF/MDH dehydrogenases —
+  and the thresholds are fitted and scored on the same points, so these are descriptive
+  separations, not a validated classifier. `python scripts/selectivity_contrast.py`.
 - Argo text explanations constrained to screening output, with rejected credentials failing closed.
 
 ## Measured baseline

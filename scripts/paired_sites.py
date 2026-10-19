@@ -73,7 +73,8 @@ COMPARED = [
 ]
 
 
-def load(path: Path, min_donors: int, min_residues: int) -> pd.DataFrame:
+def load(path: Path, min_donors: int, min_residues: int,
+         max_resolution: float | None = None) -> pd.DataFrame:
     frame = pd.read_parquet(path)
     if "site_signature" not in frame.columns:
         raise SystemExit(
@@ -90,7 +91,20 @@ def load(path: Path, min_donors: int, min_residues: int) -> pd.DataFrame:
     # signature is not a site, it is a string that many unrelated sites
     # share -- the first run of this matched GLU113 across 2V15, 4LL7, 6FRM
     # and 6FRN and called it a pair.
-    return kept[kept["signature_residues"] >= min_residues]
+    kept = kept[kept["signature_residues"] >= min_residues]
+    if max_resolution is not None:
+        if "resolution_A" not in kept.columns:
+            raise SystemExit(f"{path} has no resolution_A column -- rebuild it")
+        # Applied to BOTH tables or to neither. Filtering one side is how the
+        # first run of this analysis manufactured a result: the contrast set
+        # was capped at 2.5 A and Corpus A was not, so the Ln sides came in
+        # 0.17 A worse than their Ca partners (20/26 pairs, sign test
+        # p=0.0094) and donor distances duly ran +0.08 A longer on the Ln
+        # side. Holding both to the same cutoff collapsed that to +0.010 A
+        # at p=1.0. The effect was the filter.
+        kept = kept[kept["resolution_A"].notna()
+                    & (kept["resolution_A"] <= max_resolution)]
+    return kept
 
 
 def pair_table(frame: pd.DataFrame, keys: list[str]) -> pd.DataFrame:
@@ -163,9 +177,26 @@ def main() -> int:
                         help="skip signatures with fewer distinct residues; "
                              "one or two residues match by coincidence")
     parser.add_argument("--out", type=Path, default=None)
+    # The matched contrast set: Ca-only depositions of the same proteins,
+    # which Corpus A excludes by construction. Without it the cross-entry
+    # tier can only pair a rare-earth entry against another rare-earth entry
+    # that happens to also hold a calcium, which is four usable pairs.
+    parser.add_argument("--contrast", type=Path, default=None,
+                        help="a second site table (data/calcium_sites.parquet)")
+    parser.add_argument("--max-resolution", type=float, default=2.5,
+                        help="applied to both tables; pass 0 to disable")
     args = parser.parse_args()
 
-    frame = load(args.table, args.min_donors, args.min_residues)
+    cutoff = args.max_resolution if args.max_resolution else None
+    frame = load(args.table, args.min_donors, args.min_residues, cutoff)
+    frame["corpus"] = "A"
+    if args.contrast:
+        other = load(args.contrast, args.min_donors, args.min_residues, cutoff)
+        other["corpus"] = "contrast"
+        print(f"contrast set: {len(other)} sites from "
+              f"{other['pdb_id'].nunique()} entries "
+              f"({(other['family'] == 'calcium').sum()} calcium)")
+        frame = pd.concat([frame, other], ignore_index=True)
     print(f"{len(frame)} sites with >= {args.min_residues} signature "
           f"residues and >= {args.min_donors} protein donors, from "
           f"{frame['pdb_id'].nunique()} entries "
@@ -185,6 +216,25 @@ def main() -> int:
 
     cross = deltas(pair_table(frame, ["site_signature"]), ["site_signature"])
     report("CROSS-ENTRY (same signature, any deposition)", cross)
+
+    if args.contrast is not None and len(cross):
+        # A pair is only *matched* if its calcium came from the contrast set.
+        # One whose calcium sits in a rare-earth entry is the S3.13 Q2
+        # comparison wearing a signature, and must not be counted as evidence.
+        calcium = frame[frame["family"] == "calcium"]
+        from_contrast = set(
+            calcium[calcium["corpus"] == "contrast"]["site_signature"])
+        matched = cross[cross["site_signature"].isin(from_contrast)]
+        report("MATCHED (calcium from the Ca-only contrast set)", matched)
+        for _, row in matched.sort_values(
+                "coordination_number_delta", ascending=False).iterrows():
+            entries = frame[frame["site_signature"] == row["site_signature"]]
+            ln = sorted(set(entries[entries["family"] == "lanthanide"]["pdb_id"]))
+            ca = sorted(set(entries[entries["family"] == "calcium"]["pdb_id"]))
+            print(f"    {row['site_signature'][:44]:44s} "
+                  f"CN {row['coordination_number_ln']:.1f}/"
+                  f"{row['coordination_number_ca']:.1f}  "
+                  f"Ln {','.join(ln[:3])} vs Ca {','.join(ca[:3])}")
     if len(cross):
         print("\n  top signatures by copy count (confirm these are the same "
               "protein before using them):")

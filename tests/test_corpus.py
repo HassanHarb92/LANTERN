@@ -159,3 +159,48 @@ def test_signature_residue_count_never_exceeds_donor_count():
     sized = frame[frame["site_signature"].str.len() > 0]
     residues = sized["site_signature"].str.count(";") + 1
     assert (residues <= sized["protein_donor_count"]).all()
+
+
+@pytest.mark.skipif(not TABLE.exists(), reason="site table not built")
+def test_table_carries_resolution_for_the_paired_contrast():
+    """Every geometric column is resolution-dependent, so the cutoff has to
+    be appliable from the table itself rather than re-fetched per analysis.
+    """
+    import pandas as pd
+    frame = pd.read_parquet(TABLE)
+    assert "resolution_A" in frame.columns
+    assert "method" in frame.columns
+    xray = frame[frame["method"] == "X-RAY DIFFRACTION"]
+    assert xray["resolution_A"].notna().all(), (
+        "an X-ray entry with no resolution would silently survive the "
+        "quality cut that the matched contrast depends on")
+    # NMR has no resolution in this sense; it must be absent, not zero.
+    nmr = frame[frame["method"] == "SOLUTION NMR"]
+    if len(nmr):
+        assert nmr["resolution_A"].isna().all()
+
+
+def test_resolution_filter_is_not_optional_once_asked_for():
+    """Regression: the matched contrast's first run filtered one side only.
+
+    Capping the Ca set at 2.5 A while leaving Corpus A uncapped left the Ln
+    sides 0.17 A worse-resolved than their partners and produced a +0.08 A
+    donor-distance "effect" that vanished at a symmetric cutoff. The guard
+    is that a filter request against a table with no resolution column must
+    fail loudly rather than silently return everything.
+    """
+    import pandas as pd
+    from scripts.paired_sites import load
+    frame = pd.DataFrame({
+        "site_signature": ["ASP1;ASP2;ASP3"] * 3,
+        "protein_donor_count": [4, 4, 4],
+        "family": ["lanthanide", "calcium", "calcium"],
+    })
+    path = ROOT / "tests" / "_tmp_no_resolution.parquet"
+    frame.to_parquet(path, index=False)
+    try:
+        assert len(load(path, 2, 3)) == 3, "unfiltered load should pass all"
+        with pytest.raises(SystemExit, match="resolution"):
+            load(path, 2, 3, 2.5)
+    finally:
+        path.unlink(missing_ok=True)

@@ -173,6 +173,16 @@ def site_rows(pdb_id: str, text: str, meta: dict) -> list[dict]:
                         if x in KNOWN_CHELATORS})),
             "class_first_pass": label,
             "class_basis": basis,
+            # Carried per site rather than looked up later because every
+            # geometric column above is resolution-dependent, and the matched
+            # Ca contrast proved that a filter applied to one side only
+            # manufactures a difference: the Ln sides ran 0.17 A worse than
+            # their Ca partners, which on its own produced a +0.08 A donor
+            # distance "effect" that vanished once both sides were held to
+            # the same cutoff. None for NMR and EM, which have no resolution
+            # in this sense and whose distances come from restraints.
+            "resolution_A": meta.get("resolution_A"),
+            "method": meta.get("method", ""),
             "title": meta.get("title", ""),
         })
     return rows

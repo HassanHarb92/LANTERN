@@ -908,6 +908,105 @@ Reproduce: `python scripts/paired_sites.py` for the in-corpus tiers, then
 --enumeration data/calcium_counterparts.json`, and `python scripts/build_site_table.py --corpus
 .cache/calcium --enumeration data/calcium_counterparts.json --out data/calcium_sites.parquet`.
 
+### 3.15 The matched contrast, measured: a null result, and why it is the only possible one
+
+The fetch returned **172 Ca-only entries across 67 accessions** (739 candidates before the 2.5 Å and
+five-per-accession cuts), parsed to **645 calcium sites in 172 entries**. Against Corpus A that gives
+**31 cross-corpus matched signatures** — against 4 from Corpus A alone.
+
+**First, an artefact I manufactured myself.** The first run looked like a result: donor distances
++0.08 Å longer on the lanthanide side, and `protein_donor_count` higher in 7 of 7 pairs (sign test
+p=0.016). It was the filter. I had capped the contrast set at 2.5 Å and left Corpus A unfiltered, so
+the lanthanide sides ran **0.17 Å worse-resolved than their calcium partners (20/26 pairs, p=0.0094)**
+— a stronger effect than any chemistry in the table. The resolution gap correlated with the distance
+delta (r=+0.40). Holding both sides to the same cutoff collapses the distance difference to +0.010 Å
+at p=1.0 and the donor-count effect to 2/2, p=0.50. Resolution is now a column in both tables and the
+cutoff is applied to both or to neither.
+
+**With that fixed, nothing separates.** 19 fold- and resolution-matched pairs:
+
+| descriptor | Ln median | Ca median | Ln>Ca | sign test |
+|---|---:|---:|---:|---:|
+| coordination_number | 7.00 | 7.00 | 6/11 | 1.00 |
+| mean_donor_distance_A | 2.40 | 2.41 | 10/19 | 1.00 |
+| protein_donor_count | 5.00 | 5.00 | 2/2 | 0.50 |
+| water_donor_count | 1.00 | 1.00 | 6/10 | 0.75 |
+| bidentate_carboxylates | 1.00 | 1.00 | 1/1 | 1.00 |
+| **net_charge** | −3.00 | −3.00 | **0/0** | — |
+| **carboxylate_residues** | 3.00 | 3.00 | **0/0** | — |
+
+The last two rows are the control working: same signature means same residues, so the charge
+descriptors are identical *by construction* and must read exactly zero. They do, in all 19 pairs,
+which is what certifies that the matching is sound and the nulls above are real nulls.
+
+> **The null is structural, not disappointing.** A matched pair is by construction a site observed
+> holding *both* ions — which is to say, a site that is **not selective**. The design selects for
+> promiscuity, so there is no selectivity left in it to measure. The decisive evidence is what is
+> missing: **not one natural-lanthanide-biology site has a calcium partner anywhere in the data.**
+> Lanmodulin cannot appear in this set, because not binding calcium is the entire point of it. All
+> 19 pairs are calcium proteins with a lanthanide soaked in — troponin C, mannose-binding protein,
+> langerin, psoriasin, calexcitin, α-lactalbumin, proteinase K. (The title pass labels only 3 of them
+> `ln_substituted_ca`; its keyword list is EF-hand-centric and misses the lectins and the hydrolases.
+> That is a gap in the hint, not in the geometry.)
+>
+> So the matched design answers a different question than the one it was built for, and answers it
+> cleanly: **a pre-formed calcium site does not measurably deform when it accepts a lanthanide
+> instead.** Same coordination number, same donor distances, same denticity, at PDB resolution. That
+> is worth knowing, and it rules out first-shell geometry *alone* as the thing that distinguishes the
+> two ions in a fixed fold.
+
+### 3.16 The comparison that does work: native against native
+
+Three contrasts exist in this data and two of them cannot answer the selectivity question — §3.13's
+Q2 measures provenance, §3.15's matched pairs measure promiscuity. The third is sites that bind
+lanthanide **and not** calcium against sites that bind calcium in their own Ca-only depositions. It
+does not control the fold, but unlike Q2 both sides are native: every protein crystallised with the
+ion it actually uses.
+
+Entry-level medians, both sides ≤2.5 Å and chelator-free, **10 lanthanide entries vs 171 calcium
+entries**, two-sided permutation test on the difference of medians:
+
+| descriptor | Ln | Ca | balanced acc. | split | perm *p* |
+|---|---:|---:|---:|---|---:|
+| **coordination_number** | 9.50 | 7.00 | **1.000** | ≥8.5 | **0.0016** |
+| **bidentate_carboxylates** | 2.50 | 1.00 | **0.988** | ≥1.5 | **<0.0001** |
+| mean_donor_distance_A | 2.62 | 2.44 | 0.835 | ≥2.53 | 0.0008 |
+| protein_donor_count | 7.00 | 5.00 | 0.816 | ≥5.5 | 0.0139 |
+| protein_atoms_within_8A | 100.0 | 87.0 | 0.715 | ≥100 | 0.0365 |
+| net_charge | −3.00 | −2.00 | 0.825 | <−3 | 0.168 *(n.s.)* |
+| carboxylate_residues | 3.00 | 2.00 | 0.825 | ≥3 | 0.167 *(n.s.)* |
+| shell_net_charge | −3.00 | −2.00 | 0.807 | <−3 | 0.248 *(n.s.)* |
+| metal_sasa_A2 | 6.54 | 10.38 | 0.763 | <9.4 | 0.659 *(n.s.)* |
+
+**Coordination number and bidentate carboxylate count separate, and they are exactly what Ln³⁺
+coordination chemistry predicts** — a larger ion preferring CN 8–10 where Ca²⁺ sits at 6–8, and a
+higher charge density pulling carboxylates into bidentate contact. Neither is the Dudev charge rule.
+
+**Net charge is not significant (p=0.168).** That is now the third independent route to the same
+conclusion: it scored 94% at telling a real site from an artefact (§3.13 Q3), 75% at telling which
+ion a genuine site prefers (§3.12), and here it fails outright. Net charge is a triage filter and
+must stay out of the selectivity score. **SASA fails too** (p=0.659), and the per-family table says
+why — lanmodulin's sites are fully buried (median 0.00 Å²) while the dehydrogenase sites are not
+(8.72 Å²), so burial is a property of those two folds rather than of lanthanide selectivity.
+
+> **The honest *n* is two, not ten.** The ten lanthanide entries are six methanol/alcohol
+> dehydrogenases and four lanmodulins. Collapsing sites to entry medians already prevents 8FNR's
+> fourteen lanmodulin sites from counting as fourteen observations, but two families is still the
+> real limit, and the thresholds above are fitted and scored on the same points — the balanced
+> accuracies are descriptive, not validated. A coordination number of 1.000 separation on 10 vs 171
+> means "these two families are cleanly different from calcium proteins", not "this classifier
+> works". Both families agree on the direction of CN and bidentate count, which is the strongest
+> statement two families support.
+
+**What this fixes in M3.1.** The geometry score should be built on **coordination number and
+bidentate carboxylate count**, with donor distance and protein donor count as weaker support. Net
+charge, shell charge and SASA come out of the selectivity term — net charge stays, but in triage.
+This is still not machine learning at *n*=2 families; it is two thresholds with a mechanistic
+rationale and a stated validation gap.
+
+Reproduce: `python scripts/paired_sites.py --contrast data/calcium_sites.parquet` for §3.15 and
+`python scripts/selectivity_contrast.py` for §3.16.
+
 ---
 
 ## 4. The strategic reframe: three finite corpora
@@ -1471,7 +1570,7 @@ parts are now contradicted by evidence:
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python -m pytest -q                      # 96 passed
+.venv/bin/python -m pytest -q                      # 100 passed
 
 # §3.13 Corpus A end to end: download, parse to one table, then measure.
 # The parquet is committed, so steps 1-2 are only needed to rebuild it.

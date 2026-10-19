@@ -147,8 +147,13 @@ def main() -> int:
 
     print("\n" + "  ".join(f"{k}={len(v)}" for k, v in sorted(by_status.items())))
     total = sum(r.get("bytes", 0) for r in results)
+    # resolve() first: --out may be given relative ("--out .cache/calcium"),
+    # and relative_to against the absolute ROOT then raises -- after every
+    # file and the manifest are already safely on disk, which makes it a
+    # crash that looks like a failed download and is not one.
+    written = (args.out / "_manifest.json").resolve()
     print(f"{total / 1e6:.1f} MB on disk, manifest written to "
-          f"{(args.out / '_manifest.json').relative_to(ROOT)}")
+          f"{written.relative_to(ROOT) if written.is_relative_to(ROOT) else written}")
     for status in ("failed", "missing"):
         if by_status.get(status):
             print(f"  {status}: {', '.join(sorted(by_status[status])[:20])}"
