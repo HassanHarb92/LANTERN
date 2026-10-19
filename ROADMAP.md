@@ -35,7 +35,7 @@ problems). `pytest -q` → **5 passed**. The app imports and runs.
 | Component | Verdict | Evidence |
 |---|---|---|
 | `structure.py` | **Genuinely good.** Keep and build on it. | Against real PDB 8FNS it finds all 4 Nd³⁺ sites in 0.4 s with correct donor residues (Asp35/37/39, Thr41, Glu46) and Nd–O distances 2.39–2.53 Å — textbook lanthanide coordination. |
-| `chemistry.py` | Works, but measures the wrong variable (§3.1) | Real-sequence ranking is sane: LanM 74.7 > TnC 69.0 > CaM 57.0 ≫ haemoglobin 23.4 > chymotrypsinogen 19.1. |
+| `chemistry.py` | Ranks correctly since the §3.6 fix, but still measures a proxy (§3.1) | Real-sequence ranking, after the loop pattern was corrected against resolved donors: *M. extorquens* LanM 86.7 > *H. quercus* LanM 71.1 > TnC 69.0 > CaM 57.0 ≫ haemoglobin 23.4 > chymotrypsinogen 19.1. Both lanthanide binders now clear both calcium proteins — but by only 2.1 points, so this is triage, not a calibrated descriptor. |
 | `uniprot.py` | **Two of three queries are broken** (§3.2) | `ef-hand` → 755 endocytosis proteins; `lanmodulin` → exactly 1 result. |
 | `catalog.py` + demo data | **Degenerate** (§3.3) | 3 of 4 demo records tie at exactly 45.0 with 0 motif matches. |
 | `argo.py` | **Silently renders auth failures as science** (§3.4) | Verified live against the real gateway. |
@@ -95,7 +95,7 @@ EF-hand, and the lanthanide protein outside that sub-type scored as a non-binder
 > turns the order the right way up:
 >
 > | Rank | Protein | Role | Score | Motifs | was |
-> |---|---|---|---|---:|---:|---:|
+> |---|---|---|---:|---:|---:|
 > | 1 | Lanmodulin, *M. extorquens* (C5B164) | **lanthanide binder** | **86.7** | 4 | 74.7 |
 > | 2 | Lanmodulin, *H. quercus* (A0A4V2JDD3) | **lanthanide binder** | **71.1** | 3 | 35.1 |
 > | 3 | Troponin C, human (P02585) | calcium protein | 69.0 | 2 | 69.0 |
@@ -159,7 +159,7 @@ Offline demo is the default mode and the first thing any user or judge sees. Sco
 ```
 
 A three-way tie, and **zero of the four synthetic sequences match the EF-hand pattern the tool
-searches for** — including the one labelled "lanmodulin". Real lanmodulin scores 74.7 with 3 motif
+searches for** — including the one labelled "lanmodulin". Real lanmodulin scores 86.7 with 4 motif
 hits. The demo therefore showcases the tool failing, while the honest "these are synthetic" labels
 (which are good, and should stay as a principle) cannot rescue a ranking that is a tie.
 
@@ -1101,5 +1101,7 @@ structure tests: `.venv/bin/python -m pytest tests/test_structure.py -q`. They r
 cached structures and need no network. `scripts/prefetch_structures.py` refreshes that cache.
 
 §3.1's coordination comparison and §3.3's demo-ranking table are reproduced by scoring the real
-UniProt sequences and parsing 8FNS/8FNR/1CLL with the repo's own `structure.py`, filtered to O/N/S
-donors within 3.2 Å.
+UniProt sequences and parsing the five cached structures (8FNS, 8FNR, 8DQ2, 9PI2, 1CLL) with the
+repo's own `structure.py`, filtered to O/N/S donors within 3.2 Å. Pass `metals=ALL_METAL_CODES` to
+include the Ca²⁺ contrast sites — without it `binding_neighborhood()` returns rare earths only, and
+9PI2's calcium site disappears.
