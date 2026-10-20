@@ -1,7 +1,9 @@
 """Offline tests for the Argo client's fail-closed behaviour. No network access."""
 import pytest
-from reefinder.argo import (ArgoClient, ArgoError, reject_if_blocked, sampling_params,
+from lantern import argo
+from lantern.argo import (ArgoClient, ArgoError, reject_if_blocked, sampling_params,
                             ANTHROPIC_MAX_TOKENS)
+from lantern.llm import LLMError
 
 
 class TestBlockedResponseDetection:
@@ -86,3 +88,42 @@ class TestConfiguration:
             monkeypatch.delenv(var, raising=False)
         ok, detail = ArgoClient().health()
         assert not ok and "not both set" in detail
+
+    def test_argo_error_is_an_llm_error(self):
+        """So app.py's single `except LLMError` covers the Argo path too."""
+        assert issubclass(ArgoError, LLMError)
+
+
+class TestTruncationDisclosure:
+    """Argo is OpenAI-shaped, so it reports a clipped completion as
+    finish_reason "length". The README promises all three providers disclose
+    truncation; without this the default provider would be the one that
+    silently renders a narration cut off where its caveat belonged."""
+
+    @staticmethod
+    def _respond(monkeypatch, body):
+        class R:
+            status_code = 200
+
+            def json(self):
+                return body
+
+            def raise_for_status(self):
+                pass
+
+        monkeypatch.setattr(argo.requests, "post", lambda *a, **k: R())
+
+    def test_length_finish_reason_is_disclosed(self, monkeypatch):
+        self._respond(monkeypatch, {
+            "id": "chatcmpl-ok", "usage": {"total_tokens": 900},
+            "choices": [{"finish_reason": "length",
+                         "message": {"content": "The score cannot distinguish"}}]})
+        out = ArgoClient(user="u", model="gpt-4o").chat([{"role": "user", "content": "x"}])
+        assert out.startswith("The score cannot distinguish") and "truncated" in out
+
+    def test_complete_answer_is_not_annotated(self, monkeypatch):
+        self._respond(monkeypatch, {
+            "id": "chatcmpl-ok", "usage": {"total_tokens": 900},
+            "choices": [{"finish_reason": "stop", "message": {"content": "A full answer."}}]})
+        assert ArgoClient(user="u", model="gpt-4o").chat(
+            [{"role": "user", "content": "x"}]) == "A full answer."

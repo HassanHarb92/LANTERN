@@ -1,10 +1,16 @@
-"""Argo OpenAI-compatible endpoint, with fail-closed networking behavior."""
+"""Argo OpenAI-compatible endpoint, with fail-closed networking behavior.
+
+One of three interchangeable providers; see llm.py for the others and for the
+factory that chooses between them.
+"""
 import os
 import re
 import requests
+from .llm import LLMError, TRUNCATION_NOTE, default_timeout
 
-class ArgoError(RuntimeError):
-    pass
+class ArgoError(LLMError):
+    """Argo-specific failure. Catching LLMError catches this too, so callers
+    that want to be provider-agnostic do not have to name the gateway."""
 
 
 # Argo reports a rejected credential as HTTP 200 carrying a well-formed chat
@@ -57,13 +63,17 @@ def reject_if_blocked(body: dict) -> None:
 
 
 class ArgoClient:
-    def __init__(self, base_url=None, user=None, model=None, timeout=25):
+    name = "argo"
+    label = "Argonne Argo"
+    key_variable = "ARGO_USER"
+
+    def __init__(self, base_url=None, user=None, model=None, timeout=None):
         self.base_url = (base_url or os.getenv("ARGO_BASE_URL", "https://apps.inside.anl.gov/argoapi/v1")).rstrip("/")
         # An ANL domain username, not a secret key. ARGO_API_KEY is the former
         # name, still read so that existing .env files keep working.
         self.user = user or os.getenv("ARGO_USER") or os.getenv("ARGO_API_KEY", "")
         self.model = model or os.getenv("ARGO_MODEL", "")
-        self.timeout = timeout
+        self.timeout = timeout or default_timeout()
 
     def configured(self) -> bool:
         """Both settings are present. Says nothing about whether they work."""
@@ -114,9 +124,15 @@ class ArgoClient:
         reject_if_blocked(body)
 
         try:
-            content = body["choices"][0]["message"]["content"]
+            choice = body["choices"][0]
+            content = choice["message"]["content"]
         except (KeyError, IndexError, TypeError) as exc:
             raise ArgoError("Argo returned a response with no message content.") from exc
         if not isinstance(content, str) or not content.strip():
             raise ArgoError("Argo returned an empty or non-text response.")
+        # Argo is OpenAI-shaped, so it reports a clipped completion the same
+        # way. Disclosing it keeps all three providers interchangeable: a
+        # narration that stops mid-caveat must not read as a finished answer.
+        if isinstance(choice, dict) and choice.get("finish_reason") == "length":
+            content += TRUNCATION_NOTE
         return content

@@ -1,7 +1,7 @@
 """Offline tests for query construction. No network access."""
 import pytest
-from reefinder import uniprot
-from reefinder.uniprot import ALLOWED_QUERIES, INTERPRO_FAMILIES, TOPICS, search_proteins
+from lantern import uniprot
+from lantern.uniprot import ALLOWED_QUERIES, INTERPRO_FAMILIES, TOPICS, search_proteins
 
 
 def test_endocytosis_keyword_is_not_queried():

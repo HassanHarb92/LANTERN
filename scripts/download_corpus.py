@@ -57,7 +57,7 @@ ASSEMBLY_URL = "https://files.rcsb.org/download/{pdb_id}-assembly1.cif.gz"
 WORKERS = 6
 ATTEMPTS = 3
 TIMEOUT = 60
-USER_AGENT = "REE-Finder/0.1 (research; contact via repository)"
+USER_AGENT = "LANTERN/0.1 (research; contact via repository)"
 
 _print_lock = threading.Lock()
 

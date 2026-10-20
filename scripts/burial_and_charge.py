@@ -22,7 +22,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from reefinder.structure import (ALL_METAL_CODES,         # noqa: E402
+from lantern.structure import (ALL_METAL_CODES,         # noqa: E402
                                  REE_LIGAND_CODES, binding_neighborhood)
 
 STRUCTURES = ("8FNS", "8FNR", "8DQ2", "9PI2", "1CLL")

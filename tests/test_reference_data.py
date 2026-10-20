@@ -12,9 +12,9 @@ import json
 
 import pytest
 
-from reefinder.catalog import (REFERENCE_PATH, SYNTHETIC_PATH, load_reference,
+from lantern.catalog import (REFERENCE_PATH, SYNTHETIC_PATH, load_reference,
                                load_synthetic, provenance)
-from reefinder.chemistry import ef_hand_loops, screen
+from lantern.chemistry import ef_hand_loops, screen
 
 REFERENCE = {p.accession: p for p in load_reference()}
 PROVENANCE = provenance()

@@ -6,35 +6,35 @@ import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 from dotenv import load_dotenv
-from reefinder.agent import run_campaign, explain_campaign, SCORE_LIMITATION
-from reefinder.argo import ArgoClient, ArgoError
-from reefinder.catalog import load_reference
-from reefinder.chemistry import METALS
-from reefinder.geometry import SCORE_VERSION, score_site
-from reefinder.structure import (ALL_METAL_CODES, fetch_structure, binding_neighborhood,
+from lantern.agent import run_campaign, explain_campaign, SCORE_LIMITATION
+from lantern.llm import LLMError, PROVIDERS, make_client, provider_status
+from lantern.catalog import load_reference
+from lantern.chemistry import METALS
+from lantern.geometry import SCORE_VERSION, score_site
+from lantern.structure import (ALL_METAL_CODES, fetch_structure, binding_neighborhood,
                                  resolution_from_coordinates)
-from reefinder.uniprot import TOPICS
+from lantern.uniprot import TOPICS
 
 # Pinned rather than floating: an unversioned third-party script can change
 # under the demo. Vendor this locally before any judged or offline run.
 TMOL_SRC = "https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js"
 
 load_dotenv()
-st.set_page_config(page_title="REE-Finder · Protein Discovery", page_icon="🧬", layout="wide")
+st.set_page_config(page_title="LANTERN · Protein Discovery", page_icon="🧬", layout="wide")
 st.markdown("""<style>
 .block-container {padding-top:2rem;max-width:1250px}
 .hero{padding:1.4rem;border-radius:18px;background:linear-gradient(105deg,#102c42,#125c60);color:#f0fbf9;margin-bottom:1.3rem}
 .hero h1{margin:0;font-size:2.2rem}.hero p{opacity:.86;margin-bottom:0}
 .small{color:#a9bcc9;font-size:.86rem}
 </style>""", unsafe_allow_html=True)
-st.markdown('<div class="hero"><h1>🧬 REE-Finder</h1><p>Explore nature’s proteins for rare-earth-binding hypotheses · Chemistry-guided · Evidence-aware · Powered by Argo</p></div>', unsafe_allow_html=True)
+st.markdown('<div class="hero"><h1>🧬 LANTERN</h1><p>Lanthanide-Aware Network for Targeted Exploration and Recognition in Nature · Chemistry-guided · Evidence-aware</p></div>', unsafe_allow_html=True)
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def argo_health(base_url: str, model: str, has_user: bool):
+def llm_health(provider: str, base_url: str, model: str, has_key: bool):
     """Cached so the badge does not fire a request on every widget rerun.
     Keyed on configuration only -- never on the credential itself."""
-    return ArgoClient().health()
+    return make_client(provider).health()
 
 
 with st.sidebar:
@@ -49,12 +49,25 @@ with st.sidebar:
                               "then fetches sequences from UniProt.")
     limit = st.slider("Maximum proteins", 5, 50, 20, step=5, disabled=mode == "Reference set")
     st.divider()
-    st.caption("Argo model and username are read from .env. Never paste credentials into chat.")
-    argo = ArgoClient()
-    if not argo.configured():
-        st.info("Argo not configured; screening still works.")
+    st.subheader("🤖 Language model")
+    # Default to whatever LLM_PROVIDER names, so .env alone can drive a
+    # headless run. An unrecognised value must not take the whole app down
+    # with it -- the screening pipeline does not need a model at all.
+    status = {row["name"]: row for row in provider_status()}
+    requested = (os.getenv("LLM_PROVIDER") or "argo").strip().lower()
+    if requested not in PROVIDERS:
+        st.warning(f"LLM_PROVIDER={requested!r} is not one of {', '.join(PROVIDERS)}; using argo.")
+        requested = "argo"
+    provider = st.selectbox(
+        "Provider", list(PROVIDERS), index=list(PROVIDERS).index(requested),
+        format_func=lambda p: f"{status[p]['label']}{'' if status[p]['configured'] else ' — no key'}",
+        help="Narration only. Screening and scoring are deterministic and never call a model.")
+    llm = make_client(provider)
+    st.caption("Credentials are read from .env. Never paste them into chat.")
+    if not llm.configured():
+        st.info(f"{llm.label} not configured; screening still works.")
     else:
-        ok, detail = argo_health(argo.base_url, argo.model, bool(argo.user))
+        ok, detail = llm_health(provider, llm.base_url, llm.model, True)
         st.success(detail) if ok else st.warning(detail)
     st.caption("Research prototype, not a validated affinity predictor.")
 
@@ -75,7 +88,7 @@ if "campaign" not in st.session_state:
     a.metric("Reference proteins", str(len(load_reference())),
              help="Authentic UniProt sequences: 2 lanmodulins, 2 calcium proteins, 2 negatives")
     b.metric("Supported targets", str(sum(1 for m in METALS.values() if m["kind"] == "lanthanide")))
-    c.metric("Cloud LLM", "Argonne Argo")
+    c.metric("Cloud LLM", llm.label, help="Switch providers in the sidebar.")
     st.markdown("Click **Run protein discovery** to screen the reference set, or switch to "
                 "**Live database** to pull the lanmodulin family, then explore a known structure.")
     st.stop()
@@ -89,7 +102,7 @@ c.metric("Competitor", campaign["competitor"])
 d.metric("Source", campaign["mode"])
 st.caption(campaign["disclaimer"])
 
-tab1,tab2,tab3 = st.tabs(["🏆 Candidates", "🔬 Protein explorer", "💬 Ask Argo"])
+tab1,tab2,tab3 = st.tabs(["🏆 Candidates", "🔬 Protein explorer", "💬 Ask the model"])
 with tab1:
     st.subheader("Exploratory protein shortlist")
     st.caption("Scores are relative sequence heuristics, not predictions of experimentally measured REE binding or metal selectivity.")
@@ -99,7 +112,7 @@ with tab1:
                         "Provenance": c["protein"]["source"]} for c in candidates])
     st.dataframe(df, width='stretch', hide_index=True)
     st.download_button("⬇️ Download results (JSON)", data=json.dumps(campaign, indent=2),
-                       file_name="reefinder_campaign.json", mime="application/json")
+                       file_name="lantern_campaign.json", mime="application/json")
     st.subheader("Workflow trace")
     for i, step in enumerate(campaign["trace"], 1):
         st.write(f"**{i}.** {step}")
@@ -178,15 +191,18 @@ v.addStyle({{hetflag:true}},{{sphere:{{scale:0.45}}}});v.zoomTo();v.render();</s
                            file_name=f"{pdb_id.upper()}.{fmt}")
 with tab3:
     st.subheader("Research assistant")
-    st.caption("Argo receives the campaign summary, not your credentials or full protein coordinates.")
+    st.caption(f"{llm.label} receives the campaign summary, not your credentials or "
+               "full protein coordinates.")
     question = st.text_area("Ask a scientific question", value=f"What can we infer about {campaign['target']} versus {campaign['competitor']} from these results? What experiments should we do?", height=115)
-    if st.button("✨ Ask Argo", disabled=not argo.configured()):
+    if st.button(f"✨ Ask {llm.label}", disabled=not llm.configured()):
         try:
             with st.spinner("Reasoning from the campaign evidence..."):
-                st.session_state.explanation = explain_campaign(campaign, argo, question)
-        except ArgoError as exc:
+                st.session_state.explanation = explain_campaign(campaign, llm, question)
+        except LLMError as exc:
             st.error(str(exc))
     if "explanation" in st.session_state:
         st.markdown(st.session_state.explanation)
-    if not argo.configured():
-        st.info("To enable Argo: create `.env` from `.env.example`, set `ARGO_USER` and `ARGO_MODEL`, then restart the app.")
+    if not llm.configured():
+        st.info(f"To enable {llm.label}: create `.env` from `.env.example`, set "
+                f"`{llm.key_variable}`, then restart the app. Any of the three "
+                "providers works; pick one in the sidebar.")

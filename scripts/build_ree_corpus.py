@@ -8,7 +8,7 @@ someone remembers. The hand-written list that shipped first was missing Y1 --
 a bare yttrium ion, chemically identical to YT3 -- and with it 19 entries, and
 nothing in the pipeline could have noticed.
 
-Each discovered component is then classified against reefinder.structure:
+Each discovered component is then classified against lantern.structure:
 bare ions (REE_LIGAND_CODES) are queried for entries, pre-chelated reagents
 (CHELATED_REE_CODES) are excluded with their reason recorded. A component in
 neither table is a hard error -- that is the Y1 failure, and it should stop
@@ -32,7 +32,7 @@ import requests
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from reefinder.structure import (CHELATED_REE_CODES,  # noqa: E402
+from lantern.structure import (CHELATED_REE_CODES,  # noqa: E402
                                  REE_LIGAND_CODES)
 
 SEARCH = "https://search.rcsb.org/rcsbsearch/v2/query"
@@ -114,7 +114,7 @@ def main() -> int:
     if unclassified:
         print(f"\nERROR: {len(unclassified)} component(s) in neither table: "
               f"{', '.join(unclassified)}")
-        print("Classify each in reefinder/structure.py as a bare ion or a")
+        print("Classify each in lantern/structure.py as a bare ion or a")
         print("pre-chelated reagent before rebuilding. Refusing to guess.")
         return 1
 

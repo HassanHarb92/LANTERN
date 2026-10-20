@@ -11,9 +11,9 @@ from pathlib import Path
 
 import pytest
 
-from reefinder.geometry import (CRITERIA, MAX_RESOLUTION_A, SCORE_VERSION,
+from lantern.geometry import (CRITERIA, MAX_RESOLUTION_A, SCORE_VERSION,
                                 rank_key, score_site, score_sites)
-from reefinder.structure import (ALL_METAL_CODES, binding_neighborhood,
+from lantern.structure import (ALL_METAL_CODES, binding_neighborhood,
                                  cached_structure, resolution_from_coordinates)
 
 ROOT = Path(__file__).resolve().parent.parent

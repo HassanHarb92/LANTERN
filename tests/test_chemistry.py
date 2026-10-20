@@ -1,10 +1,10 @@
 import inspect
 
-from reefinder.models import Protein
-from reefinder.chemistry import (EF_HAND_HINT, EF_LOOP_INSTRUMENT,
+from lantern.models import Protein
+from lantern.chemistry import (EF_HAND_HINT, EF_LOOP_INSTRUMENT,
                                  ef_hand_loops, score_sequence, screen)
-from reefinder.catalog import load_reference, load_synthetic
-from reefinder.agent import run_campaign
+from lantern.catalog import load_reference, load_synthetic
+from lantern.agent import run_campaign
 
 # Loops read off deposited coordinates by scripts/loop_detector.py, which
 # derives them from the lowest-numbered protein donor of each metal site

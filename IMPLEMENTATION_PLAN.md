@@ -1,4 +1,4 @@
-# REE-Finder: Complete Hackathon Implementation Plan
+# LANTERN: Complete Hackathon Implementation Plan
 
 **Version:** 0.1 scaffold / 1.0 target  
 **Audience:** hackathon developers, scientific advisors, coding agents  
@@ -55,7 +55,7 @@ De novo protein sequence generation, training/fine-tuning AlphaFold, high-throug
 
 ## 2. UX and visual design
 
-**Product identity:** REE-Finder; deep navy background, teal primary accent, neutral evidence tags, spacious cards. Aim for professional but approachable scientific UI.
+**Product identity:** LANTERN; deep navy background, teal primary accent, neutral evidence tags, spacious cards. Aim for professional but approachable scientific UI.
 
 **Welcome page:** three actions: "Use an example", "Discover real proteins", "Open existing run". Explain that a demo score is not predicted affinity.
 
@@ -391,7 +391,7 @@ Support clear cache and re-fetch. If API fails, show stale cached data as cached
 
 ## 13. Coding agent handoff instructions
 
-> You are implementing REE-Finder v1.0 from this document. Read `README.md`, `docs/SCIENTIFIC_CONTRACT.md`, source files and tests first. Maintain the current runnable offline demo and stable public API. Work sprint by sprint, beginning with authentic scientific reference fixtures. Before modifying code, list the specific planned files and acceptance tests for the sprint. Never alter experimental claims without verifiable citations. Synthetic sequences must remain explicitly synthetic. All scores must remain labeled as heuristics until calibrated. Do not hardcode Argonne credentials. Keep Argo API optional and gracefully degrade when inaccessible. Run `pytest -q` after each change, add focused tests, and explain what evidence each new feature can and cannot establish.
+> You are implementing LANTERN v1.0 from this document. Read `README.md`, `docs/SCIENTIFIC_CONTRACT.md`, source files and tests first. Maintain the current runnable offline demo and stable public API. Work sprint by sprint, beginning with authentic scientific reference fixtures. Before modifying code, list the specific planned files and acceptance tests for the sprint. Never alter experimental claims without verifiable citations. Synthetic sequences must remain explicitly synthetic. All scores must remain labeled as heuristics until calibrated. Do not hardcode Argonne credentials. Keep Argo API optional and gracefully degrade when inaccessible. Run `pytest -q` after each change, add focused tests, and explain what evidence each new feature can and cannot establish.
 
 **Recommended first task:** implement Sprint 1: retrieve genuine lanmodulin/calmodulin sequences, validate exact PDB-to-UniProt mapping, build a local reference fixture, introduce `is_synthetic` and access-date fields, and create acceptance tests that fail if synthetic educational data are presented as true binding discoveries.
 

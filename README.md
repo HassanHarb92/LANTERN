@@ -1,14 +1,16 @@
-# 🧬 REE-Finder
+# 🧬 LANTERN
 
-**An Argo-powered, evidence-aware prototype for exploring naturally occurring rare-earth-binding proteins.**
+*Lanthanide-Aware Network for Targeted Exploration and Recognition in Nature*
 
-This is a *prototype*, not a validated discovery pipeline. It includes a working web UI, synthetic offline demo, live sequence retrieval from UniProt and InterPro, deterministic exploratory sequence scores, a structure viewer, first-shell coordination analysis of deposited rare-earth sites, and Argo-based explanations. **It does not yet compute a calibrated selectivity descriptor, experimentally grounded metal selectivity, or autonomous multi-tool planning.** See `ROADMAP.md` for the measured state of the code and the path to those.
+**An evidence-aware prototype for exploring naturally occurring rare-earth-binding proteins.**
+
+This is a *prototype*, not a validated discovery pipeline. It includes a working web UI, synthetic offline demo, live sequence retrieval from UniProt and InterPro, deterministic exploratory sequence scores, a structure viewer, first-shell coordination analysis of deposited rare-earth sites, and LLM-written explanations from Argonne Argo, OpenAI or Anthropic. **It does not yet compute a calibrated selectivity descriptor, experimentally grounded metal selectivity, or autonomous multi-tool planning.** See `ROADMAP.md` for the measured state of the code and the path to those.
 
 ## Quick start (macOS/Linux)
 
 ```bash
-unzip REE-Finder.zip  # If downloaded as a zip
-cd REE-Finder
+unzip LANTERN.zip  # If downloaded as a zip
+cd LANTERN
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -16,29 +18,58 @@ cp .env.example .env
 streamlit run app.py
 ```
 
-Open the Streamlit URL, select **Offline demo**, and click **Run protein discovery**. The demo uses **synthetic sequences** and real PDB accessions only for separately viewing experimental structures. Scores from the demo must never be described as findings on real protein sequences.
+Open the Streamlit URL, keep **Reference set** selected, and click **Run protein discovery**. The
+reference set is six **authentic UniProt sequences** — two lanmodulins, two calcium proteins, two
+negatives — screened offline with no network access. The scores are exploratory sequence heuristics
+and must never be described as measured binding or selectivity. No language model is needed for any
+of this.
 
-## Argo configuration
+## Language model configuration
 
-Edit `.env`:
+The model **only narrates results**. Retrieval, screening and geometry scoring are deterministic and
+never call it, so the provider you pick cannot change a number LANTERN reports — and running with no
+provider at all costs you nothing but the written summary.
+
+Pick one of three in `.env`, then switch freely in the sidebar:
 
 ```dotenv
+LLM_PROVIDER=argo          # argo | openai | anthropic
+LANTERN_TIMEOUT=25
+
+# argo — Argonne gateway, needs ANL network access
 ARGO_BASE_URL=https://apps.inside.anl.gov/argoapi/v1
 ARGO_USER=your_anl_domain_username
 ARGO_MODEL=Claude Sonnet 5
+
+# openai
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4o                 # optional
+
+# anthropic
+ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_MODEL=claude-sonnet-5-5   # optional
 ```
+
+**Do not commit `.env`.** The app sends only a bounded summary of screening results, never your
+credentials or full coordinates, and no error message or health badge ever echoes a key value.
 
 `ARGO_USER` is an **ANL domain username, not a secret API key** — Argo authenticates a username.
 (`ARGO_API_KEY`, the former name, is still read as a fallback.) Use a model name exactly as Argo
-lists it: `curl -s https://apps.inside.anl.gov/argoapi/v1/models`. **Do not commit `.env`.** The app
-sends only a bounded summary of screening results.
+lists it: `curl -s https://apps.inside.anl.gov/argoapi/v1/models`. The OpenAI and Anthropic keys
+*are* real secrets. Argo's host is an Argonne-internal name, so access may depend on your network.
 
-Argo reports a rejected credential as **HTTP 200 with a normal-looking chat completion** whose body
-is an access-denied notice. The client detects this (blocked completion id, or zero billed tokens)
-and raises instead of displaying it as analysis. The sidebar badge additionally checks that the
-gateway answers and that `ARGO_MODEL` exists; note it cannot validate the username, since the model
-list is served unauthenticated. Argo's host is an Argonne-internal name, so access may depend on
-your network. Endpoints and models can change.
+Each provider fails closed in the way it can actually fail:
+
+| Provider | Failure this guards against |
+|---|---|
+| Argo | A rejected credential returns **HTTP 200 with a normal-looking completion** whose body is an access-denied notice. Detected by blocked completion id or zero billed tokens, and raised rather than displayed as analysis. |
+| OpenAI | A refusal arrives as `content: null` with the reason in a sibling `refusal` field — reported as a refusal, not as an empty answer. |
+| Anthropic | There is **no `system` role**; the system prompt is hoisted into the top-level `system` parameter. Forwarding it as a message would silently discard the instruction that forbids inventing affinities. |
+
+All three disclose truncation rather than returning a summary that stops mid-caveat, and all three
+raise `LLMError` on an unusable credential instead of returning prose. The sidebar badge checks the
+provider answers and that your model id is one the key can reach, which is the usual reason a
+previously working configuration stops working.
 
 Start live discovery by selecting **Live database** in the sidebar. Available families:
 
@@ -64,9 +95,9 @@ domain.
 ## Project layout
 
 ```text
-REE-Finder/
+LANTERN/
 ├── app.py                        # Streamlit user experience
-├── reefinder/
+├── lantern/
 │   ├── __init__.py
 │   ├── models.py                 # Typed data records
 │   ├── chemistry.py              # Unvalidated transparent sequence heuristic
@@ -74,6 +105,7 @@ REE-Finder/
 │   ├── uniprot.py                # UniProt search + InterPro family retrieval
 │   ├── structure.py              # Structure fetch + first-shell coordination analysis
 │   ├── geometry.py               # geometry-v2: the structural call, and what it refuses to score
+│   ├── llm.py                    # Provider layer: OpenAI + Anthropic clients, and the factory
 │   ├── argo.py                   # Argo chat client, fails closed on rejected credentials
 │   └── agent.py                  # Fixed retrieve-then-score pipeline (not a planner)
 ├── scripts/
@@ -104,7 +136,7 @@ REE-Finder/
 ├── data/assembly_counts.json     # Chains deposited vs chains in the biological assembly, per entry
 ├── data/curation_candidates.json # Four structured signals per entry, tiered for hand-curation
 ├── data/curation_verdicts.json   # The hand verdicts reached, with evidence; overrides the title pass
-├── tests/                        # Offline regression tests (131, no network)
+├── tests/                        # Offline regression tests (192, no network)
 ├── docs/SCIENTIFIC_CONTRACT.md   # Scientific claims and evidence gates
 ├── ROADMAP.md                    # Verified state, defects, milestones M0-M6
 ├── IMPLEMENTATION_PLAN.md        # Earlier aspirational plan, superseded in part
@@ -211,7 +243,7 @@ pytest -q
   whole family. The hand-curation verdicts behind this, with their evidence, are in
   `data/curation_verdicts.json`; the evidence admitting an entry to the positive class is
   deliberately non-geometric, since geometry is what the contrast then measures on it.
-- **`geometry-v2`, the structural call** (`reefinder/geometry.py`, shown in the Structure tab).
+- **`geometry-v2`, the structural call** (`lantern/geometry.py`, shown in the Structure tab).
   One criterion: **coordination number ≥ 9**, at the weakest of the four lanthanide families.
   **There are no weights and now only one number**, because a weighted sum fitted on four families
   would be four numbers fitted to four points. It reproduces the separation it came from (4/4 Ln
@@ -239,7 +271,7 @@ pytest -q
   the conclusion holds — but it now rests on two independent probes instead of one shortlist, and
   reading those 38 is the next curation step. `scripts/curate_corpus.py` prints the audit; the
   counts are pinned by tests so that improving recall forces the number to be restated.
-- Argo text explanations constrained to screening output, with rejected credentials failing closed.
+- Text explanations constrained to screening output, from Argo, OpenAI or Anthropic, with unusable credentials failing closed on all three.
 
 ## Measured baseline
 

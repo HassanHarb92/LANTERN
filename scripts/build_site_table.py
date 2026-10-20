@@ -64,7 +64,7 @@ sys.path.insert(0, str(ROOT))
 
 import pandas as pd                                       # noqa: E402
 
-from reefinder.structure import (ALL_METAL_CODES,         # noqa: E402
+from lantern.structure import (ALL_METAL_CODES,         # noqa: E402
                                  REE_LIGAND_CODES, WATER_RESNAMES,
                                  binding_neighborhood)
 

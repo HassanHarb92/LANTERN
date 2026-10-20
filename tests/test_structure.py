@@ -2,7 +2,7 @@
 import statistics
 
 import pytest
-from reefinder.structure import (REE_LIGAND_CODES, ALL_METAL_CODES, DONOR_ELEMENTS,
+from lantern.structure import (REE_LIGAND_CODES, ALL_METAL_CODES, DONOR_ELEMENTS,
                                  CHELATED_REE_CODES, binding_neighborhood,
                                  donor_chemistry, cached_structure,
                                  fetch_structure, resolution_from_coordinates,

@@ -16,7 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from reefinder.structure import STRUCTURE_CACHE, fetch_structure  # noqa: E402
+from lantern.structure import STRUCTURE_CACHE, fetch_structure  # noqa: E402
 
 WANTED = {
     "8FNS": "Lanmodulin (M. extorquens, C5B164) with Nd3+; CN 9-10",

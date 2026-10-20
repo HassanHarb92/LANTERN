@@ -1,10 +1,17 @@
-# REE-Finder — Roadmap to a Working System
+# LANTERN — Roadmap to a Working System
+
+*Lanthanide-Aware Network for Targeted Exploration and Recognition in Nature*
 
 **Status date:** 2026-10-19
 **Method:** every claim below was verified by running the code in this repo and querying the live
 APIs it depends on. Commands are reproducible; numbers are not estimates.
 **Companion docs:** `IMPLEMENTATION_PLAN.md` (prior aspirational plan — see §7 for what to retire),
 `docs/SCIENTIFIC_CONTRACT.md` (claim boundaries — keep, it is sound).
+**On the name:** the project was called REE-Finder until 2026-10-19; commits and cached fetch
+provenance from before that date carry the old name. Everywhere else in this document "REE" means
+*rare-earth element* and is not a reference to the old name — `REE_LIGAND_CODES`,
+`CHELATED_REE_CODES`, `scripts/build_ree_corpus.py` and `data/ree_pdb_entries.json` are named for
+the chemistry and keep their names.
 
 ---
 
@@ -20,7 +27,7 @@ The real problem is **much smaller and already enumerable**, and that is good ne
   uncharacterized.** That is the discovery space, and it fits on one screen.
 - Every one of those 188 has an AlphaFold model already computed.
 
-So REE-Finder should stop being a search engine and become **a complete, curated, verified evidence
+So LANTERN should stop being a search engine and become **a complete, curated, verified evidence
 base over a finite corpus, plus a ranked shortlist of the 188 unstudied LanM homologs.** That is a
 deliverable a structural biologist would actually use, it is achievable, and nobody has packaged it.
 The agent layer orchestrates and explains; it is not the discovery mechanism.
@@ -710,7 +717,7 @@ Reproduce: `python scripts/sequence_hallmarks.py`.
 M3.1 named these two as the descriptors not yet built, with the Dudev rule as the published form:
 *"buried active centers with net charge of −4 or −3 are characterized by higher Ln³⁺ over Ca²⁺
 selectivity, whereas it is the opposite for sites with overall charge of −1"* (Nikolova & Dudev,
-*IJMS* 2023, **24**:6297). Both are now implemented in `reefinder/structure.py` — `site_net_charge()`
+*IJMS* 2023, **24**:6297). Both are now implemented in `lantern/structure.py` — `site_net_charge()`
 counts first-shell charge, `_burial()` reports metal SASA plus a heavy-atom count — and attached to
 every site dict. Measured across the 42 cached sites (36 lanthanide, 6 calcium):
 
@@ -1148,7 +1155,7 @@ rebuild both site tables with `--assembly-dir .cache/assembly`, then
 > two-criterion conjunction and the 75.9%/99.5% site calibration are v1's and are kept here so the
 > change has something to be read against. The shipped score is **geometry-v2**.
 
-M3.1 is implemented as `reefinder/geometry.py`. It is the smallest thing §3.17 supports: the two
+M3.1 is implemented as `lantern/geometry.py`. It is the smallest thing §3.17 supports: the two
 descriptors that separated with zero overlap, no weights, and a set of refusals.
 
 **No weights.** A weighted sum of two descriptors fitted on three families would be three numbers
@@ -1304,7 +1311,7 @@ than an order of magnitude; bidentate count falls to **30 of 55**.
 > Ranked by overlap it is seventh. The *p*-value stays small because three of four families sit
 > high — it cannot see that the fourth is sitting in the calcium bulk. §3.17 derived the rule
 > *overlap count beats p-value at small n* from two near-misses; here it overturns a criterion
-> that was shipped in `reefinder/geometry.py` and passing its own reproduction test.
+> that was shipped in `lantern/geometry.py` and passing its own reproduction test.
 
 **What dropping it costs, measured both ways.** The second criterion was never buying specificity —
 CN ≥ 9 alone already admitted 0 of 55 calcium accessions, measured before this family existed. It
@@ -1832,7 +1839,7 @@ These are cheap, they are what unblocks the headline screen, and none of them ne
   At *n* = 3 families, **report the overlap count beside every threshold**: it is the number that
   survives a small sample, where a *p*-value is mostly a statement about *n* (§3.17).
 - ✅ Version it (`score_version`) and keep the sequence heuristic alongside, clearly labelled as
-  triage only. **Shipped** as `reefinder/geometry.py` and wired into the Structure tab, with
+  triage only. **Shipped** as `lantern/geometry.py` and wired into the Structure tab, with
   refusals for chelated sites, resolution worse than 2.5 Å, and negative calls made on an
   asymmetric unit. 9PI2's six Nd and two Ca sites split correctly inside one 0.99 Å crystal.
 - ✅ **Raising *n* to four removed a criterion (§3.19).** The honest *n* was three; `curate_corpus.py`
@@ -1937,7 +1944,7 @@ exists, with the known binder recovered as a control. **This is the result the p
 >    independently measured Hans-LanM La/Ca ratio of 8.8×10⁵ lands on exactly that figure — a real
 >    consistency check and the single best calibration anchor available.
 > 3. **A calibrated Ln-vs-Ca regressor is not feasible on public data, and the roadmap should stop
->    implying otherwise.** n=4 is a validation set, never a training set. REE-Finder is a
+>    implying otherwise.** n=4 is a validation set, never a training set. LANTERN is a
 >    *ranked-hypothesis generator* with a physics/propensity score. The 621-ortholog SpyCI-LAMBS
 >    dataset (*Nat Chem Biol* 2026) does not rescue this: it measures RE-vs-RE, calcium is never
 >    assayed, and all 621 are one 133-residue family. It is excellent for a *different* question —
@@ -1984,12 +1991,21 @@ explicitly marked unmeasured.
 - UI: candidate cards, 3D site inspector with donor atoms and distances labelled, evidence ledger,
   CSV/JSON export with versions and access dates.
 - Self-host 3Dmol.js rather than CDN-loading it, so the demo survives a hostile network. Current
-  release is **2.5.5**; `app.py:105` loads an unpinned `3Dmol.org/build/3Dmol-min.js`, which is
-  both unversioned and a third-party origin. Vendor it from npm (`3dmol@2.5.5`), or pin
-  `https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js` as an interim step.
+  release is **2.5.5**. The interim step has landed — `app.py` pins
+  `https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js` at `TMOL_SRC` — but it is still a
+  third-party origin; vendoring it from npm (`3dmol@2.5.5`) remains open.
+- **Provider independence — done.** `lantern/llm.py` adds OpenAI and Anthropic clients beside Argo,
+  selected by `LLM_PROVIDER` or in the sidebar, so the project is no longer gated on an
+  Argonne-internal host. This closes the "Argo account not provisioned" risk in §8 for the
+  narration layer. Two translation hazards were found and are covered by tests: Anthropic has **no
+  `system` role**, so the system prompt — the instruction forbidding invented affinities — must be
+  hoisted to the top-level `system` parameter or it is silently dropped; and OpenAI reports a
+  refusal as `content: null` with a sibling `refusal` field, which reads as an empty response
+  unless handled. Each client raises `LLMError` rather than returning a provider's error text as
+  prose, matching the Argo guard in §3.4.
 
 **Done when:** the agent completes a campaign end-to-end with an audit log mapping every claim to a
-tool call and a source, and degrades to the deterministic pipeline when Argo is unreachable.
+tool call and a source, and degrades to the deterministic pipeline when no provider is reachable.
 
 ### Stretch — Corpus C
 
@@ -2052,7 +2068,7 @@ parts are now contradicted by evidence:
 |---|---|---|
 | Curated biological Ln sites turn out to be ~20, not ~100 | M3 calibration is underpowered | Report confidence intervals; frame as hypothesis ranking, never prediction. Decide at M2 exit, where the real count is known. |
 | AlphaFold apo models do not represent the metal-bound conformation | M4 descriptors misleading on predicted structures | Validate the descriptor on holo structures first; gate on pLDDT; label predicted sites hypothetical. The plan's existing warning here is correct. |
-| Argo account not provisioned | No LLM layer | Everything through M5 is LLM-free by design. M6 degrades gracefully. |
+| Argo account not provisioned | No LLM layer | **Closed.** Everything through M5 is LLM-free by design, and M6's narration now runs on Argo, OpenAI or Anthropic (`lantern/llm.py`), so an unprovisioned Argonne account no longer removes the layer. |
 | The 188 homologs are near-identical to C5B164 | "Discovery" is trivial | Measure sequence identity spread at M4 entry; if clustered, report it honestly and widen to Corpus C. |
 | Lanthanide sites in the PDB are mostly artefacts | M2 yields little signal | This is why M2's curation step is the asset, not the download. |
 
@@ -2097,7 +2113,7 @@ curl -s 'https://rest.uniprot.org/uniprotkb/P0DP23.json?fields=ft_binding' \
 
 # §4 Corpus A, rebuilt end to end: discovers the ligand codes, then the entries.
 # Writes data/ree_pdb_entries.json and refuses to run if RCSB has added a
-# rare-earth component that reefinder/structure.py does not yet classify.
+# rare-earth component that lantern/structure.py does not yet classify.
 .venv/bin/python scripts/build_ree_corpus.py          # 27 components -> 636 entries
 
 # §4 the component discovery step on its own -- this is what found the missing Y1

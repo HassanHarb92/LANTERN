@@ -44,7 +44,7 @@ from io import StringIO                                    # noqa: E402
 
 from Bio.PDB.MMCIFParser import MMCIFParser                # noqa: E402
 
-from reefinder.structure import binding_neighborhood       # noqa: E402
+from lantern.structure import binding_neighborhood       # noqa: E402
 
 CORPUS = ROOT / ".cache" / "corpus"
 API = "https://metalpdb.cerm.unifi.it/api"
@@ -59,7 +59,7 @@ def metalpdb_sites(element: str) -> list[dict]:
     response = requests.get(
         API, params={"query": f"metal:{element}",
                      "columns": "donors,coordination,geometry,ligands"},
-        timeout=60, headers={"User-Agent": "REE-Finder/0.1 (research)"})
+        timeout=60, headers={"User-Agent": "LANTERN/0.1 (research)"})
     response.raise_for_status()
     return response.json()
 

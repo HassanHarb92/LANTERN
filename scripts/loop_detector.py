@@ -42,8 +42,8 @@ sys.path.insert(0, str(ROOT))
 
 from Bio.Data.IUPACData import protein_letters_3to1 as THREE_TO_ONE  # noqa: E402
 
-from reefinder.chemistry import EF_HAND_HINT          # noqa: E402
-from reefinder.structure import (ALL_METAL_CODES, REE_LIGAND_CODES,  # noqa: E402
+from lantern.chemistry import EF_HAND_HINT          # noqa: E402
+from lantern.structure import (ALL_METAL_CODES, REE_LIGAND_CODES,  # noqa: E402
                                  _parse, binding_neighborhood,
                                  cached_structure)
 from scripts.analyze_motifs import family_sequences   # noqa: E402

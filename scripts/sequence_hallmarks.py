@@ -27,7 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from reefinder.chemistry import (EF_HAND_HINT,          # noqa: E402
+from lantern.chemistry import (EF_HAND_HINT,          # noqa: E402
                                  EF_LOOP_INSTRUMENT, ef_hand_loops)
 from scripts.loop_detector import annotated_sets        # noqa: E402
 

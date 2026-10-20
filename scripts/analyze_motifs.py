@@ -26,9 +26,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from reefinder.catalog import load_reference          # noqa: E402
-from reefinder.chemistry import EF_HAND_HINT          # noqa: E402
-from reefinder.uniprot import search_proteins         # noqa: E402
+from lantern.catalog import load_reference          # noqa: E402
+from lantern.chemistry import EF_HAND_HINT          # noqa: E402
+from lantern.uniprot import search_proteins         # noqa: E402
 
 CACHE = ROOT / ".cache" / "lanm_family.json"
 
