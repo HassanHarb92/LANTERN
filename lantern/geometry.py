@@ -201,6 +201,14 @@ def score_site(site: dict, *, resolution_A: float | None = None,
 
     return {
         "score_version": SCORE_VERSION,
+        # Which site this call is about, carried by the call itself. score_sites
+        # returns its results re-ordered, so a caller zipping the input sites
+        # against the output calls labels every one of them wrongly -- and the
+        # mislabelling is invisible, because both lists are the right length and
+        # every call is individually correct. A call that names its own site
+        # cannot be attached to a different one.
+        "site_id": {"chain": site.get("chain"), "site": site.get("site"),
+                    "element": site.get("element")},
         "call": call,
         "call_reliable": reliable,
         "criteria_met": met if callable_site else 0,
@@ -238,7 +246,13 @@ def rank_key(call: dict) -> tuple:
 
 def score_sites(sites: list[dict], *, resolution_A: float | None = None,
                 coordinate_source: str | None = None) -> list[dict]:
-    """geometry-v2 over every site in one structure, best first."""
+    """geometry-v2 over every site in one structure, best first.
+
+    The returned calls are re-ordered, so they are NOT positionally aligned
+    with `sites`. Read `call["site_id"]` to find out which site a call belongs
+    to; zipping the two lists together silently mislabels every site whenever
+    the ranking changes the order, which is most of the time.
+    """
     calls = [score_site(s, resolution_A=resolution_A, coordinate_source=coordinate_source)
              for s in sites]
     return sorted(calls, key=rank_key, reverse=True)

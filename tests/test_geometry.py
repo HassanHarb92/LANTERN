@@ -285,3 +285,33 @@ def test_the_v1_conjunction_would_still_lose_the_fourth_family():
 
     leaked = int((cm["bidentate_carboxylates"] >= 1).sum())
     assert leaked >= 25, f"relaxing to >=1 should leak heavily, leaked {leaked}"
+
+
+class TestACallNamesItsOwnSite:
+    """score_sites re-orders, so position cannot identify a site."""
+
+    def test_score_sites_reorders_and_would_mislabel_a_zip(self):
+        from lantern.structure import ALL_METAL_CODES, binding_neighborhood, cached_structure
+        text, fmt = cached_structure("9PI2")
+        sites = binding_neighborhood(text, fmt, metals=ALL_METAL_CODES)
+        calls = score_sites(sites, resolution_A=resolution_from_coordinates(text, fmt),
+                            coordinate_source="asu")
+        assert len(calls) == len(sites)
+        zipped = [(s["chain"], s["site"]) for s in sites]
+        reported = [(c["site_id"]["chain"], c["site_id"]["site"]) for c in calls]
+        # Every call must name a real site, and the ordering must be the
+        # ranking's, not the input's.
+        assert set(reported) == set(zipped)
+        assert reported != zipped or len(set(zipped)) <= 1
+
+    def test_every_call_carries_the_identity_of_the_site_it_scored(self):
+        for cn, bidentate in ((9, 2), (6, 0)):
+            s = site(cn, bidentate)
+            call = score_site(s)
+            assert call["site_id"] == {"chain": s.get("chain"), "site": s.get("site"),
+                                       "element": s.get("element")}
+
+    def test_identity_survives_the_not_callable_path(self):
+        call = score_site({"chain": "B", "site": 404, "element": "Nd"})
+        assert call["call"] == "not callable"
+        assert call["site_id"] == {"chain": "B", "site": 404, "element": "Nd"}
