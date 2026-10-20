@@ -467,3 +467,37 @@ def test_cached_demo_structures_report_their_real_resolution():
         if cached is None:
             continue
         assert resolution_from_coordinates(*cached) == pytest.approx(expected)
+
+
+@CACHED
+def test_sites_and_donors_carry_coordinates_for_the_viewer():
+    """binding_neighborhood is the only producer of the xyz the viewer draws
+    from, and lantern/viewer.py raises rather than guessing when it is absent.
+    Nothing else pins that contract: the viewer's own tests build synthetic
+    site dicts, so dropping xyz here breaks the app with a green suite."""
+    text, fmt = cached_structure("8FNS")
+    sites = binding_neighborhood(text, fmt)
+    assert sites
+    for site in sites:
+        assert len(site["xyz"]) == 3
+        # Must be JSON-native: Bio.PDB returns numpy scalars, which pass every
+        # in-process check and then fail at json.dump() in the browser payload.
+        assert all(type(c) is float for c in site["xyz"])
+        assert site["donors"]
+        for donor in site["donors"]:
+            assert len(donor["xyz"]) == 3
+            assert all(type(c) is float for c in donor["xyz"])
+
+
+@CACHED
+def test_measured_distance_matches_the_carried_coordinates():
+    """The viewer labels a bond with distance_A but draws it between the two
+    xyz it was given. If those disagreed, the picture and the number would
+    disagree, which is the one failure the viewer is built to prevent."""
+    import math
+    text, fmt = cached_structure("8FNS")
+    for site in binding_neighborhood(text, fmt):
+        for donor in site["donors"]:
+            drawn = math.dist(site["xyz"], donor["xyz"])
+            assert abs(drawn - donor["distance_A"]) < 0.01, (
+                f"{site['element']}{site['site']} -> {donor['residue']}{donor['atom']}")

@@ -149,7 +149,8 @@ LANTERN/
 ├── data/assembly_counts.json     # Chains deposited vs chains in the biological assembly, per entry
 ├── data/curation_candidates.json # Four structured signals per entry, tiered for hand-curation
 ├── data/curation_verdicts.json   # The hand verdicts reached, with evidence; overrides the title pass
-├── tests/                        # Offline regression tests (234, no network)
+├── static/3Dmol-min.js           # Vendored 3dmol@2.5.5, served at /app/static; BSD-3-Clause
+├── tests/                        # Offline regression tests (245, no network)
 ├── docs/SCIENTIFIC_CONTRACT.md   # Scientific claims and evidence gates
 ├── ROADMAP.md                    # Verified state, defects, milestones M0-M6
 ├── IMPLEMENTATION_PLAN.md        # Earlier aspirational plan, superseded in part
@@ -188,7 +189,8 @@ pytest -q
   Build and validate: `python scripts/loop_detector.py`.
 - Interactive result table, workflow trace, downloadable JSON.
 - Structure retrieval with automatic mmCIF fallback (RCSB publishes no legacy `.pdb` for large
-  entries such as 6EK0, 7K00, 3J3Q); pinned 3Dmol.js viewer, which still needs CDN connectivity.
+  entries such as 6EK0, 7K00, 3J3Q); 3Dmol.js is vendored in `static/`, so the viewer needs no
+  network either.
 - **Binding-site visualiser** (`lantern/viewer.py`). Pick any deposited metal site and see the
   ion, a dashed bond to every first-shell donor, and the measured distance on each bond, with
   donors coloured by chemical class and toggles for residue labels, distances, waters and

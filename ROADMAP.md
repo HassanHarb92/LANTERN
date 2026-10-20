@@ -2002,14 +2002,22 @@ explicitly marked unmeasured.
   - *One ion radius for every element.* Ln³⁺ and Ca²⁺ ionic radii differ by hundredths of an
     ångström — that near-identity is the selectivity problem — so drawing them to scale would
     imply a distinction the chemistry does not offer. Colour carries identity instead.
-  Coverage: `tests/test_viewer.py` (42 tests) pins the spec, and, where `node` is installed,
+  Coverage: `tests/test_viewer.py` (51 tests) pins the spec, and, where `node` is installed,
   executes the generated JavaScript against a stubbed `$3Dmol` and asserts on the shapes drawn
   — a blank viewer raises nothing on the Python side, so it is the only layer that can catch it.
-- Self-host 3Dmol.js rather than CDN-loading it, so the demo survives a hostile network. Current
-  release is **2.5.5**. The interim step has landed — `lantern/viewer.py` pins
-  `https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js` at `TMOL_SRC`, and both scenes
-  now say so on the canvas when the script fails to load rather than leaving a black rectangle
-  — but it is still a third-party origin; vendoring it from npm (`3dmol@2.5.5`) remains open.
+- **Self-hosted 3Dmol.js — done.** `static/3Dmol-min.js` is `3dmol@2.5.5` from the npm tarball,
+  verified byte-for-byte against the registry's published sha512 and against what the CDN serves,
+  BSD-3-Clause with the licence alongside it. `.streamlit/config.toml` enables static serving and
+  `viewer.tmol_sources()` makes the local copy the primary source, so the last externally-hosted
+  asset is gone and the whole core workflow — reference set, cached structures, coordination
+  analysis, viewer — runs with no network at all. The CDN is kept as a *browser-side* fallback
+  rather than deleted: static serving is a config option, and someone running `streamlit run`
+  from another directory will not pick up our config, so trying local first and the CDN second
+  means the viewer works if either is available instead of swapping one single point of failure
+  for another. `tests/test_viewer.py` runs the fallback for real — denies the page `$3Dmol`,
+  lets it request the CDN, then supplies the library the way a late script would and asserts the
+  full scene appears — because a fallback that silently fails to draw looks exactly like one
+  that was never needed.
 - **Provider independence — done.** `lantern/llm.py` adds OpenAI and Anthropic clients beside Argo,
   selected by `LLM_PROVIDER` or in the sidebar, so the project is no longer gated on an
   Argonne-internal host. This closes the "Argo account not provisioned" risk in §8 for the

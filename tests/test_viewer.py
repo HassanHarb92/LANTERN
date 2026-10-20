@@ -12,8 +12,9 @@ import pytest
 
 from lantern.structure import donor_class
 from lantern.viewer import (DONOR_COLORS, DONOR_ORDER, OTHER_METAL_COLOR,
-                            RARE_EARTH_COLOR, metal_color, overview_html,
-                            site_viewer_html, viewer_spec)
+                            RARE_EARTH_COLOR, TMOL_SRC, VENDORED_TMOL_PATH,
+                            VENDORED_TMOL_URL, metal_color, overview_html,
+                            site_viewer_html, tmol_sources, viewer_spec)
 
 
 def make_site(**overrides) -> dict:
@@ -308,3 +309,125 @@ class TestTheBrowserDrawsWhatTheSpecSays:
                               capture_output=True, text=True, timeout=60)
         assert done.returncode == 0, done.stderr[:2000]
         assert done.stdout.strip() == "1"
+
+
+class TestTheViewerSurvivesAMissingNetwork:
+    """3Dmol was the last externally-hosted asset the demo needed. These pin
+    that it is vendored, that the page asks for the local copy first, and
+    that losing either source alone still leaves a working viewer."""
+
+    def test_the_vendored_library_is_present_and_is_really_3dmol(self):
+        assert VENDORED_TMOL_PATH.is_file(), "static/3Dmol-min.js is missing"
+        blob = VENDORED_TMOL_PATH.read_bytes()
+        # Size guards against a truncated or placeholder file; the marker
+        # guards against vendoring something that is not 3Dmol at all.
+        assert len(blob) > 400_000
+        assert b"$3Dmol" in blob or b"3Dmol" in blob
+
+    def test_the_licence_travels_with_it(self):
+        licence = VENDORED_TMOL_PATH.with_name("3Dmol-LICENSE.txt")
+        assert licence.is_file(), "BSD-3-Clause requires the licence be distributed"
+        assert "BSD-3-Clause" in licence.read_text()
+
+    def test_sources_prefer_the_vendored_copy_and_keep_the_cdn_behind_it(self):
+        assert tmol_sources() == (VENDORED_TMOL_URL, TMOL_SRC)
+
+    def test_the_page_requests_the_local_copy_first(self):
+        primary, fallback = tmol_sources()
+        html = site_viewer_html("ATOM", "pdb", make_site(),
+                                script_src=primary, fallback_src=fallback)
+        assert f'<script src="{VENDORED_TMOL_URL}">' in html
+        # The CDN appears only as the fallback assigned in JS, never as a
+        # second blocking script tag.
+        assert html.count("<script src=") == 1
+
+    def test_no_fallback_configured_leaves_the_single_source_behaviour(self):
+        html = site_viewer_html("ATOM", "pdb", make_site())
+        assert "createElement('script')" not in html
+        assert "could not be loaded" in html
+
+
+# A fallback that silently fails to draw looks exactly like one that was never
+# needed, so run it: deny the page $3Dmol, let it ask for the CDN, then supply
+# $3Dmol the way a late-arriving script would and check the scene appears.
+FALLBACK_HARNESS = """
+const CALLS = {sphere: [], cylinder: [], label: [], zoomTo: 0, render: 0};
+const BUTTONS = [], REQUESTED = [];
+function node(tag) {
+  return {tag, style: {cssText: ''}, children: [], textContent: '', innerHTML: '',
+    appendChild(c) { this.children.push(c); if (c.tag === 'button') BUTTONS.push(c); return c; }};
+}
+const nodes = {};
+globalThis.document = {
+  getElementById(id) { return nodes[id] || (nodes[id] = node('div')); },
+  createElement(tag) { return node(tag); },
+  createTextNode(t) { return {tag: '#text', textContent: t}; },
+  head: {appendChild(s) { REQUESTED.push(s); return s; }},
+};
+function arrive() {
+  globalThis.$3Dmol = {createViewer: () => ({
+    addModel() {}, setStyle() {}, addStyle() {}, zoom() {},
+    addSphere(s) { CALLS.sphere.push(s); },
+    addCylinder(c) { CALLS.cylinder.push(c); },
+    addLabel(text) { CALLS.label.push(text); },
+    removeAllShapes() { CALLS.sphere = []; CALLS.cylinder = []; },
+    removeAllLabels() { CALLS.label = []; },
+    zoomTo() { CALLS.zoomTo++; }, render() { CALLS.render++; },
+  })};
+}
+"""
+
+
+def run_without_3dmol(html: str, then: str) -> dict:
+    """Run the scene with no $3Dmol defined, then `then`, and report."""
+    bodies = [b for b in re.findall(r"<script[^>]*>(.*?)</script>", html, re.S) if b.strip()]
+    assert len(bodies) == 1, f"expected one inline script, found {len(bodies)}"
+    done = subprocess.run(["node", "--input-type=module", "-e",
+                           FALLBACK_HARNESS + bodies[0] + then],
+                          capture_output=True, text=True, timeout=60)
+    assert done.returncode == 0, done.stderr[:2000]
+    return json.loads(done.stdout)
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
+class TestTheCdnFallbackActuallyDraws:
+
+    def test_it_asks_the_cdn_for_the_pinned_build(self):
+        out = run_without_3dmol(
+            site_viewer_html("ATOM", "pdb", make_site(),
+                             script_src=VENDORED_TMOL_URL, fallback_src=TMOL_SRC),
+            "console.log(JSON.stringify({asked: REQUESTED.map(s => s.src),"
+            " drawn: CALLS.sphere.length}));")
+        assert out["asked"] == [TMOL_SRC]
+        assert out["drawn"] == 0, "nothing should be drawn before the script arrives"
+
+    def test_the_scene_appears_once_the_fallback_loads(self):
+        out = run_without_3dmol(
+            site_viewer_html("ATOM", "pdb", make_site(),
+                             script_src=VENDORED_TMOL_URL, fallback_src=TMOL_SRC),
+            "arrive(); REQUESTED[0].onload();"
+            "console.log(JSON.stringify({spheres: CALLS.sphere.length,"
+            " bonds: CALLS.cylinder.length, buttons: BUTTONS.length,"
+            " rendered: CALLS.render > 0}));")
+        # Same scene the happy path draws: the ion plus its three donors.
+        assert out["spheres"] == 4
+        assert out["bonds"] == 3
+        assert out["buttons"] == 5
+        assert out["rendered"] is True
+
+    def test_a_dead_fallback_explains_itself_instead_of_going_blank(self):
+        out = run_without_3dmol(
+            site_viewer_html("ATOM", "pdb", make_site(),
+                             script_src=VENDORED_TMOL_URL, fallback_src=TMOL_SRC),
+            "REQUESTED[0].onerror();"
+            "console.log(JSON.stringify({html: nodes['lantern-site'].innerHTML}));")
+        assert "could not be loaded" in out["html"]
+        assert "computed server-side" in out["html"]
+
+    def test_the_overview_falls_back_too(self):
+        out = run_without_3dmol(
+            overview_html("ATOM", "pdb", [make_site()],
+                          script_src=VENDORED_TMOL_URL, fallback_src=TMOL_SRC),
+            "arrive(); REQUESTED[0].onload();"
+            "console.log(JSON.stringify({spheres: CALLS.sphere.length}));")
+        assert out["spheres"] == 1

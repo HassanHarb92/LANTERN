@@ -14,6 +14,7 @@ between parsers -- the shell still draws correctly and the view degrades to
 less context rather than to a wrong picture.
 """
 import json
+from pathlib import Path
 
 from .structure import REE_LIGAND_CODES, donor_class
 
@@ -57,6 +58,31 @@ DONOR_ORDER = ("carboxylate", "backbone_carbonyl", "sidechain_amide",
                "hydroxyl", "water", "ligand", "other")
 
 TMOL_SRC = "https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js"
+# Vendored copy, byte-identical to the npm tarball for 3dmol@2.5.5 (verified
+# against the registry's published sha512) and served by Streamlit from
+# ./static when server.enableStaticServing is on, which .streamlit/config.toml
+# sets. BSD-3-Clause; the licence travels with it as static/3Dmol-LICENSE.txt.
+VENDORED_TMOL_PATH = Path(__file__).resolve().parent.parent / "static" / "3Dmol-min.js"
+VENDORED_TMOL_URL = "/app/static/3Dmol-min.js"
+
+
+def tmol_sources() -> tuple[str, str]:
+    """Where the page should load 3Dmol from, as (primary, fallback).
+
+    Prefer the vendored copy, so a demo on a hostile or absent network still
+    draws. Keep the CDN as a browser-side fallback rather than dropping it:
+    static serving is a config option, and someone running `streamlit run`
+    from another directory will not pick up our config.toml. Trying the local
+    copy first and the CDN second means the viewer works if *either* is
+    available, instead of trading one single point of failure for another.
+
+    Returns an empty fallback when the vendored file is missing, which leaves
+    the CDN as the only source and the existing "could not be loaded" message
+    as the failure mode.
+    """
+    if VENDORED_TMOL_PATH.is_file():
+        return VENDORED_TMOL_URL, TMOL_SRC
+    return TMOL_SRC, ""
 
 
 def metal_color(element: str) -> str:
@@ -166,8 +192,30 @@ def _js(value) -> str:
             .replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026"))
 
 
+def _boot(fallback_src: str) -> str:
+    """JS that runs `start()` as soon as $3Dmol exists, or `fail()` if it never does.
+
+    The <script src> above has already resolved by the time this runs -- a
+    classic script tag blocks the parser -- so `typeof $3Dmol` here is a
+    reliable test of whether the primary source worked, and appending the
+    fallback only on the failing path costs nothing on the happy one.
+    """
+    if not fallback_src:
+        return "(typeof $3Dmol === 'undefined') ? fail() : start();"
+    return f"""if (typeof $3Dmol !== 'undefined') {{
+    start();
+  }} else {{
+    const s = document.createElement('script');
+    s.src = {_js(fallback_src)};
+    s.onload = function () {{ (typeof $3Dmol === 'undefined') ? fail() : start(); }};
+    s.onerror = fail;
+    document.head.appendChild(s);
+  }}"""
+
+
 def overview_html(coordinate_text: str, fmt: str, sites: list[dict] | None = None, *,
-                  height: int = 460, script_src: str = TMOL_SRC) -> str:
+                  height: int = 460, script_src: str = TMOL_SRC,
+                  fallback_src: str = "") -> str:
     """The whole fold, with every deposited metal marked and named.
 
     The orientation view. It answers "how many sites are there and where",
@@ -183,11 +231,11 @@ def overview_html(coordinate_text: str, fmt: str, sites: list[dict] | None = Non
 <script>
 (function () {{
   const host = document.getElementById('lantern-overview');
-  if (typeof $3Dmol === 'undefined') {{
+  function fail() {{
     host.innerHTML = '<div style="padding:18px;color:#f0b5a8;font:13px -apple-system,sans-serif">'
-      + '3Dmol.js could not be loaded from the CDN, so the structure cannot be drawn.</div>';
-    return;
+      + '3Dmol.js could not be loaded, so the structure cannot be drawn.</div>';
   }}
+  function start() {{
   const viewer = $3Dmol.createViewer(host, {{backgroundColor: {_js(BACKGROUND)}}});
   viewer.addModel({_js(coordinate_text)}, {_js(fmt)});
   viewer.setStyle({{}}, {{cartoon: {{color: 'spectrum', opacity: 0.85}}}});
@@ -201,14 +249,22 @@ def overview_html(coordinate_text: str, fmt: str, sites: list[dict] | None = Non
   }});
   viewer.zoomTo();
   viewer.render();
+  }}
+
+  {_boot(fallback_src)}
 }})();
 </script>"""
 
 
 def site_viewer_html(coordinate_text: str, fmt: str, site: dict, *,
                      call: dict | None = None, height: int = 480,
-                     script_src: str = TMOL_SRC) -> str:
-    """A self-contained 3Dmol scene for one binding site."""
+                     script_src: str = TMOL_SRC, fallback_src: str = "") -> str:
+    """A self-contained 3Dmol scene for one binding site.
+
+    `fallback_src` is tried in the browser if `script_src` does not define
+    $3Dmol, so a page served the vendored copy still draws when static
+    serving is off. See `tmol_sources`.
+    """
     spec = viewer_spec(site, call=call)
     return f"""<div id="lantern-site" style="position:relative;width:100%;height:{height}px;
  background:{BACKGROUND};border-radius:12px;overflow:hidden"></div>
@@ -224,15 +280,15 @@ def site_viewer_html(coordinate_text: str, fmt: str, site: dict, *,
   const FMT = {_js(fmt)};
   const host = document.getElementById('lantern-site');
 
-  if (typeof $3Dmol === 'undefined') {{
+  function fail() {{
     // Say so rather than leaving a black rectangle: the numbers below the
-    // viewer are computed server-side and remain valid without the CDN.
+    // viewer are computed server-side and remain valid without 3Dmol.
     host.innerHTML = '<div style="padding:18px;color:#f0b5a8;font:13px -apple-system,sans-serif">'
-      + '3Dmol.js could not be loaded from the CDN, so the structure cannot be drawn. '
+      + '3Dmol.js could not be loaded, so the structure cannot be drawn. '
       + 'The coordination numbers and distances below are computed server-side and are unaffected.</div>';
-    return;
   }}
 
+  function start() {{
   const viewer = $3Dmol.createViewer(host, {{backgroundColor: SPEC.background}});
   viewer.addModel(COORDS, FMT);
   const state = {{residues: true, distances: true, waters: true, cartoon: true}};
@@ -337,5 +393,8 @@ def site_viewer_html(coordinate_text: str, fmt: str, site: dict, *,
 
   draw();
   frame();
+  }}
+
+  {_boot(fallback_src)}
 }})();
 </script>"""

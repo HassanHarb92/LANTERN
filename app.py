@@ -15,7 +15,11 @@ from lantern.structure import (ALL_METAL_CODES, fetch_structure, binding_neighbo
                                  resolution_from_coordinates)
 from lantern.uniprot import TOPICS
 from lantern.viewer import (RARE_EARTH_ELEMENTS, overview_html, site_viewer_html,
-                              viewer_spec)
+                              tmol_sources, viewer_spec)
+
+# Vendored 3Dmol first, CDN behind it. Resolved once: it is a file-existence
+# check, and the answer cannot change while the process runs.
+TMOL_PRIMARY, TMOL_FALLBACK = tmol_sources()
 
 load_dotenv()
 st.set_page_config(page_title="LANTERN · Protein Discovery", page_icon="🧬", layout="wide")
@@ -194,14 +198,16 @@ with tab2:
                               help="Pick a metal site to see its first coordination shell, "
                                    "or keep the whole fold for orientation.")
         if chosen == 0:
-            embed(overview_html(text, fmt, sites), 480)
+            embed(overview_html(text, fmt, sites, script_src=TMOL_PRIMARY,
+                                fallback_src=TMOL_FALLBACK), 480)
             if sites:
                 st.caption("Every deposited metal is marked and named. Select one above to see "
                            "the donor atoms it binds and the distance to each.")
         else:
             site = sites[chosen - 1]
             call = calls[chosen - 1] if calls else None
-            embed(site_viewer_html(text, fmt, site, call=call), 620)
+            embed(site_viewer_html(text, fmt, site, call=call, script_src=TMOL_PRIMARY,
+                                   fallback_src=TMOL_FALLBACK), 620)
             st.caption(f"**{site['element']} {site['site']}, chain {site['chain']}** — "
                        f"{viewer_spec(site)['summary']}. Dashed bonds run from the ion to each "
                        "O/N/S atom within 3.2 Å; the view is cropped to that first shell, so "
