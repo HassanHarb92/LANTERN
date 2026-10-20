@@ -5,7 +5,12 @@ guarantees are covered by tests/test_discover.py. This exists because the app
 is the product, and the only way to know the question box, the tabs, the
 viewer and the narration still work together is to click them.
 
-    .venv/bin/python scripts/drive_app.py ["a question"]
+    .venv/bin/python scripts/drive_app.py ["a question"] [--live]
+
+--live flips the sidebar toggle, which is the path that reaches UniProt and
+RCSB. Worth driving separately: the offline path reads structures from the
+bundled cache, so it cannot tell you whether a searched protein arrives with
+a structure attached to it.
 """
 import pathlib
 import sys
@@ -17,14 +22,19 @@ from streamlit.testing.v1 import AppTest
 # working directory, so this script would otherwise look for scripts/app.py.
 APP = str(pathlib.Path(__file__).resolve().parent.parent / "app.py")
 
-QUESTION = sys.argv[1] if len(sys.argv) > 1 else (
-    "what proteins should I try for capturing Ce3+")
+ARGS = [a for a in sys.argv[1:] if a != "--live"]
+LIVE = "--live" in sys.argv
+QUESTION = ARGS[0] if ARGS else "what proteins should I try for capturing Ce3+"
 FINISHED = ".!?)*`\"'"
 
 
 def main() -> int:
     load_dotenv()
     app = AppTest.from_file(APP, default_timeout=300).run()
+
+    print(f"live search: {LIVE}")
+    if LIVE:
+        app.toggle[0].set_value(True).run()
 
     app.text_input(key="question").set_value(QUESTION).run()
     app.button[0].click().run()
@@ -41,6 +51,12 @@ def main() -> int:
           f" of {record['shortlist']['considered']}")
     print(f"evidence   : {len(record['evidence'])} structure(s), "
           f"{sum(e['site_count'] for e in record['evidence'])} site(s)")
+    for ev in record["evidence"]:
+        choice = ev.get("structure_choice")
+        print(f"  {ev['accession']:12} {ev['structure_kind']:9} "
+              f"{ev.get('pdb_id') or '—':6} {ev['site_count']:2} site(s)"
+              + (f"  (chose 1 of {len(choice['deposited'])} deposited)"
+                 if choice else ""))
     print(f"rendered   : {len(app.tabs)} tab(s), {len(app.dataframe)} table(s), "
           f"{len(app.selectbox)} selectbox(es)")
 

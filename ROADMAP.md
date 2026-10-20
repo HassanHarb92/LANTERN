@@ -2,7 +2,7 @@
 
 *Lanthanide-Aware Network for Targeted Exploration and Recognition in Nature*
 
-**Status date:** 2026-10-19
+**Status date:** 2026-10-20 (§3.20; everything above it dated 2026-10-19)
 **Method:** every claim below was verified by running the code in this repo and querying the live
 APIs it depends on. Commands are reproducible; numbers are not estimates.
 **Companion docs:** `IMPLEMENTATION_PLAN.md` (prior aspirational plan — see §7 for what to retire),
@@ -1469,6 +1469,56 @@ families is the current state of the evidence, not a result.
 
 Reproduce: `pytest tests/test_geometry.py -v`; refresh the shortlist with
 `python -I scripts/curate_corpus.py`.
+
+### 3.20 Live search threw away the structures, so turning it on cost you the measurement
+
+**Found 2026-10-20, fixed the same day.** `uniprot.FIELDS` requested
+`accession,protein_name,organism_name,sequence`. UniProt returns
+`uniProtKBCrossReferences` only when `xref_pdb` is among the requested fields, so every live hit
+arrived with `pdb_id=None`. `discover._evidence_for` reads exactly that attribute, so every live
+candidate fell through to:
+
+> No deposited structure and no prediction, so the coordination number is unknown. The design
+> rules above are sequence-only.
+
+Measured before the fix, on the canonical question with the sidebar toggle on:
+
+| | shortlist | structures measured | sites |
+|---|---|---|---|
+| Offline (bundled set) | 2 of 6 | 2 | 18 |
+| **Live search on** | 1 of 1 | **0** | **0** |
+
+The protein the live search returns is C5B164 — lanmodulin, the right answer. UniProt's own record
+for it cross-references **8FNS at 1.01 Å**, the same file `data/structures/` already holds and the
+offline path already measures. The platform had the protein, had the structure, and said the
+coordination number was unknown. Not a false claim — a false *unknown*, which is the same fault
+pointing the other way: the toggle that advertises more proteins silently removed the half of the
+loop that measures anything.
+
+**Fix.** `xref_pdb` is requested, `pdb_cross_references` parses the id, method and resolution out
+of each cross-reference, and `choose_structure` picks one. Method and resolution come from the
+cross-reference itself, so this costs no extra request per hit.
+
+**The choice is the part that needed care.** An entry can list several structures and the page
+shows one. The rule is highest-resolution X-ray, because geometry-v2 weighs how far to trust a
+call against the resolution of the entry it measured — so the sharpest coordinates make the
+measurement downstream worth the most. That is *not* a relevance judgement: a cross-reference does
+not say which metal is in which file, and a 2.5 Å entry holding the user's lanthanide beats a
+1.0 Å apo one for the question actually being asked. Entries stating no resolution (NMR, 6MI5
+here) are not ranked against those that do — treating `None` as a number sorts them either first
+or last and neither is a measurement — so they are the fallback, taken in PDB-id order, and the
+reason string says that choice is arbitrary. Every unmeasured structure stays in the record and is
+listed on the page under what was not measured.
+
+After the fix, same question, toggle on: **8FNS measured, 4 Nd sites, all CN 9–10, all called
+lanthanide-like**, with "chose 1 of 2 deposited" disclosed. Reproduce:
+`pytest tests/test_uniprot.py tests/test_discover.py -v`, or drive the page with
+`python scripts/drive_app.py --live`.
+
+**What this does not fix.** The default live corpus is `lanmodulin`, which is one UniProt record
+(§3.2) — so live search still returns *fewer* candidates than the bundled six, and `lanm-family`
+remains the only route to the other 188. Retrieval breadth is M4's problem; this entry is only
+about not discarding what retrieval already found.
 
 ---
 

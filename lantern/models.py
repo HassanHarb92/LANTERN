@@ -8,6 +8,12 @@ class Protein:
     organism: str
     sequence: str = ""
     pdb_id: Optional[str] = None
+    # Every structure UniProt cross-references for this entry, as
+    # {id, method, resolution_A}. `pdb_id` is whichever one
+    # uniprot.choose_structure picked; the rest are kept so a page can say
+    # what was deposited and not measured, instead of presenting one
+    # structure as though it were the only one.
+    pdb_options: list[dict] = field(default_factory=list)
     source: str = "curated"
     evidence: str = "unreviewed hypothesis"
     source_url: str = ""

@@ -70,7 +70,7 @@ class TestEachStructuresWidgetsBelongToThatStructure:
     the options render correctly, because Streamlit formats them inside the
     selectbox call, and every later call is wrong. It is also an IndexError
     whenever an earlier structure has more sites than the last one -- 8FNR has
-    15 and 8FNS has 5, so the canonical question is already such a case."""
+    14 and 8FNS has 4, so the canonical question is already such a case."""
 
     def test_each_site_picker_formats_with_its_own_structures_labels(self, page):
         pickers = [box for box in page.selectbox if box.label == "View"]

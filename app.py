@@ -98,7 +98,8 @@ with st.sidebar:
     live = st.toggle(
         "Search UniProt live", value=False,
         help="Off: screen the six bundled reference sequences offline. On: "
-             "pull the family named in your question from UniProt/InterPro.")
+             "pull the family named in your question from UniProt/InterPro "
+             "and measure whichever structures those entries cross-reference.")
     allow_predictions = st.toggle(
         "Fall back to AlphaFold", value=False,
         help="Only used when a candidate has no deposited structure. A "
@@ -318,6 +319,26 @@ for tab, ev in zip(tabs, record["evidence"]):
         y.metric("Resolution (Å)", ev["resolution_A"] or "—")
         z.metric("Metal sites", ev["site_count"])
 
+        # A live search can find several deposited structures for one
+        # accession and this page measures exactly one of them. Saying which
+        # rule picked it, and naming what it passed over, is what keeps the
+        # numbers below from resting on a choice the user never saw.
+        choice = ev.get("structure_choice")
+        if choice:
+            st.caption(choice["reason"])
+            with st.expander(f"{len(choice['not_measured'])} other deposited "
+                             f"structure(s) for {ev['accession']}, not measured"):
+                st.dataframe(pd.DataFrame([{
+                    "PDB": o["id"], "Method": o["method"],
+                    "Resolution (Å)": o["resolution_A"] or "—",
+                    "Chains": o["chains"],
+                } for o in choice["not_measured"]]),
+                    width="stretch", hide_index=True)
+                st.caption("Listed from the UniProt cross-references, which "
+                           "state the method and resolution but not which "
+                           "metal each file holds. Measuring one of these "
+                           "instead could give different sites.")
+
         raw_sites = [s["raw"] for s in sites]
         views = ["Whole structure"] + [
             f"{s['deposited_element']} {s['site']} · chain {s['chain']} "
@@ -337,7 +358,7 @@ for tab, ev in zip(tabs, record["evidence"]):
         # read the last structure's list -- harmless while Streamlit calls it
         # inside this line, wrong the moment anything calls it later, and an
         # IndexError when an earlier structure has more sites than the last
-        # one (8FNR has 15, 8FNS has 5).
+        # one (8FNR has 14 and 8FNS 4, so the canonical question is that case).
         chosen = st.selectbox(
             "View", range(len(views)), index=opening,
             format_func=lambda i, v=views: v[i], key=f"view_{ev['accession']}",

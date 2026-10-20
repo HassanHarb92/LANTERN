@@ -60,7 +60,7 @@ from .ions import LANTHANIDES_III, rank_by_size_match, size_match
 from .plan import parse_question
 from .structure import (ALL_METAL_CODES, binding_neighborhood, cached_structure,
                         fetch_structure, resolution_from_coordinates)
-from .uniprot import search_proteins
+from .uniprot import choose_structure, search_proteins
 
 # Elements that are a lanthanide in a coordinate file. Yttrium is not one
 # chemically but sits with them in every site table this project uses.
@@ -267,6 +267,32 @@ def _prediction_evidence(accession: str, sequence: str, *, timeout: int) -> dict
     }
 
 
+def _structure_choice(protein, measured: str) -> dict | None:
+    """What else was deposited for this protein, and why this one was measured.
+
+    A live search can turn up several structures for one accession, and the
+    page shows exactly one of them. Choosing silently would make the tightest
+    claim on the page -- a coordination number measured from coordinates --
+    rest on a pick the user never saw, so the rule and the structures it
+    passed over travel with the measurement.
+
+    None when there was no choice to make: one deposited structure, or a
+    curated record that names its own.
+    """
+    options = list(getattr(protein, "pdb_options", None) or [])
+    if len(options) < 2:
+        return None
+    chosen, reason = choose_structure(options)
+    return {
+        "measured": measured,
+        "reason": reason,
+        "agrees_with_the_rule": (chosen or "").upper() == (measured or "").upper(),
+        "deposited": options,
+        "not_measured": [o for o in options
+                         if o["id"].upper() != (measured or "").upper()],
+    }
+
+
 def _evidence_for(candidate: dict, protein, target: str, *, live: bool,
                   allow_predictions: bool, timeout: int) -> dict:
     """Whatever structural evidence can be had for one candidate, or why none."""
@@ -287,6 +313,8 @@ def _evidence_for(candidate: dict, protein, target: str, *, live: bool,
         if coords is not None:
             text, fmt = coords
             evidence = _structure_evidence(target, text, fmt, pdb_id.upper())
+            evidence["structure_choice"] = _structure_choice(protein,
+                                                             pdb_id.upper())
             evidence["notes"] = notes
             return evidence
 

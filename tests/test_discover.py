@@ -244,6 +244,71 @@ class TestAnUnmeasurableCandidateIsNotAPassingOne:
             assert phrase in PREDICTION_HAS_NO_METAL
 
 
+# A protein shaped the way a live UniProt hit now arrives: the structures the
+# entry cross-references, and one of them chosen. C5B164's real two, so the
+# chosen file is the 8FNS already in data/structures/ and nothing here needs a
+# network.
+PASSES_EVERY_RULE = ("DAAAAAAIAAAE" + "G" * 12) * 3 + "DAAAAAAIAAAE"
+C5B164_OPTIONS = [{"id": "6MI5", "method": "NMR", "resolution_A": None,
+                   "chains": "X=23-133"},
+                  {"id": "8FNS", "method": "X-ray", "resolution_A": 1.01,
+                   "chains": "A=29-133"}]
+
+
+def live_shaped(pdb_id: str = "8FNS") -> Protein:
+    return Protein(accession="C5B164", name="Lanmodulin", organism="o",
+                   sequence=PASSES_EVERY_RULE, pdb_id=pdb_id,
+                   pdb_options=C5B164_OPTIONS)
+
+
+@pytest.fixture(scope="module")
+def measured():
+    """One live-shaped candidate, measured once and shared. Read-only."""
+    return answer(CANONICAL, proteins=[live_shaped()])["evidence"][0]
+
+
+class TestMeasuringOneStructureOfSeveralSaysSo:
+    """A live search finds every structure UniProt lists for an accession and
+    this page measures exactly one. The coordination numbers below it are the
+    tightest claim the platform makes, so the rule that picked the file they
+    came from -- and the files it passed over -- travel with them."""
+
+    def test_the_structure_is_actually_measured(self, measured):
+        """The point of the whole change: a live-shaped record gets sites."""
+        assert measured["structure_kind"] == "deposited"
+        assert measured["site_count"] > 0
+
+    def test_it_names_the_rule_that_picked_the_file(self, measured):
+        reason = measured["structure_choice"]["reason"]
+        assert "8FNS" in reason and "1.01" in reason
+
+    def test_it_names_what_it_did_not_measure(self, measured):
+        skipped = measured["structure_choice"]["not_measured"]
+        assert [o["id"] for o in skipped] == ["6MI5"]
+
+    def test_the_measured_structure_is_not_listed_as_skipped(self, measured):
+        """Rendered as "other structures, not measured", including the one on
+        screen would state the opposite of the truth."""
+        assert "8FNS" not in [o["id"]
+                              for o in measured["structure_choice"]["not_measured"]]
+
+    def test_it_says_when_the_file_measured_is_not_the_one_the_rule_picks(self):
+        """pdb_id can come from somewhere other than the rule -- a curated
+        record, or a hand-set field. Silently printing the rule's reasoning
+        over a different file would explain a choice that was not made."""
+        record = answer(CANONICAL, proteins=[live_shaped("8FNR")])
+        assert record["evidence"][0]["structure_choice"]["agrees_with_the_rule"] is False
+
+    def test_a_curated_record_claims_no_choice_was_made(self, run):
+        """The bundled set names one structure per protein and lists no
+        alternatives. An empty "others" expander would imply it had looked."""
+        assert all(ev.get("structure_choice") is None for ev in run["evidence"])
+
+    def test_the_download_keeps_the_choice(self):
+        record = exportable(answer(CANONICAL, proteins=[live_shaped()]))
+        assert record["evidence"][0]["structure_choice"]["reason"]
+
+
 class TestVerificationCanBeSkippedButNotFaked:
 
     def test_verify_false_returns_a_shortlist_with_no_evidence(self):
