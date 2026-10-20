@@ -480,27 +480,46 @@ citing 615 is wrong) state three "hallmarks of a LanM", quoted verbatim:
 > resulting in an unusual three-helix bundle architecture with the metal-binding sites on the
 > periphery. Third, at least one EF hand contains **proline at the second position**."
 
-Hallmarks 2 and 3 are pure sequence features, require no structure, and the current score uses
-neither. Measured on the reference set (loop-start period; the paper's "12–13 residue separation" is
-the inter-loop linker, i.e. period minus the 12-residue loop):
+Hallmarks 2 and 3 are pure sequence features and require no structure. **Hallmark 2 is now the
+third rule in `lantern/design.py`** (`MAX_ADJACENT_GAP_AA = 14`, strictly less); hallmark 3 is still
+unused. The paper's "12–13 residue separation" is the inter-loop *linker* — loop-start period minus
+the 12-residue loop — and that is the quantity `ef_hand_layout` returns, through
+`EF_LOOP_INSTRUMENT` and never through `EF_HAND_HINT`. Re-measured on the reference set:
 
-| Protein | Loop starts | Periods | Verdict |
+| Protein | Loop starts | Linkers | Rule 3 |
 |---|---|---|---|
-| `C5B164` Mex-LanM | 35, 59, 84, 108 | **24, 25, 24** | LanM-like |
-| `A0A4V2JDD3` Hans-LanM | 34, 58, 83 | **24, 25** | LanM-like |
-| `P02585` troponin C | 104, 140 | **36** | Ca-like |
-| `P69905`, `P00766` negatives | — | — | no loops |
+| `C5B164` Mex-LanM | 35, 59, 84, 108 | **12, 13, 12** | pass |
+| `A0A4V2JDD3` Hans-LanM | 34, 58, 83, 107 | **12, 13, 12** | pass |
+| `P0DP23` calmodulin-1 | 21, 57, 94, 130 | **24, 25, 24** | fail |
+| `P02585` troponin C | 28, 64, 104, 140 | **24, 28, 24** | fail |
+| `P69905`, `P00766` negatives | — | — | fail (no loops) |
 
-**This separates both lanmodulins from the calcium protein, including the one the current score
-ranks 4th of 6.** Hallmark 3 corroborates: Pro sits at position 2 in `NPDGDTTLESGE` and in all three
-Mex-LanM loops. Across the 189 family members the median period is **24.0**.
+Both lanmodulins land on **12–13** and both calcium proteins on **24–28**: the paper's own contrast
+("12–13 … rather than the typical ≈25"), reproduced on this set with no threshold fitted to it.
 
-> **Still not validated at scale, unlike position 9.** The loop finder has deliberately poor recall
+**The detector swap is what earned this rule its place.** Under `EF_HAND_HINT` the table above was
+measured in periods, calmodulin was absent from it entirely, and troponin C showed two loops instead
+of four. The balanced instrument finds all four of calmodulin's — which means calmodulin now *passes*
+the "at least four EF-hand loops" rule, and spacing is the only rule in the set that separates it
+from a lanmodulin. A rule that was unmeasurable under the biased detector is load-bearing under the
+neutral one.
+
+So state the fragility plainly, in the form §3.19 forced on the geometry score: calmodulin and
+troponin C both pass rules 1 and 2 and fail only rule 3, which means **the selector's entire ability
+to reject a calcium EF-hand protein rests on one sequence rule measured at n = 6.** It reproduces a
+published hallmark rather than being fitted here, which is why it is in the score at all; it is
+still one rule, and a calcium protein with a short linker would walk straight through the shortlist.
+Hallmark 3 corroborates but is not scored: Pro sits at position 2 in `NPDGDTTLESGE` and in all three
+Mex-LanM loops. Across the 189 family members the median period is **24.0** (linker 12).
+
+> **Still not validated at scale, unlike position 9.** The loop finder had deliberately poor recall
 > on calcium EF-hands — 1 of calmodulin's 4 — which is a *feature* for position-9 discrimination
-> (§3.6) but a *problem* for spacing, because you cannot measure the period between loops you did
+> (§3.6) but was a *problem* for spacing, because you cannot measure the period between loops you did
 > not find. The n=6 result above and the published hallmark are what support spacing; measuring it
-> against calcium proteins needs a balanced-recall detector that does not yet exist. **Spacing stays
-> out of the score until then.** Position 9 did not need it: it is carried by the existing pattern
+> against calcium proteins needed a balanced-recall detector, which now exists. **Spacing is scored
+> through that detector and only that one; n is still 6, and the shortlist rule carries the
+> disclaimer that passing it is an architecture match and not an affinity.** Position 9 did not need
+> it: it is carried by the existing pattern
 > and is validated on 694 sequences (§3.6). Its *composition* was still measured against a second,
 > deliberately neutral loop definition (§3.8.1) — not a validated balanced detector, but enough to
 > catch that the biased pattern was understating Glu in calcium loops by 4× (3.3% → 13.3%). Where
