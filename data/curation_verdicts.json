@@ -1,0 +1,190 @@
+{
+  "_comment": [
+    "Hand-curation verdicts, applied by scripts/build_site_table.py AFTER the",
+    "title keyword pass and overriding it. Each verdict names a human-checked",
+    "reason; the title pass stays visible in the source because its failures",
+    "are the reason this file exists.",
+    "",
+    "A verdict goes in here only with evidence that is checkable from outside",
+    "the geometry -- construct provenance, citation, deposition metadata -- so",
+    "that labelling an entry can never be a restatement of the descriptor the",
+    "label is later used to test. The one class that matters for that is",
+    "natural_ln_biology: it is the positive class of the ROADMAP 3.17/3.19",
+    "contrast, so an entry promoted into it on the strength of its coordination",
+    "number would make that contrast circular.",
+    "",
+    "Written by ROADMAP 3.19. Rebuild with: python -I scripts/build_site_table.py"
+  ],
+  "generated": "2026-10-19",
+  "roadmap": "3.19",
+  "classes": {
+    "natural_ln_biology": "A wild-type protein whose lanthanide site is the protein's own.",
+    "ln_substituted_ca": "A native calcium site holding a lanthanide instead.",
+    "ln_substituted_native_site": "A native site for some OTHER metal holding a lanthanide. Split out of ln_substituted_ca by 3.19, which could not express lactoferrin (Fe3+). The displaced metal is named in the basis.",
+    "engineered_lbt": "A designed or grafted lanthanide-binding construct: LBT fusions, de-novo binders, chelate conjugates, paramagnetic-NMR tags.",
+    "phasing_artefact": "The lanthanide is a reagent. Nucleating or phasing agent, heavy-atom derivative, or an adventitious surface ion.",
+    "not_protein": "The host polymer is not a protein. Breaks the axis the other four classes share -- they say what the SITE is, this says what the MOLECULE is -- and is here so that such an entry is visibly excluded rather than silently mislabelled."
+  },
+  "groups": [
+    {
+      "class": "natural_ln_biology",
+      "basis": "curated:wild-type-PepSY-Q1H2G7",
+      "entries": ["9VY4", "9VY5", "9VY6", "9VY7", "9VY8", "9VY9", "9VYA"],
+      "evidence": [
+        "The fourth natural family, and the one the title pass could not see: the titles say 'Structure of MIF binding with <element> ions' and contain no keyword. Only struct_keywords says 'Rare earth, Metalloprotein'.",
+        "Wild type, verified before use: construct = UniProt Q1H2G7 residues 23-175, the mature chain after the annotated signal peptide (the single mismatch is the initiator Met for Ala23). pdbx_mutation is empty. Methylobacillus flagellatus KT; E. coli is the expression host only. UniProt annotates two PepSY domains in tandem.",
+        "A real site rather than a soak: 159 sites over the 7 crystals reduce to 24 distinct residue signatures, and 5 of those occur in ALL SEVEN while 16 occur in exactly one. The 16 are the soak background; the 5 are the protein's own sites.",
+        "Seven crystals, seven different lanthanides (Yb, Tb, Ho, La, Sm, Gd, Nd), 1.21-3.05 A.",
+        "Citation: 'Adjacent Rare Earth Separation by a protein atomic ruler', to be published. Released 2026-07-22."
+      ],
+      "not_evidence": "The five conserved signatures are carboxylate-dominated -- four carboxylate-only, the fifth carrying a single Gln -- and the family's median coordination number is 9. Both are recorded here rather than above because they are descriptors the 3.17/3.19 contrast measures ON this family; admitting the family on them would make that contrast circular.",
+      "consequence": "Promoting these to the positive class is what took geometry from two criteria to one: the family reaches CN 9 through five MONODENTATE carboxylates, so the v1 bidentate>=2 criterion failed on it, and at the threshold that keeps it (>=1) 30 of 55 calcium accessions pass too."
+    },
+    {
+      "class": "phasing_artefact",
+      "basis": "curated:Tb-Xo4-crystallophore",
+      "entries": ["4BAD", "4BAF", "4BAP", "4BAR", "4BS7", "5MF2",
+                  "6F2F", "6F2I", "6F2M", "6HF6", "6HF7", "6HK1"],
+      "evidence": [
+        "The Tb-Xo4 'crystallophore' series: a lanthanide complex added as a nucleating and phasing agent to lysozyme, thaumatin, a phage tail protein, a protease, an adenylate kinase and a thiazole synthase. Ligand codes 7MT / WRT.",
+        "Right element, certainly not biology -- the converse of the calcium contrast, which tests the wrong metal in a real site. This tests the right metal in a non-site.",
+        "Ground truth for the negative control in 3.19: of their 126 sites, 98 are removed by the resolution and chelator filters and NONE of the surviving 28 reaches CN 9 (they run CN 0-4, other_ligand_donor_count 0 -- bare surface ions that the chelator flag correctly declined to fire on)."
+      ]
+    },
+    {
+      "class": "phasing_artefact",
+      "basis": "curated:adventitious-surface-ion",
+      "entries": ["9B1V", "9WE9"],
+      "entry_notes": {
+        "9B1V": "'Crystal structure of PqqT with PQQ and Gd3+ bound'. The study is engineered -- 'Structure-driven development of a biomimetic rare earth artificial metalloprotein', PNAS 2024, doi:10.1073/pnas.2405836121 -- but the three deposited Gd sites are CN 0-3, i.e. not the designed site.",
+        "9WE9": "'Plasmodium vivax aspartyl-tRNA synthetase in complex with L-Asp, Lanthanide, MOPSO and Butanetriol'. The title lists the lanthanide between a buffer and a cryoprotectant, and struct_keywords never mentions it. Three Yb sites on single surface glutamates (GLU474, GLU554 twice), CN 5-6."
+      },
+      "evidence": [
+        "Classed on what the deposited sites are rather than on what the paper is about; the provenance is recorded here so a later curator can disagree with that choice."
+      ]
+    },
+    {
+      "class": "phasing_artefact",
+      "basis": "curated:dipicolinate-co-crystallization",
+      "entries": ["4IRW"],
+      "evidence": [
+        "'Co-crystallization of streptavidin-biotin complex with a lanthanide-ligand complex gives rise to a novel crystal form'. Streptavidin is a biotin-binding beta barrel; the Tb arrives already chelated, as a crystallization additive. Same role as Tb-Xo4, different chemistry: the ligand here is pyridine-2,6-dicarboxylate (dipicolinate).",
+        "This is the entry on which the chelator filter is load-bearing. All 20 Tb sites are chelator-flagged and every one has protein_donor_count 0 -- the protein contributes nothing to any of them -- yet 8 reach CN 9 through the chelate alone. Without the filter those 8 are false positives for the v2 criterion. The Tb-Xo4 series never tested this: its 28 surviving sites run CN 0-4, so CN alone would have been enough for them."
+      ]
+    },
+    {
+      "class": "phasing_artefact",
+      "basis": "curated:gd-cluster-soak",
+      "entries": ["7O9P"],
+      "evidence": [
+        "'Crystal structure of the Awp3b (adhesin-like wall protein 3b) A-domain from Candida glabrata showing a gadolinium cluster'. An adhesin A-domain binds peptides and sugars; struct_keywords calls the lanthanide a 'gadolinium cluster' / 'lanthanide cluster' outright.",
+        "42 Gd sites in one deposition, 28 of them at CN 0-2 -- the soak background. The best is CN 8 (LYS109;ARG110;GLY139;GLU141;ASP169, a site with two cationic residues in its own first shell). None reaches CN 9."
+      ]
+    },
+    {
+      "class": "phasing_artefact",
+      "basis": "curated:heavy-atom-derivative",
+      "entries": ["6THE"],
+      "evidence": [
+        "'Crystal structure of core domain of four-domain heme-cupredoxin-Cu nitrite reductase from Bradyrhizobium sp. ORS 375' -- a copper enzyme. Neither title nor struct_keywords mentions a lanthanide at all; the entry is in the shortlist only because its organism matched, which is why that tier is called 'supporting'.",
+        "Four different rare-earth elements in one crystal (Er, Tb, Yb, and Y, which is a rare earth but not a lanthanide) across 30 sites at 2.87 A, every one of them CN 0-1. A phasing screen, and the clearest case in the corpus that an organism match on its own carries no weight."
+      ]
+    },
+    {
+      "class": "ln_substituted_native_site",
+      "basis": "curated:ln-replaces-Mg2+",
+      "entries": ["5F8A"],
+      "evidence": [
+        "'Crystal structure of the ternary EcoRV-DNA-Lu complex with uncleaved DNA substrate. Lanthanide binding to EcoRV-DNA complex inhibits cleavage.' EcoRV is a Mg2+-dependent restriction endonuclease; Lu3+ occupies the catalytic metal site and stalls the reaction, which is how the uncleaved substrate was trapped.",
+        "The two Lu sites sit on GLU45 and ASP74 -- the PD...D/ExK catalytic carboxylates themselves, not surface acid. A genuine metal site holding the wrong metal on purpose: the second displaced metal this class has had to express, after Fe3+ in lactoferrin.",
+        "Reported in ROADMAP 3.19 because it is the one site among these six entries that passes the v2 criterion (CN 9, 4 protein donors, 2 bidentate carboxylates, not chelator-flagged). It is a true positive for the score and a negative for the biology: the score ranks SITES that suit a lanthanide, and a catalytic carboxylate cluster does, whether or not the organism ever meets one."
+      ]
+    },
+    {
+      "class": "not_protein",
+      "basis": "curated:dna-aptamer",
+      "entries": ["7QB3"],
+      "evidence": [
+        "'Solution structure of a lanthanide-binding DNA aptamer'. Organism 'synthetic construct', no UniProt accession, struct_keywords 'aptamer, lanthanide, DNA'. A selected nucleic acid, so neither natural protein biology nor a protein engineering construct -- the four original classes have nowhere to put it.",
+        "The parse confirms it from the coordinates rather than the metadata: the single Lu site's signature is DC15;DG17;DC18, three deoxynucleotides. It is also a parser limitation worth naming -- those three are counted in protein_donor_count, because the donor count keys on polymer residues and does not ask which polymer."
+      ]
+    },
+    {
+      "class": "engineered_lbt",
+      "basis": "curated:LBT-fusion",
+      "entries": ["2RPV", "9L6D"],
+      "entry_notes": {
+        "2RPV": "'Solution Structure of GB1 with LBT probe'.",
+        "9L6D": "'the crystal structure of Azurin-LBT' -- an LBT fusion, not a lanthanide-substituted copper site."
+      },
+      "evidence": [
+        "Both are lanthanide-binding-tag fusions that the title pass missed only because it does not key on the abbreviation 'LBT'. Adding the abbreviation to TITLE_RULES was rejected: as a bare three-letter substring it also matches ordinary words, and two hand verdicts are cheaper than a rule that needs its own false-positive audit."
+      ]
+    },
+    {
+      "class": "engineered_lbt",
+      "basis": "curated:chelate-conjugate",
+      "entries": ["1NC2", "1NC4"],
+      "evidence": [
+        "Monoclonal antibody 2D12.5 Fab in complex with a DOTA-lanthanide chelate. The protein binds the cage, not the metal: all 4 sites are caught by the chelator flag independently of this label."
+      ]
+    },
+    {
+      "class": "engineered_lbt",
+      "basis": "curated:paramagnetic-NMR-tag",
+      "entries": ["2RSE"],
+      "evidence": [
+        "FKBP12-mTOR FRB-rapamycin complex with a lanthanide tag attached for pseudocontact shifts. The lanthanide reports on the structure; it is not part of it."
+      ]
+    },
+    {
+      "class": "ln_substituted_native_site",
+      "basis": "curated:ln-replaces-Fe3+",
+      "entries": ["1FCK", "1QJM"],
+      "evidence": [
+        "Human lactoferrin with Ce3+ in the iron sites ('diceric human lactoferrin'). This is the gap 3.19 found in the four-class scheme: the displacement is real and well documented, but the displaced metal is Fe3+, so ln_substituted_ca cannot express it."
+      ]
+    }
+  ],
+  "confirmed_by_title_pass": {
+    "_comment": "Checked by hand, title pass already right, no override written. Recorded so that 'not in verdicts' does not read as 'not looked at'.",
+    "1KSM": "ln_substituted_ca via title:calbindin -- Ln-substituted calbindin D9k, used as a PCS system. The Ca-site label is the accurate one.",
+    "1TJB": "engineered_lbt via title:lanthanide-binding peptide",
+    "2OJR": "engineered_lbt via title:lanthanide-binding tag",
+    "3VDZ": "engineered_lbt via title:lanthanide-binding tag",
+    "5XBO": "engineered_lbt via title:lanthanoid tagging",
+    "6ZV9": "engineered_lbt via title:de novo",
+    "7CCN": "engineered_lbt via title:lanthanide binding tag",
+    "7CCO": "engineered_lbt via title:lanthanide binding tag",
+    "7P3H": "engineered_lbt via title:designed coiled",
+    "9CEQ": "engineered_lbt via title:lanthanide binding tag",
+
+    "_comment_families": [
+      "The 17 below are the three families of ROADMAP 3.17, vetted there and",
+      "not re-read here: this records that the title pass agrees with that",
+      "earlier reading, which is a weaker claim than a fresh per-entry check.",
+      "They carry no override, so their class_basis in the table stays the",
+      "title rule that produced it and none of them reads as curated."
+    ],
+    "4MAE": "natural_ln_biology via title:methanol dehydrogenase -- MDH/XoxF",
+    "6DAM": "natural_ln_biology via title:methanol dehydrogenase -- MDH/XoxF",
+    "6FKW": "natural_ln_biology via title:methanol dehydrogenase -- MDH/XoxF",
+    "6OC5": "natural_ln_biology via title:methanol dehydrogenase -- MDH/XoxF",
+    "6OC6": "natural_ln_biology via title:methanol dehydrogenase -- MDH/XoxF",
+    "7O6Z": "natural_ln_biology via title:methanol dehydrogenase -- MDH/XoxF",
+    "6ZCV": "natural_ln_biology via title:lanthanide-dependent -- MDH/XoxF. One Pr site and one Ca site; with 9PI2's two, these are the 3 calcium ions that 3.19 first miscounted into the lanthanide denominator.",
+    "6ZCW": "natural_ln_biology via title:lanthanide-dependent -- MDH/XoxF",
+    "6MI5": "natural_ln_biology via title:lanm -- lanmodulin",
+    "8DQ2": "natural_ln_biology via title:lanm -- lanmodulin",
+    "8FNR": "natural_ln_biology via title:lanm -- lanmodulin",
+    "8FNS": "natural_ln_biology via title:lanm -- lanmodulin",
+    "9PI2": "natural_ln_biology via title:lanm -- lanmodulin, and the single-crystal control of 3.18: 6 Nd sites and 2 Ca sites in one deposition",
+    "9C8X": "natural_ln_biology via title:methylo -- LanD",
+    "9C8Y": "natural_ln_biology via title:methylo -- LanD",
+    "9C8Z": "natural_ln_biology via title:methylo -- LanD",
+    "9C90": "natural_ln_biology via title:methylo -- LanD",
+
+    "3LTQ": "engineered_lbt via title:lanthanide binding tag -- 'Interleukin 1B solved by SAD using an inserted Lanthanide Binding Tag'. Engineered and used for phasing at once; the tag is the reason the metal is there, so the engineered label is the one that explains it.",
+    "5OBB": "engineered_lbt via title:lanthanide binding motif -- 'a modified mouse H chain ferritin with a lanthanide binding motif'. 'Modified' is the deposition's own word."
+  }
+}

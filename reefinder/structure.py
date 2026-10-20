@@ -160,7 +160,7 @@ def resolution_from_coordinates(text: str, fmt: str = "pdb") -> float | None:
     """Diffraction resolution as deposited, or None if the entry states none.
 
     None is a real answer, not a parse failure: NMR entries write "RESOLUTION.
-    NOT APPLICABLE." and carry no `_refine.ls_d_res_high` at all. geometry-v1
+    NOT APPLICABLE." and carry no `_refine.ls_d_res_high` at all. geometry-v2
     treats an unknown resolution as a caveat rather than as a good one, so
     returning None is safer than guessing a number, and guessing 2.0 would
     silently admit entries the contrast behind the thresholds excluded.

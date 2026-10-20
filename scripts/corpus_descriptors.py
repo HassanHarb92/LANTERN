@@ -82,7 +82,7 @@ def report_composition(frame: pd.DataFrame) -> None:
           f"({len(plausible) / total:.1%}), in "
           f"{plausible['pdb_id'].nunique()} entries.")
     print("  The threshold is asserted, not fitted -- it is a sieve to point")
-    print("  hand-curation at, not a classifier, and the roadmap's four-class")
+    print("  hand-curation at, not a classifier, and the class")
     print("  assignment still has to be made by a person.")
     print(f"\n  For contrast, {(lanthanide['protein_donor_count'] <= 2).sum() / total:.1%} "
           f"of sites have two protein donors or fewer,")
@@ -185,8 +185,8 @@ def main() -> int:
   above DOWNWARD, which makes a strong result meaningful and a weak one
   uninformative -- the asymmetry is worth keeping in mind in that order.
 
-  WHAT WOULD FIX IT. Hand-curate a few hundred sites into the four classes
-  of S4. The geometry is now computed for all 2795, so curation is a
+  WHAT WOULD FIX IT. Hand-curate a few hundred sites into the classes
+  of S4. The geometry is computed for every site, so curation is a
   labelling job and no longer a parsing one -- which was M2's point.""")
     return 0
 

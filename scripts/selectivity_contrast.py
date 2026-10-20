@@ -111,7 +111,21 @@ DESCRIPTORS = list(DIRECTION)
 # keywords missed it, and its site sits on a C2 dimer axis, so the
 # asymmetric unit showed CN 5 and SASA 47.9 and it read as adventitious
 # surface binding. From the assembly it is CN 10, net charge -6, SASA 0.0 --
-# the most anionic site in the corpus. S3.17.
+# as anionic as any site in the corpus (11 sites reach -6). S3.17.
+#
+# PepSY/Q1H2G7 is the fourth and was found later still, by none of the above:
+# its title says "Structure of MIF binding with Ytterbium ions", its entity
+# description says "Propeptide, PepSY amd peptidase M4", and neither mentions
+# lanthanides. Only struct_keywords ("Rare earth, Metalloprotein") names it.
+# Seven entries, seven different lanthanides, five site signatures conserved
+# across all seven crystals; the construct is UniProt Q1H2G7 residues 23-175,
+# the mature wild-type chain after the signal peptide, so this is natural
+# biology and not a designed binder. It is the family that removed bidentate
+# carboxylates from the score, because it reaches CN 9 monodentate. S3.19.
+#
+# CAVEAT carried with the data: the 9VY* citation is "Adjacent Rare Earth
+# Separation by a protein atomic ruler", To Be Published. The structures are
+# evidence; the function is so far a title.
 FAMILIES = {
     "4MAE": "MDH/XoxF", "6DAM": "MDH/XoxF", "6FKW": "MDH/XoxF",
     "6OC5": "MDH/XoxF", "6OC6": "MDH/XoxF", "6ZCV": "MDH/XoxF",
@@ -119,6 +133,9 @@ FAMILIES = {
     "6MI5": "lanmodulin", "8DQ2": "lanmodulin", "8FNR": "lanmodulin",
     "8FNS": "lanmodulin", "9PI2": "lanmodulin",
     "9C8X": "LanD", "9C8Y": "LanD", "9C8Z": "LanD", "9C90": "LanD",
+    "9VY4": "PepSY/Q1H2G7", "9VY5": "PepSY/Q1H2G7", "9VY6": "PepSY/Q1H2G7",
+    "9VY7": "PepSY/Q1H2G7", "9VY8": "PepSY/Q1H2G7", "9VY9": "PepSY/Q1H2G7",
+    "9VYA": "PepSY/Q1H2G7",
 }
 
 
@@ -309,10 +326,27 @@ def main() -> int:
           f"{', '.join(c for c, _, _ in separating) if separating else 'none'}")
     print(f"separating with NO overlap at all: "
           f"{', '.join(clean) if clean else 'none'}")
-    print("a p-value at n=3 is mostly a statement about n; the overlap count "
-          "is the one that survives.")
+    print(f"a p-value at n={len(fam_ln)} is mostly a statement about n; the "
+          "overlap count is the one that survives.")
     print("thresholds are fitted and scored on the same points; treat the "
           "balanced accuracies as descriptive, not validated.")
+
+    # The two numbers geometry.py is built on, printed next to the contrast
+    # they come from rather than left to be recomputed by hand. 3.19 found
+    # them recomputed by hand and wrong.
+    print(f"\nsite-level calibration on these {len(lanthanide)} Ln and "
+          f"{len(calcium)} Ca sites -- pseudo-replicated, for calibration only:")
+    print(f"  {'rule':34s} {'sensitivity':>16s} {'specificity':>16s}")
+    for label, keep in (
+            ("CN >= 9 and bidentate >= 2 (v1)",
+             lambda d: (d["coordination_number"] >= 9)
+             & (d["bidentate_carboxylates"] >= 2)),
+            ("CN >= 9 alone (v2)", lambda d: d["coordination_number"] >= 9),
+            ("bidentate >= 2 alone", lambda d: d["bidentate_carboxylates"] >= 2)):
+        hit, miss = keep(lanthanide), keep(calcium)
+        print(f"  {label:34s} {hit.sum():5d}/{len(lanthanide):<4d} "
+              f"{100 * hit.mean():5.1f}%  {len(calcium) - miss.sum():5d}/"
+              f"{len(calcium):<4d} {100 * (~miss).mean():6.2f}%")
     return 0
 
 

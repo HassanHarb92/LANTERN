@@ -73,7 +73,7 @@ REE-Finder/
 │   ├── catalog.py                # Loads the authentic reference set and the test fixtures
 │   ├── uniprot.py                # UniProt search + InterPro family retrieval
 │   ├── structure.py              # Structure fetch + first-shell coordination analysis
-│   ├── geometry.py               # geometry-v1: the structural call, and what it refuses to score
+│   ├── geometry.py               # geometry-v2: the structural call, and what it refuses to score
 │   ├── argo.py                   # Argo chat client, fails closed on rejected credentials
 │   └── agent.py                  # Fixed retrieve-then-score pipeline (not a planner)
 ├── scripts/
@@ -92,6 +92,7 @@ REE-Finder/
 │   ├── matched_calcium.py        # Fetch Ca-only depositions of the same proteins, by UniProt
 │   ├── paired_sites.py           # Same site, both ions: the fold-controlled contrast
 │   ├── assembly_audit.py         # Which entries are parsed with half a site (ASU < assembly)
+│   ├── curate_corpus.py          # Shortlist the 636 for hand-curation; never auto-labels
 │   └── selectivity_contrast.py   # Native Ln biology vs native Ca -- what actually separates
 ├── data/reference_proteins.json  # 6 authentic UniProt sequences, checksummed
 ├── data/synthetic_examples.json  # Synthetic fixtures, used only by tests
@@ -101,7 +102,9 @@ REE-Finder/
 ├── data/calcium_sites.parquet    # 681 Ca sites in 172 Ca-only depositions of the same proteins
 ├── data/calcium_counterparts.json# How those 172 were chosen, and from which accessions
 ├── data/assembly_counts.json     # Chains deposited vs chains in the biological assembly, per entry
-├── tests/                        # Offline regression tests (120, no network)
+├── data/curation_candidates.json # Four structured signals per entry, tiered for hand-curation
+├── data/curation_verdicts.json   # The hand verdicts reached, with evidence; overrides the title pass
+├── tests/                        # Offline regression tests (129, no network)
 ├── docs/SCIENTIFIC_CONTRACT.md   # Scientific claims and evidence gates
 ├── ROADMAP.md                    # Verified state, defects, milestones M0-M6
 ├── IMPLEMENTATION_PLAN.md        # Earlier aspirational plan, superseded in part
@@ -185,31 +188,49 @@ pytest -q
   `assembly1`, and the correction is applied to both corpora by one rule — fixing one arm of a
   contrast and not the other is how the resolution bug above happened. Audit it with
   `python scripts/assembly_audit.py`.
-- **What separates a lanthanide-selective site, measured native against native.** Three natural
-  families — lanmodulin, the XoxF/MDH dehydrogenases, and the LanD lanthanide chaperone found by
-  the assembly fix — against 55 calcium accessions, both sides ≤2.5 Å and chelator-free, scored by
-  an exact one-sided rank test over all C(58,3) assignments: **coordination number (9.00 vs 7.00)**
-  and **bidentate carboxylates (2.00 vs 1.00)** are the only descriptors **no calcium accession
-  reaches** (*p* = 0.00003, the floor at this *n*). **Net charge fails for the fourth time** — it is
-  significant (*p* = 0.0024) and it is the Dudev prediction, but 17 of 55 calcium accessions are as
-  anionic, so it stays in triage; SASA fails for the fifth (*p* = 0.063). Two statistical traps are
-  recorded in ROADMAP §3.17 because each briefly reversed the answer: entry-level pseudo-replication
-  (four LanD entries are one protein with four metals) and a two-sided permutation test that scores
-  perfect separation *worse* than partial separation at *n* = 3. At three families the overlap count
-  is the honest statistic and the *p*-value is mostly a statement about *n*.
-  `python scripts/selectivity_contrast.py`.
-- **`geometry-v1`, the structural call** (`reefinder/geometry.py`, shown in the Structure tab).
-  Coordination number ≥ 9 **and** bidentate carboxylates ≥ 2 — the two descriptors above, at the
-  weakest of the three lanthanide families. **There are no weights**: the score is how many of the
-  two criteria a site meets, and ties break on the raw descriptors, because a weighted sum fitted
-  on three families would be three numbers fitted to three points. It reproduces the separation it
-  came from (3/3 Ln families pass, **0/55 Ca accessions**), and on 9PI2 — Nd³⁺ and Ca²⁺ in one
-  0.99 Å crystal, so fold and resolution are held identical — it calls all **6 Nd sites**
-  lanthanide-like and both **Ca sites** calcium-like. Site-level calibration, pseudo-replicated
-  and quoted as such: 75.9% sensitivity, 99.5% specificity. It **refuses** to score chelated
-  sites, anything worse than 2.5 Å, and marks a *negative* call made on an asymmetric unit as
-  unreliable — both criteria are counts a truncated parse can only understate. Net charge and
-  SASA are reported next to every call and never scored.
+- **What separates a lanthanide-selective site, measured native against native.** **Four** natural
+  families — lanmodulin, the XoxF/MDH dehydrogenases, the LanD lanthanide chaperone found by the
+  assembly fix, and a wild-type tandem-PepSY protein crystallised with seven different lanthanides
+  — against 55 calcium accessions, both sides ≤2.5 Å and chelator-free, scored by an exact
+  one-sided rank test over all C(59,4) assignments: **coordination number (9.00 vs 7.00)** is the
+  only one of nine descriptors **no calcium accession reaches** (0/55, *p* = 0.000002).
+  **Net charge fails for the fifth time** — it is significant (*p* = 0.00023) and it is the Dudev
+  prediction, but 17 of 55 calcium accessions are as anionic, so it stays in triage; SASA fails for
+  the sixth (25/55). Three statistical traps are recorded in ROADMAP §3.17 and §3.19 because each
+  briefly reversed the answer: entry-level pseudo-replication (four LanD entries are one protein
+  with four metals), a two-sided permutation test that scores perfect separation *worse* than
+  partial separation, and a *p*-value that stays second-best of nine while its descriptor's overlap
+  goes 0/55 → 30/55. The overlap count is the honest statistic at this *n*; the *p*-value is mostly
+  a statement about *n*. `python scripts/selectivity_contrast.py`.
+- **The fourth family cost the score a criterion** (ROADMAP §3.19). It was found by curating the
+  corpus on structured metadata instead of titles (`python scripts/curate_corpus.py`) — its title
+  says "Structure of MIF binding with Ytterbium ions" and names no family. It reaches **CN 9 using
+  five *monodentate* carboxylates**, so the v1 criterion `bidentate ≥ 2` failed on it, and the
+  threshold that keeps it (`≥ 1`) admits **30 of the 55 calcium accessions**. Dropping the
+  criterion cost 2 false-positive sites out of 664 and bought back 12 points of sensitivity and a
+  whole family. The hand-curation verdicts behind this, with their evidence, are in
+  `data/curation_verdicts.json`; the evidence admitting an entry to the positive class is
+  deliberately non-geometric, since geometry is what the contrast then measures on it.
+- **`geometry-v2`, the structural call** (`reefinder/geometry.py`, shown in the Structure tab).
+  One criterion: **coordination number ≥ 9**, at the weakest of the four lanthanide families.
+  **There are no weights and now only one number**, because a weighted sum fitted on four families
+  would be four numbers fitted to four points. It reproduces the separation it came from (4/4 Ln
+  families pass, **0/55 Ca accessions**, and **0 of 28** surviving sites in the Tb-Xo4
+  crystallophore series — a second negative control with the right element and no biology), and on
+  9PI2 — Nd³⁺ and Ca²⁺ in one 0.99 Å crystal, so fold and resolution are held identical — it calls
+  all **6 Nd sites** lanthanide-like and both **Ca sites** calcium-like. Site-level calibration,
+  pseudo-replicated and quoted as such: 65.4% sensitivity, 99.25% specificity. It **refuses** to
+  score chelated sites and anything worse than 2.5 Å, and marks a *negative* call made on an
+  asymmetric unit as unreliable — coordination number is a count a truncated parse can only
+  understate. Bidentate carboxylates, net charge and SASA are reported next to every call and
+  never scored.
+- **What the score is, out of sample.** Applied to the 98 sites of the six shortlisted entries that
+  belong to no family, v2 fires exactly once: on Lu³⁺ sitting in EcoRV's catalytic Mg²⁺ site
+  (5F8A), coordinated by the enzyme's own `GLU45;ASP74`. That is a genuine lanthanide-suited site
+  in a protein that never evolved to meet one — **v2 ranks sites, not organisms**, so the curation
+  label is carried beside the call rather than folded into it. The same six entries are what shows
+  the chelator refusal is load-bearing: 4IRW's Tb–dipicolinate cage produces **8 sites at CN ≥ 9
+  with zero protein donors**, and the filter removes all of them.
 - Argo text explanations constrained to screening output, with rejected credentials failing closed.
 
 ## Measured baseline

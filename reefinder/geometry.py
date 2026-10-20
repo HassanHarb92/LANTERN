@@ -1,74 +1,111 @@
-"""geometry-v1: the structural call, built on the two descriptors that survived.
+"""geometry-v2: one descriptor, because a fourth family killed the other one.
 
-This is the M3.1 geometric score. It is deliberately the smallest thing that
-the measurements support, and most of this module is the reasons for what it
+This is the M3.1 geometric score. It is deliberately the smallest thing the
+measurements support, and most of this module is the reasons for what it
 leaves out.
 
-**What it scores, and why only two things.** ROADMAP 3.17 compared three
-natural lanthanide families -- lanmodulin, the XoxF/MDH dehydrogenases, and
-the LanD lanthanide chaperone -- against 55 calcium accessions, both sides at
-2.5 A or better and chelator-free, with an exact one-sided rank test. Nine
-descriptors were measured. Exactly two separate with *no overlap at all*:
+**What changed from v1, and why it matters more than what it scores.** v1 had
+two criteria: coordination number >= 9 and bidentate carboxylates >= 2. At
+n = 3 families those two were indistinguishable -- both separated the natural
+lanthanide families from all 55 calcium accessions with *zero* overlap, at the
+same exact p. Adding a fourth family (ROADMAP 3.19: a wild-type tandem-PepSY
+protein from *Methylobacillus flagellatus*, UniProt Q1H2G7, crystallised with
+seven different lanthanides) separated them completely:
 
-    coordination number      Ln 9.00  Ca 7.00   0 of 55 Ca accessions reach 9
-    bidentate carboxylates   Ln 2.00  Ca 1.00   0 of 55 Ca accessions reach 2
+    coordination number      Ln medians 9, 9, 9, 10    0 of 55 Ca reach 9
+    bidentate carboxylates   Ln medians 1, 2, 2, 3.5  30 of 55 Ca reach 1
 
-Those two are the score. Net charge is significant (p=0.0024) and it is the
-published Dudev prediction, which is exactly why it is tempting -- but 17 of
-55 calcium accessions are as anionic as the lanthanide families, so it is a
-triage filter and not a selectivity term. It is reported here, under
-`triage_only`, and it does not move the score. Solvent accessibility is not
-significant at all (p=0.063, 25 of 55 overlapping) and is reported for the
-same reason: so that a reader can see it was measured and rejected rather than
-forgotten.
+The fourth family reaches CN 9 through five *monodentate* carboxylates rather
+than two bidentate ones. Same coordination number, different route to it. So
+the bidentate threshold had to drop to 1 to keep the family, and at 1 it lets
+through 30 of the 55 calcium accessions: the criterion is not a lanthanide
+signal, it is a description of how three particular folds happen to chelate.
 
-**There are no weights.** A weighted sum of two descriptors fitted on three
-families would be three numbers fitted to three points. The score is the count
-of criteria met, and ties break on the raw descriptors through `rank_key`. The
-thresholds are the family medians of the positive class, fitted and scored on
-the same points; that makes this a descriptive separation, not a validated
-classifier, and `caveats` says so on every single call.
+**The trap this is the third instance of.** Ranked by p-value, bidentate
+carboxylates is still the *second best* descriptor of the nine at n = 4
+(p=0.000068). Ranked by overlap it is seventh, at 30 of 55. ROADMAP 3.17
+established the rule -- overlap count beats p-value at small n -- and this is
+the first time it has been applied against something already shipped. The
+p-value stays small because three of four families sit high; it cannot see
+that the fourth one is in the calcium bulk.
 
-**Why a negative call is weaker than a positive one.** Both criteria are
-counts that a truncated parse can only *understate*. A metal on a
+**What dropping it cost, measured both ways.** The second criterion was never
+buying specificity: CN >= 9 alone already passed 0 of 55 calcium accessions
+before the fourth family existed. It was costing sensitivity.
+
+                            Ln families   Ca accessions   site sens   site spec
+    CN>=9 AND bidentate>=2      3 of 4         0 of 55       52.9%      99.55%
+    CN>=9 alone                 4 of 4         0 of 55       65.4%      99.25%
+
+Twelve points of sensitivity and a whole family, for 0.3 points of site-level
+specificity -- two additional false-positive sites out of 664. Those four
+numbers are printed by `scripts/selectivity_contrast.py` rather than copied
+in by hand, which is how the first version of them came to be computed over
+a denominator containing three calcium ions.
+
+**A second negative control, orthogonal to calcium.** 3.19 also curated the
+Tb-Xo4 "crystallophore" entries: 12 structures where a lanthanide complex was
+added purely as a nucleating and phasing agent, so the element is right and
+the site is certainly not biology. 98 of their 126 sites are removed by the
+resolution and chelator filters; of the 28 that survive, *none* reaches CN 9
+(they run CN 0-4, bare surface ions). The calcium contrast tests the wrong
+metal in a real site; this tests the right metal in a non-site.
+
+**What is reported and not scored.** Net charge is the published Dudev
+prediction and is exactly as tempting as that makes it, but 17 of 55 calcium
+accessions are as anionic as the lanthanide families -- it has now failed on
+overlap five times. Solvent accessibility fails too (25 of 55). Bidentate
+carboxylates now joins them. All three are in `triage_only`: visible, so a
+reader can see they were measured and rejected rather than forgotten.
+
+**There are no weights.** The score is whether the one criterion is met. The
+threshold is the minimum of the positive class's family medians, fitted and
+scored on the same points; that makes this a descriptive separation, not a
+validated classifier, and `caveats` says so on every single call.
+
+**Why a negative call is weaker than a positive one.** Coordination number is
+a count that a truncated parse can only *understate*. A metal on a
 crystallographic symmetry axis is coordinated by two protomers while the
-deposited asymmetric unit holds one, so the coordination number read off an
-ASU is a lower bound: 9C8X reads CN 5 and net charge -3 from the deposited
-coordinates and CN 10, net charge -6 from the biological assembly, which is
-the difference between discarding a lanthanide chaperone and finding one.
-This affects 119 of the 808 entries in the corpus. So when the coordinates are
-an asymmetric unit, a *passing* call is safe and a *failing* call is not
-trustworthy -- `call_reliable` is False and the caveat names the fix.
+deposited asymmetric unit holds one, so a CN read off an ASU is a lower bound:
+9C8X reads CN 5 from the deposited coordinates and CN 10 from the biological
+assembly, which is the difference between discarding a lanthanide chaperone
+and finding one. This affects 119 of the 808 entries in the corpus. So when
+the coordinates are an asymmetric unit a *passing* call is safe and a
+*failing* call is not trustworthy -- `call_reliable` is False and the caveat
+names the fix. Collapsing to a single criterion makes this cleaner than it was
+in v1, because the one thing scored is exactly the thing truncation hides.
 """
 from __future__ import annotations
 
 # (descriptor, minimum to count as met, what that threshold is)
 #
-# Both thresholds are the weakest of the three lanthanide families, not a
-# midpoint between the classes. A midpoint would be tuned to the calcium set's
-# upper tail, which is 55 accessions of whatever happened to be deposited; the
-# family minimum is a statement about the positive class, which is the thing
-# being generalised from.
+# The threshold is the weakest of the four lanthanide families, not a midpoint
+# between the classes. A midpoint would be tuned to the calcium set's upper
+# tail, which is 55 accessions of whatever happened to be deposited; the family
+# minimum is a statement about the positive class, which is the thing being
+# generalised from.
 CRITERIA: tuple[tuple[str, int, str], ...] = (
     ("coordination_number", 9,
-     "weakest of 3 Ln families; 0 of 55 Ca accessions reach it (ROADMAP 3.17, exact p=0.00003)"),
-    ("bidentate_carboxylates", 2,
-     "weakest of 3 Ln families; 0 of 55 Ca accessions reach it (ROADMAP 3.17, exact p=0.00003)"),
+     "weakest of 4 Ln families; 0 of 55 Ca accessions and 0 of 28 crystallophore "
+     "sites reach it (ROADMAP 3.19, exact one-sided p=0.000002)"),
 )
 
-SCORE_VERSION = "geometry-v1"
+SCORE_VERSION = "geometry-v2"
 
-# The resolution both arms of the 3.17 contrast were held to. Beyond it the
-# donor distances that set the coordination number are not reliably placed,
-# and -- the lesson of 3.15 -- a resolution cut applied to one side of a
-# comparison and not the other manufactures geometric differences on its own.
+# The resolution both arms of the contrast were held to. Beyond it the donor
+# distances that set the coordination number are not reliably placed, and --
+# the lesson of 3.15 -- a resolution cut applied to one side of a comparison
+# and not the other manufactures geometric differences on its own.
 MAX_RESOLUTION_A = 2.5
 
 ALWAYS = (
-    "Thresholds are the family medians of 3 natural Ln families and are fitted and "
+    "Threshold is the minimum family median of 4 natural Ln families, fitted and "
     "scored on the same points: a descriptive separation, not a validated classifier.",
-    "n = 3 families. The claim is the overlap count -- 0 of 55 Ca accessions reach "
-    "either threshold -- not the p-value, which at this n is mostly a statement about n.",
+    "n = 4 families. The claim is the overlap count -- 0 of 55 Ca accessions reach "
+    "the threshold -- not the p-value, which at this n is mostly a statement about n.",
+    "A fifth family may do to coordination number what the fourth did to bidentate "
+    "carboxylates (ROADMAP 3.19). One descriptor surviving four families is the "
+    "current state of the evidence, not a result.",
     "Describes an observed coordination geometry. Not an affinity, not a selectivity "
     "constant, and not a probability.",
 )
@@ -104,7 +141,7 @@ def _descriptors(site: dict) -> dict:
 
 def score_site(site: dict, *, resolution_A: float | None = None,
                coordinate_source: str | None = None) -> dict:
-    """Apply geometry-v1 to one site.
+    """Apply geometry-v2 to one site.
 
     `coordinate_source` is "assembly1" when the coordinates came from the
     biological assembly and "asu" when they came from the deposition as
@@ -136,7 +173,7 @@ def score_site(site: dict, *, resolution_A: float | None = None,
 
     if resolution_A is None:
         caveats.append(
-            f"Resolution unknown. The contrast behind these thresholds was held to "
+            f"Resolution unknown. The contrast behind this threshold was held to "
             f"{MAX_RESOLUTION_A} A on both sides.")
     elif resolution_A > MAX_RESOLUTION_A:
         callable_site = False
@@ -149,19 +186,16 @@ def score_site(site: dict, *, resolution_A: float | None = None,
         caveats.append(
             "Scored from the asymmetric unit" + ("" if coordinate_source else " (provenance not stated)")
             + ". A metal on a crystallographic symmetry axis is coordinated by two protomers "
-            "while the deposition holds one, so both criteria are lower bounds -- 9C8X reads "
-            "CN 5 here and CN 10 in the biological assembly. Re-score the assembly before "
-            "acting on anything short of a pass.")
+            "while the deposition holds one, so the coordination number is a lower bound -- "
+            "9C8X reads CN 5 here and CN 10 in the biological assembly. Re-score the assembly "
+            "before acting on anything short of a pass.")
 
     if not callable_site:
         call, reliable = "not callable", False
     elif met == len(CRITERIA):
+        # A pass cannot be manufactured by a truncated parse, only hidden by
+        # one, so a passing call is trustworthy whatever the provenance.
         call, reliable = "lanthanide-like", True
-    elif met:
-        # A pass can only be understated by a truncated parse, never
-        # overstated, so a partial or failing call from an ASU is the one that
-        # may be an artefact of the coordinates rather than of the protein.
-        call, reliable = "partial", not from_asu
     else:
         call, reliable = "calcium-like", not from_asu
 
@@ -174,9 +208,11 @@ def score_site(site: dict, *, resolution_A: float | None = None,
         "score": round(100.0 * met / len(CRITERIA), 1) if callable_site else None,
         "criteria": criteria,
         "triage_only": {
-            # Measured, reported, and deliberately not scored. See the module
-            # docstring: net charge is the Dudev prediction and it fails on
-            # overlap for the fourth time; SASA fails for the fifth.
+            # Measured, reported, and deliberately not scored. Bidentate count
+            # was scored in v1 and was removed by the fourth family, which
+            # reaches CN 9 monodentate; net charge is the Dudev prediction and
+            # fails on overlap for the fifth time; SASA fails for the sixth.
+            "bidentate_carboxylates": d["bidentate_carboxylates"],
             "net_charge": d["net_charge"],
             "metal_sasa_A2": d["metal_sasa_A2"],
         },
@@ -188,20 +224,21 @@ def score_site(site: dict, *, resolution_A: float | None = None,
 def rank_key(call: dict) -> tuple:
     """Sort key for ranking sites, highest first.
 
-    Criteria met is the primary key because it is the part that was measured.
-    The raw descriptors break ties instead of being folded into a weighted
-    score, so the ordering within a band is transparently "more donors, more
-    bidentate carboxylates" rather than a fitted combination pretending to be
-    one number. Sites that cannot be called sort last whatever their geometry.
+    Criterion met is the primary key, then the raw coordination number, and
+    then nothing. Sites tied on CN are left in input order rather than
+    separated by a descriptor that failed: bidentate count would be the
+    obvious tiebreak and using it would silently rank the monodentate family
+    of 3.19 below the bidentate ones, which is the weighted-score mistake in
+    miniature. Sites that cannot be called sort last whatever their geometry.
     """
     values = {c["descriptor"]: (c["value"] or 0) for c in call["criteria"]}
     return (call["call"] != "not callable", call["criteria_met"],
-            values.get("coordination_number", 0), values.get("bidentate_carboxylates", 0))
+            values.get("coordination_number", 0))
 
 
 def score_sites(sites: list[dict], *, resolution_A: float | None = None,
                 coordinate_source: str | None = None) -> list[dict]:
-    """geometry-v1 over every site in one structure, best first."""
+    """geometry-v2 over every site in one structure, best first."""
     calls = [score_site(s, resolution_A=resolution_A, coordinate_source=coordinate_source)
              for s in sites]
     return sorted(calls, key=rank_key, reverse=True)

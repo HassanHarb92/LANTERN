@@ -12,6 +12,12 @@ first pass, then hand-check". The title pass is implemented and recorded as
 `class_first_pass`, with `class_basis` naming the rule that fired, because a
 label whose provenance is not recorded cannot be audited later.
 
+The hand-check needed six: reading the shortlist turned up a lanthanide in a
+native site for a metal that is not calcium (Fe3+ in lactoferrin, Mg2+ in
+EcoRV) and a lanthanide-binding DNA aptamer, neither of which the four can
+name. The class list lives in `data/curation_verdicts.json`, not here -- this
+file applies whatever classes that file declares and never invents one.
+
 It is a *hint*, not a classification, and the honest limit is specific: a
 title cannot tell a phasing derivative from genuine biology. "STRUCTURE OF X"
 is the commonest title in the corpus and says nothing. The geometric evidence
@@ -20,6 +26,26 @@ count, bidentate carboxylates, whether the first shell is mostly buffer --
 is carried in its own columns, unmixed with the title guess, so hand curation
 can weigh them independently. Any row whose basis is `title:none` is
 unclassified and should be read as such.
+
+HAND CURATION OVERRIDES THE TITLE PASS. `data/curation_verdicts.json` holds
+the verdicts reached by reading entries one at a time, and they are applied
+here, after the keyword rules and winning over them. The basis then reads
+`curated:<reason>` instead of `title:<keyword>`, so which labels are machine
+guesses and which are human judgements stays legible in the table itself.
+
+The title pass earned this the hard way. The fourth natural lanthanide family
+(ROADMAP 3.19, seven entries of a wild-type tandem-PepSY protein) is titled
+"Structure of MIF binding with Ytterbium ions" and contains no keyword at
+all, so it sat in the unclassified pile while the geometric score was being
+derived without it -- and when it was added, it removed one of the score's
+two criteria. The rule is not fixable by adding keywords: a title is written
+by a depositor who was not thinking about this question.
+
+The verdicts file carries the evidence, not just the label, and for
+`natural_ln_biology` that evidence is deliberately non-geometric (construct
+provenance, mutation record, citation). Promoting an entry into the positive
+class *because of its coordination number* and then measuring coordination
+number on the positive class would be circular.
 
 Usage:
     python -I scripts/build_site_table.py
@@ -45,6 +71,7 @@ from reefinder.structure import (ALL_METAL_CODES,         # noqa: E402
 CORPUS = ROOT / ".cache" / "corpus"
 ASSEMBLY_DIR = ROOT / ".cache" / "assembly"
 ENUMERATION = ROOT / "data" / "ree_pdb_entries.json"
+VERDICTS = ROOT / "data" / "curation_verdicts.json"
 DEFAULT_OUT = ROOT / "data" / "lanthanide_sites.parquet"
 
 # Title keywords, lowercase, first match wins in this order. Ordered most
@@ -69,8 +96,8 @@ TITLE_RULES = [
     # looking for. Checked against all 808 titles -- the eight containing
     # "methylo" are XoxF, lanmodulin and LanD, all genuine. The residual risk
     # is an unrelated Methylobacterium protein soaked with a lanthanide for
-    # phasing; none is in the corpus today, and the four-class hand curation
-    # is where that would be caught.
+    # phasing; none is in the corpus today, and the hand curation is where
+    # that would be caught.
     #
     # NOT "land", though it is the name in the title: it also matches
     # "Ignicoccus islandicus" (6QSS, a malate dehydrogenase co-crystallised
@@ -104,11 +131,38 @@ def title_first_pass(title: str) -> tuple[str, str]:
     return "unclassified", "title:none"
 
 
+def load_verdicts(path: Path) -> dict[str, tuple[str, str]]:
+    """{PDB_ID: (class, basis)} from the hand-curation file.
+
+    Missing file is not an error -- the table is still buildable from the
+    title pass alone, it just reverts to what 3.19 was working with. A
+    duplicate entry *is* an error: two verdicts for one deposition means two
+    curators disagreed, and silently keeping the last one read is how a
+    disagreement becomes invisible.
+    """
+    if not path.is_file():
+        print(f"no curation verdicts at {path} -- title pass only")
+        return {}
+    document = json.loads(path.read_text())
+    verdicts: dict[str, tuple[str, str]] = {}
+    for group in document.get("groups", []):
+        label, basis = group["class"], group["basis"]
+        for pdb_id in group["entries"]:
+            pdb_id = pdb_id.upper()
+            if pdb_id in verdicts and verdicts[pdb_id] != (label, basis):
+                raise SystemExit(
+                    f"{path.name}: {pdb_id} has two different verdicts, "
+                    f"{verdicts[pdb_id]} and {(label, basis)}")
+            verdicts[pdb_id] = (label, basis)
+    return verdicts
+
+
 def site_rows(pdb_id: str, text: str, meta: dict,
-              coordinate_source: str = "asu") -> list[dict]:
+              coordinate_source: str = "asu",
+              verdict: tuple[str, str] | None = None) -> list[dict]:
     """One flat row per metal site in one entry."""
     sites = binding_neighborhood(text, "cif", metals=ALL_METAL_CODES)
-    label, basis = title_first_pass(meta.get("title", ""))
+    label, basis = verdict or title_first_pass(meta.get("title", ""))
     rows = []
     for site in sites:
         chemistry, charge, burial = site["chemistry"], site["charge"], site["burial"]
@@ -235,9 +289,13 @@ def main() -> int:
     parser.add_argument("--assembly-dir", type=Path, default=ASSEMBLY_DIR,
                         help="directory of {ID}-assembly1.cif.gz to prefer "
                              "over the deposited coordinates")
+    parser.add_argument("--verdicts", type=Path, default=VERDICTS,
+                        help="hand-curation verdicts, applied over the title "
+                             "pass; pass a nonexistent path to build without them")
     args = parser.parse_args()
 
     enumeration = json.loads(args.enumeration.read_text())["entries"]
+    verdicts = load_verdicts(args.verdicts)
     files = sorted(args.corpus.glob("*.cif.gz"))
     if args.limit:
         files = files[:args.limit]
@@ -268,7 +326,8 @@ def main() -> int:
             try:
                 text = gzip.open(source, "rt", errors="replace").read()
                 rows += site_rows(pdb_id, text, enumeration.get(pdb_id, {}),
-                                  "assembly1" if pdb_id in assemblies else "asu")
+                                  "assembly1" if pdb_id in assemblies else "asu",
+                                  verdicts.get(pdb_id.upper()))
             except Exception as error:                    # noqa: BLE001
                 failures.append((pdb_id, f"{type(error).__name__}: {error}"))
             if done % 100 == 0 or done == len(files):
@@ -297,9 +356,22 @@ def main() -> int:
     for element, row in counts.sort_values("sites", ascending=False).iterrows():
         print(f"    {element:3s} {row['sites']:5d} sites in {row['entries']:4d} entries")
 
-    print("\n  title first pass (a hint, not a classification):")
+    print("\n  class, title first pass (a hint) overridden by hand curation:")
     for label, count in frame["class_first_pass"].value_counts().items():
-        print(f"    {label:22s} {count:6d}")
+        curated = int((frame["class_basis"].str.startswith("curated:")
+                       & (frame["class_first_pass"] == label)).sum())
+        note = f"   ({curated} of them curated)" if curated else ""
+        print(f"    {label:28s} {count:6d}{note}")
+    if verdicts:
+        seen = set(frame["pdb_id"].str.upper())
+        applied = sorted(v for v in verdicts if v in seen)
+        print(f"\n  curation verdicts: {len(applied)} of {len(verdicts)} "
+              f"applied, from {args.verdicts.name}")
+        # Only meaningful for the corpus the verdicts were written against;
+        # on the calcium corpus every one of them is legitimately absent.
+        if applied:
+            for pdb_id in sorted(set(verdicts) - seen):
+                print(f"    !! {pdb_id} has a verdict but is not in this corpus")
     flagged = frame["chelator_flagged"].sum()
     print(f"\n  chelator-flagged (first shell at least half non-protein "
           f"non-water): {flagged} ({flagged / max(len(frame), 1):.1%})")

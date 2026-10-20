@@ -1143,6 +1143,11 @@ rebuild both site tables with `--assembly-dir .cache/assembly`, then
 
 ### 3.18 geometry-v1, and what it refuses to do
 
+> **Superseded in part by §3.19.** A fourth family removed the second of the two criteria below.
+> The *n* = 3 numbers, the 9PI2 control and every refusal in this section still stand; the
+> two-criterion conjunction and the 75.9%/99.5% site calibration are v1's and are kept here so the
+> change has something to be read against. The shipped score is **geometry-v2**.
+
 M3.1 is implemented as `reefinder/geometry.py`. It is the smallest thing §3.17 supports: the two
 descriptors that separated with zero overlap, no weights, and a set of refusals.
 
@@ -1167,7 +1172,9 @@ the usual confounders can explain a split. All **6 Nd sites** are called lanthan
 strongest control the project has and it runs offline from the cached coordinates.
 
 **Site-level calibration — pseudo-replicated, quoted for calibration only.** Across the §3.17
-filters: sensitivity **44/58 (75.9%)**, specificity **661/664 (99.5%)**. The three calcium sites
+filters: sensitivity **44/58 (75.9%)**, specificity **661/664 (99.5%)**. (§3.19 corrects that
+denominator: three of the 58 are calcium ions inside lanthanide-family entries, so the sensitivity
+is **44/55 = 80.0%**.) The three calcium sites
 that pass are worth naming rather than burying: 2YGG (a calmodulin complex, CN 9, 3 bidentate,
 SASA 3.46 Å²) is simply a lanthanide-like calcium site, and two calsequestrin sites in 7F05 are
 CN 9 with 2 bidentate but **SASA 53.6 and 65.7 Å²**, where all three lanthanide families sit
@@ -1194,6 +1201,221 @@ suggest it.
   on-the-same-points caveat, and "not an affinity, not a selectivity constant, not a probability."
 
 Reproduce: `pytest tests/test_geometry.py -v`, or open the Structure tab for 9PI2.
+
+---
+
+### 3.19 The fourth family, and the criterion it took with it
+
+§3.18 closed by saying the honest *n* was three families and that raising it was worth more than
+any refinement of the score. Raising it to four cost the score one of its two criteria. This
+section is what that looked like.
+
+**Why the search had to stop using titles.** `title_first_pass` left 590 of 636 Corpus A entries
+unclassified, and `data/ree_pdb_entries.json` carries only elements, method, resolution and title —
+no organism, no accession. Titles are written by depositors for humans and the fixes are worse than
+the misses: `land` as a substring matches *Ignicoccus islandicus* and *Switzerland*.
+`scripts/curate_corpus.py` goes to the RCSB GraphQL API for four structured signals per entry —
+entity **description**, **struct_keywords**, Pfam/InterPro/GO **annotation**, and source
+**organism** — matches whole words only, and emits a *ranked shortlist for hand curation*, never a
+label. An organism match alone can only reach the `supporting` tier, because a methylotroph can
+deposit an unrelated protein with a lanthanide soaked into it.
+
+The first run used description, annotation and organism, and recovered all 11 known positives:
+**30 strong, 2 family, 9 supporting**. The entry that mattered was in the *supporting* tier, on
+organism alone.
+
+**9VY4–9VYA.** Seven entries, one protein, seven different lanthanides — Yb, Tb, Ho, La, Sm, Gd,
+Nd — at 1.21–3.05 Å. Nothing in the usual places says so. The titles say *"Structure of MIF binding
+with Ytterbium ions"*; the entity description says *"Propeptide, PepSY amd peptidase M4"*. Only
+`struct_keywords` names it: **"Rare earth, Metalloprotein, METAL BINDING PROTEIN"**. Adding keywords
+as a fourth signal is what promotes the series to `strong`, and that is now a regression test —
+the 9VY* entries are in `KNOWN_POSITIVES` precisely because the first rule set under-ranked them.
+
+> Element names are deliberately **not** in any vocabulary. "ytterbium" in a title means a
+> lanthanide is present, which is true of all 636 entries by construction.
+
+**It is a natural protein, checked before it was used.** The construct is UniProt **Q1H2G7**
+residues 23–175 — the mature wild-type chain after the annotated signal peptide, one initiator Met
+the only difference — from *Methylobacillus flagellatus* KT, a methylotroph. `pdbx_mutation` is
+empty, the host organism is *E. coli* (expression only), and UniProt annotates **two PepSY domains**
+in tandem, which the sequence repeat confirms. A designed binder was the thing to rule out and it
+is ruled out. The citation, *"Adjacent Rare Earth Separation by a protein atomic ruler"*, is **To Be
+Published**: the structures are evidence, the function is so far a title, and that caveat travels
+with the data in `FAMILIES`.
+
+**It is a real site, not a soak.** 159 sites across the seven entries carry **24 distinct site
+signatures**. Sixteen appear in exactly one entry — that is the soak background. **Five appear in
+all seven**, which is the same five residue sets binding seven different metals in seven
+independent crystals. Every one is carboxylate-dominated — four are carboxylate-only, the fifth
+carries a single Gln:
+
+| signature | in | geometry-v1 call |
+|---|---|---|
+| GLU31; GLU104; ASP120; GLU128; GLU146; GLN149 | 7/7 | Ln-like in 4 |
+| ASP44; GLU70; GLU106; GLU153 | 7/7 | Ln-like in 4 |
+| GLU66; GLU68; GLU110; GLU132; GLU142 | 7/7 | Ln-like in 1 |
+| GLU42; ASP54; GLU106; GLU108; GLU118 | 7/7 | Ln-like in 0 |
+| ASP54; GLU68; GLU108; GLU118; GLU132 | 7/7 | Ln-like in 0 |
+
+**The family fails geometry-v1, on exactly one criterion.** Under §3.17's filters, six of seven
+entries survive (9VY6 is 3.05 Å) giving 81 sites. Family medians: **CN 9**, **bidentate 1**,
+carboxylate residues 5, net charge −5, SASA 1.45 Å². CN clears the threshold; bidentate count does
+not, so v1 called the family `partial`. Restricting to the five conserved signatures changes
+nothing — identical medians on all five descriptors — so the conclusion does not rest on the
+post-hoc filter. **The fourth family reaches CN 9 through five monodentate carboxylates instead of
+two bidentate ones.** Same coordination number, different route to it.
+
+**What that does to the descriptor table.** §3.17's nine-descriptor sweep, re-run with four
+families against the same 55 calcium accessions, ordered by overlap:
+
+Medians are listed **weakest family first**, since the overlap count is taken against the weakest
+— so for the descriptors whose lanthanide-like direction is *downward* (net charge, SASA) the
+weakest value is the largest.
+
+| overlap | exact one-sided *p* | descriptor | Ln family medians |
+|---:|---:|---|---|
+| **0/55** | **0.000002** | **coordination_number** | 9, 9, 9, 10 |
+| 16/55 | 0.00085 | protein_donor_count | 6, 6, 8, 9.5 |
+| 17/55 | 0.00023 | carboxylate_residues | 3, 4, 5, 6 |
+| 17/55 | 0.00023 | net_charge | −3, −4, −5, −6 |
+| 25/55 | 0.04088 | metal_sasa_A2 | 8.72, 1.45, 0.00, 0.00 |
+| 26/55 | 0.00805 | shell_net_charge | −3, −4, −6, −10 |
+| **30/55** | **0.00007** | **bidentate_carboxylates** | **1**, 2, 2, 3.5 |
+| 30/55 | 0.04666 | protein_atoms_within_8A | 85, 94, 100, 110 |
+| 35/54 | 0.12230 | mean_donor_distance_A | 2.43, 2.54, 2.54, 2.72 |
+
+At *n* = 3 these two were indistinguishable: both 0/55, both *p* = 0.000032. One fourth family
+separates them completely. Coordination number holds its zero overlap and its *p* improves by more
+than an order of magnitude; bidentate count falls to **30 of 55**.
+
+> **A correction, made while turning this analysis into a script.** The table above was first
+> computed inline, selecting the lanthanide arm by entry rather than by ion — which quietly put
+> **three calcium ions sitting inside lanthanide-family entries** (two in 9PI2, one in 6ZCV) into
+> the lanthanide arm. They are correctly called calcium-like by both score versions, so they were
+> *successes* being counted as failures. Every *p*-value in the first version of this table was
+> slightly off and every overlap count was exactly right, which is the §3.17 rule arriving a
+> fourth time from a direction nobody was watching. The numbers above now come from
+> `scripts/selectivity_contrast.py`, whose lanthanide arm has always filtered on
+> `family == "lanthanide"`; the same correction raises §3.18's site-level sensitivity from
+> 44/58 (75.9%) to 44/55 (**80.0%**).
+
+> **The third instance of the same trap, and the first against something already shipped.**
+> Ranked by *p*-value, bidentate carboxylates is still the **second-best descriptor of the nine**.
+> Ranked by overlap it is seventh. The *p*-value stays small because three of four families sit
+> high — it cannot see that the fourth is sitting in the calcium bulk. §3.17 derived the rule
+> *overlap count beats p-value at small n* from two near-misses; here it overturns a criterion
+> that was shipped in `reefinder/geometry.py` and passing its own reproduction test.
+
+**What dropping it costs, measured both ways.** The second criterion was never buying specificity —
+CN ≥ 9 alone already admitted 0 of 55 calcium accessions, measured before this family existed. It
+was only costing sensitivity. All three rows below are on four families, 136 Ln sites and 664 Ca
+sites, and are printed by `scripts/selectivity_contrast.py` at the foot of the contrast they come
+from, so they cannot drift from it again:
+
+| rule | Ln families | Ca accessions | site sensitivity | site specificity |
+|---|---:|---:|---:|---:|
+| CN ≥ 9 **and** bidentate ≥ 2 (v1) | 3 of 4 | 0 of 55 | 72/136 = 52.9% | 661/664 = 99.55% |
+| **CN ≥ 9 alone (v2)** | **4 of 4** | **0 of 55** | **89/136 = 65.4%** | 659/664 = 99.25% |
+| bidentate ≥ 2 alone | 3 of 4 | 1 of 55 | 83/136 = 61.0% | 623/664 = 93.83% |
+
+Twelve points of sensitivity and a whole family, against 0.3 points of site-level specificity —
+two additional false-positive sites out of 664. There is no threshold that keeps four families
+*and* separates: at bidentate ≥ 1, which is what keeping the family requires, 30 of 55 calcium
+accessions pass. `test_the_v1_conjunction_would_still_lose_the_fourth_family` pins that, so the
+argument for the removal stays executable rather than only written down.
+
+**A second negative control, orthogonal to calcium.** The keyword sweep also turned up the
+**Tb-Xo4 "crystallophore"** series — 4BAD, 4BAF, 4BAP, 4BAR, 4BS7, 5MF2, 6F2F, 6F2I, 6F2M, 6HF6,
+6HF7, 6HK1 — twelve entries where a lanthanide complex was added purely as a nucleating and
+phasing agent, plus two antibody–DOTA complexes (1NC2, 1NC4). Here the element is right and the
+site is certainly not biology, which is the converse of the calcium contrast. Of their 126 sites,
+98 are removed by the resolution and chelator filters; **of the 28 that survive, none reaches
+CN 9** — they run CN 0–4 with `other_ligand_donor_count` 0, i.e. bare surface ions that the
+chelator flag correctly declined to fire on. Both DOTA entries are caught 4/4 by the chelator flag.
+**0 false positives on 12 entries of known-artefact ground truth.**
+
+**There is no fifth family in Corpus A.** With keywords added the shortlist is **60 strong, 0
+family, 2 supporting, 574 none** — double the first run — and all 62 have now been read
+individually. The entries outside the four known families return no new natural biology. What they
+return is the non-biology classes, now identifiable rather than merely unclassified: twelve
+crystallophore entries, two antibody–DOTA conjugates, the LBT and de-novo designed binders (1TJB,
+7CCN, 7CCO, 7P3H, 9CEQ, 6ZV9, 2OJR, 3VDZ, 5XBO, 3LTQ, 5OBB, and — missed by the title pass because
+it writes the abbreviation rather than the phrase — 2RPV "GB1 with LBT probe" and 9L6D
+"Azurin-LBT"), a paramagnetic-NMR tag (2RSE), lanthanide-substituted calbindin used as a PCS system
+(1KSM), lanthanide substituted into a **non**-calcium site (1FCK and 1QJM, Ce into lactoferrin's
+Fe³⁺ site), and soaks.
+**Raising *n* beyond four requires enlarging the corpus, not re-reading it** — the PDB contains
+four natural lanthanide protein families and a great deal of lanthanide reagent.
+
+The last six were the ones whose titles promised least, and they are worth naming because reading
+them is what turns "no fifth family" from an inference into a check. **4IRW** co-crystallizes
+streptavidin with a Tb–dipicolinate complex; **7O9P** is an adhesin A-domain whose own keywords say
+"gadolinium cluster"; **6THE** is a copper nitrite reductase carrying four different rare earths
+(Er, Tb, Yb and Y) at CN 0–1, a phasing screen, and the only entry here admitted on an organism
+match alone; **9WE9** lists its lanthanide between a buffer and a cryoprotectant; **5F8A** is Lu³⁺
+in EcoRV's catalytic Mg²⁺ site, inhibiting cleavage; and **7QB3** is not a protein at all but a
+selected DNA aptamer, which the scheme could not express either, even after lactoferrin had already
+pushed it from four classes to five — hence a sixth, `not_protein`. The parse agrees with the
+metadata there from the coordinates alone: that site's signature is `DC15;DG17;DC18`. It also
+exposes a parser limitation worth naming, since those three nucleotides are counted in
+`protein_donor_count` — the count keys on polymer residues without asking which polymer.
+
+Two findings came out of those six that the four families could not have produced:
+
+- **The chelator filter is load-bearing, and only 4IRW proves it.** All 20 of its Tb sites are
+  chelator-flagged, every one has `protein_donor_count` **0** — the protein contributes nothing to
+  any of them — and yet **8 reach CN ≥ 9** through the dipicolinate cage alone. Without the filter
+  those 8 are false positives for the v2 criterion. The Tb-Xo4 series never tested this: its 28
+  surviving sites run CN 0–4, so for the crystallophores CN alone would have sufficed. A negative
+  control only exercises the component that would have failed on it.
+- **geometry-v2, applied out of sample to these 98 sites, fires once — on 5F8A.** That site is CN 9
+  with four protein donors and two bidentate carboxylates, not chelator-flagged, and its signature
+  is `GLU45;ASP74`: EcoRV's PD…D/ExK catalytic carboxylates themselves, not surface acid. The score
+  is right and the label is also right. **geometry-v2 ranks sites that suit a lanthanide, not
+  proteins that evolved to use one** — a catalytic metal site qualifies on chemistry whether or not
+  the organism ever meets a lanthanide. For a screen whose output is a shortlist for experimental
+  testing that distinction is the difference between a hit and a candidate, and it is the reason
+  the class label is carried alongside the score rather than folded into it.
+
+> One gap this exposes in the four-class scheme: `ln_substituted_ca` does not cover lactoferrin,
+> where the lanthanide replaces **Fe³⁺**, not Ca²⁺. The class is now
+> `ln_substituted_native_site`, with the displaced metal recorded in the basis.
+
+**The verdicts are in the table, not only in this section.** `data/curation_verdicts.json` carries
+all 33 of them with their evidence, and `scripts/build_site_table.py` applies them over the title
+pass, writing `class_basis` as `curated:<reason>` so that machine guesses and human judgements stay
+distinguishable in the data. A further 29 entries are recorded in `confirmed_by_title_pass`: read,
+title rule already correct, no override written — so that *not in verdicts* cannot be misread as
+*not looked at*. This is the M2 hand-curation step, started on the entries this section had to read
+anyway. Two consequences are worth stating:
+
+- **`scripts/selectivity_contrast.py` now reproduces this section by itself.** Before the verdicts
+  existed it still printed the superseded *n* = 3 result, because the fourth family was sitting in
+  the `unclassified` pile that its positive-class filter excludes — the analysis behind the shipped
+  score and the script that was supposed to regenerate it had silently diverged.
+- **The positive-class verdicts are deliberately non-geometric.** `natural_ln_biology` is the
+  positive class of this very contrast, so an entry admitted to it *because of its coordination
+  number* would make the contrast circular. The evidence recorded for the PepSY family is construct
+  provenance, an empty mutation record, cross-crystal signature conservation and a citation; its
+  geometry is what the contrast then measures, not what let it in.
+
+**geometry-v2** is therefore one criterion: **CN ≥ 9**, the single descriptor of nine that
+separates four families from 55 calcium accessions and 28 crystallophore sites with no overlap.
+Bidentate carboxylates joins net charge and SASA under `triage_only` — reported on every call,
+never scored. The `partial` band is gone, since with one criterion a call is a pass or a fail and
+there is no half-passing bucket to file a failing family into. The ASU asymmetry gets *cleaner*,
+not messier: the one thing scored is exactly the quantity a truncated parse understates, so a
+passing call is trustworthy whatever the provenance and a failing one from an ASU is not. Ranking
+orders on CN and then stops — using bidentate count as a tiebreak would reinstate the removed
+descriptor silently, in the ordering instead of in the call, which is the weighted-score mistake in
+miniature (`test_ranking_does_not_demote_a_monodentate_site_below_a_bidentate_one`).
+
+Every call now also carries a fourth caveat naming what would break it: *a fifth family may do to
+coordination number what the fourth did to bidentate carboxylates.* One descriptor surviving four
+families is the current state of the evidence, not a result.
+
+Reproduce: `pytest tests/test_geometry.py -v`; refresh the shortlist with
+`python -I scripts/curate_corpus.py`.
 
 ---
 
@@ -1271,6 +1493,12 @@ natural lanthanide biology, and sampling the titles shows what it actually conta
 
 Curation into these four classes is therefore mandatory, and *is itself the scientific
 contribution* — no public resource currently offers it.
+
+> **Doing it took six, not four** (§3.19). Two of the additions came from entries the four-way
+> split simply could not name: `ln_substituted_native_site`, because lactoferrin and EcoRV hold
+> their lanthanide in a site evolved for Fe³⁺ and Mg²⁺ rather than Ca²⁺, and `not_protein`, for a
+> lanthanide-binding DNA aptamer. The survey above was written from what the PDB was expected to
+> contain; the extra classes are what reading it actually returned.
 
 **Corpus B — the discovery space: 189 LanM-family proteins, 188 uncharacterized.** NCBIfam
 NF053806; 1 reviewed (C5B164), 188 unreviewed, mostly *Methylobacterium* and relatives. Spot-checked
@@ -1455,8 +1683,10 @@ Build Corpus A as a versioned local database.
   (`chelator_flagged`, plus the chelator names themselves) and nothing is dropped: MetalPDB
   independently confirms PQQ and methanol as genuine first-shell donors of the XoxF lanthanide
   site, so a filter that discarded non-protein donors would discard methanol dehydrogenase.
-- 🟡 **Classify every site into the four classes of §4** — natural Ln biology, Ln-substituted Ca
-  site, engineered LBT, phasing/surface artefact. **First pass done, hand-check outstanding.** The
+- 🟡 **Classify every site into the classes of §4** — natural Ln biology, Ln-substituted Ca site,
+  engineered LBT, phasing/surface artefact, and the two the hand-check had to add: Ln substituted
+  into a native **non**-Ca site, and not-a-protein. **First pass done, shortlist hand-checked, the
+  unclassified tail outstanding.** The
   title pass ships as `class_first_pass` with `class_basis` naming the keyword that fired, because
   a label whose provenance is not recorded cannot be audited later: **2655 unclassified, 57 natural
   Ln biology, 56 Ln-substituted Ca, 27 engineered LBT**. It is a *hint*. A title cannot tell a
@@ -1470,6 +1700,22 @@ Build Corpus A as a versioned local database.
   key is pinned by a test. Site 11 of 8FNR (CN = 4, 2 carboxylates, no water) remains the worked
   example of an artefact the classifier must reject; sites 1–3 of the same entry (CN = 9, 3
   bidentate) are what it must keep.
+
+  ✅ **The hand-check is done for the whole shortlist: 33 verdicts in the table, 29 more entries
+  confirmed as already-correct (§3.19, 2026-10-19).** `scripts/curate_corpus.py` shortlists entries
+  on four *structured* RCSB signals — entity description, struct_keywords, Pfam/InterPro/GO
+  annotation, source organism — instead of titles, and never auto-labels;
+  `data/curation_verdicts.json` holds what reading the shortlist concluded, with the evidence, and
+  `scripts/build_site_table.py` applies it over the title pass as `class_basis = curated:<reason>`.
+  Progress is **60 of 60 strong-tier and 2 of 2 supporting-tier entries read, 0 outstanding**. The
+  counts are now **2739 unclassified, 224 natural Ln biology, 224 phasing artefact, 125 engineered
+  LBT, 56 Ln-substituted Ca, 6 Ln-substituted non-Ca site, 1 not protein**. Three of those classes
+  could not previously be reached at all: `phasing_artefact` had no keyword rule,
+  `ln_substituted_native_site` did not exist until lactoferrin showed that `ln_substituted_ca`
+  cannot express a lanthanide displacing Fe³⁺ (EcoRV then gave it a second displaced metal, Mg²⁺),
+  and `not_protein` had to be added for a DNA aptamer that the site parser was happy to describe
+  and the class scheme could not name. What the verdicts bought immediately was the fourth natural
+  family and, through it, the removal of a criterion from the shipped score.
 - Build the matched Ca²⁺ contrast set from 1CLL and comparable EF-hand structures. Where a protein
   appears in both sets — troponin C with Ca and with Tb, calmodulin with Ca and with Tb — you have
   a *paired* same-protein comparison, which is the strongest evidence in the corpus. Extract these
@@ -1481,8 +1727,9 @@ Build Corpus A as a versioned local database.
 
 **Done when:** a single local query returns every known lanthanide protein site with geometry and a
 curation label, and the CN distributions for biological Ln sites versus Ca sites separate visibly.
-**Status: geometry and provenance done, curation label outstanding.** The CN distributions do
-separate — 9.00 (9.00–10.00) for titled biology against 4.00 (2.00–7.00) for everything untitled,
+**Status: geometry and provenance done, the shortlist fully curated (33 entries hand-verdicted and
+29 confirmed, §3.19), and the long tail of 2739 unclassified sites outstanding.** The CN
+distributions do separate — 9.00 (9.00–10.00) for titled biology against 4.00 (2.00–7.00) for everything untitled,
 83.6% balanced accuracy — but §3.13 shows that comparison is mostly real-site-versus-surface-soak,
 not Ln-versus-Ca, and the Ln-versus-Ca split on this uncurated corpus runs backwards for the reason
 given there. The curation step is what the rest of M2's claim rests on.
@@ -1546,23 +1793,39 @@ These are cheap, they are what unblocks the headline screen, and none of them ne
   holds: 97.6% of cached sites fall in that class. Coordination number, already shipped, separates
   better than either (93.1% vs 77.8% and 75.0% balanced accuracy). Calibrating them needs Ln sites
   from **outside** this fold, where charge varies — i.e. M2's corpus.
-- ✅ **Which descriptors go in is now settled (§3.17).** Against three natural Ln families and 55
-  Ca accessions, **coordination number** and **bidentate carboxylate count** are the only two with
-  **zero overlap** — no calcium accession reaches either. Net charge is significant and is the
-  Dudev prediction, but 17 of 55 Ca accessions are as anionic, so it stays in **triage** for the
-  fourth time; SASA is out for the fifth (n.s.). Build `geometry-v1` on those two.
+- ✅ **Which descriptors go in is now settled (§3.17, revised by §3.19).** Against **four** natural
+  Ln families and 55 Ca accessions, **coordination number** is the only one of nine with **zero
+  overlap** — no calcium accession reaches CN 9. Bidentate carboxylate count tied it at *n* = 3 and
+  broke at *n* = 4 (30/55). Net charge is significant and is the Dudev prediction, but 17 of 55 Ca
+  accessions are as anionic, so it stays in **triage** for the fifth time; SASA is out for the
+  sixth. Build the score on coordination number alone.
 - Calibrate thresholds on M2's curated Ln sites versus the Ca contrast set. With ~tens of
   genuine biological Ln sites this is **threshold calibration and ROC reporting, not machine
   learning** — do not train a model on this sample size and do not call the output a probability.
   At *n* = 3 families, **report the overlap count beside every threshold**: it is the number that
   survives a small sample, where a *p*-value is mostly a statement about *n* (§3.17).
-- ✅ Version it (`score_version: "geometry-v1"`) and keep the sequence heuristic alongside, clearly
-  labelled as triage only. **Shipped** as `reefinder/geometry.py` and wired into the Structure tab
-  (§3.18): two criteria, no fitted weights, and refusals for chelated sites, resolution worse than
-  2.5 Å, and negative calls made on an asymmetric unit. Calibration: 3/3 Ln families pass and 0/55
-  Ca accessions do; 9PI2's six Nd and two Ca sites split correctly inside one 0.99 Å crystal.
-- **Still open:** the honest *n* is three families, so raising it is worth more than any refinement
-  of the score. That is M2 curation, not M3.
+- ✅ Version it (`score_version`) and keep the sequence heuristic alongside, clearly labelled as
+  triage only. **Shipped** as `reefinder/geometry.py` and wired into the Structure tab, with
+  refusals for chelated sites, resolution worse than 2.5 Å, and negative calls made on an
+  asymmetric unit. 9PI2's six Nd and two Ca sites split correctly inside one 0.99 Å crystal.
+- ✅ **Raising *n* to four removed a criterion (§3.19).** The honest *n* was three; `curate_corpus.py`
+  made it four by going to RCSB `struct_keywords` instead of titles, and the fourth family —
+  wild-type tandem-PepSY, UniProt Q1H2G7, seven lanthanides, five sites conserved across all seven
+  crystals — reaches CN 9 with *monodentate* carboxylates. **`geometry-v2` is one criterion,
+  CN ≥ 9**: 4/4 families, 0/55 Ca accessions, 0/28 crystallophore artefact sites. Bidentate count
+  joins net charge and SASA in triage. It would have been kept on its *p*-value, which is still
+  second-best of nine; its overlap went 0/55 → 30/55.
+- ✅ **First out-of-sample test of v2, on the 98 sites of the six hand-read entries that were
+  nobody's family (§3.19).** One site fires: 5F8A, Lu³⁺ on EcoRV's catalytic `GLU45;ASP74`. Correct
+  as chemistry and correctly *not* natural biology — **v2 ranks sites that suit a lanthanide, not
+  proteins that evolved to use one**, which is why the class label travels beside the score instead
+  of inside it. The same six showed the chelator filter is load-bearing: 4IRW has 8 CN ≥ 9 sites
+  with zero protein donors, all cage, all filtered — a failure the 28 crystallophore sites (CN 0–4)
+  could never have caught.
+- **Still open:** *n* = 4 and Corpus A has no fifth family — all 62 shortlisted entries have now
+  been read, and the ones outside the four families are phasing reagents, designed binders, NMR
+  tags, a metal-substituted catalytic site and one DNA aptamer (§3.19). Raising *n* further means
+  **enlarging the corpus**, not re-reading it.
 
 > **Two external baselines to beat, both verified to exist.** A descriptor that cannot outperform
 > these is not worth shipping.

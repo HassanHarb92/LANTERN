@@ -10,11 +10,13 @@ from pathlib import Path
 
 import pytest
 
-from scripts.build_site_table import KNOWN_CHELATORS, title_first_pass
+from scripts.build_site_table import (KNOWN_CHELATORS, load_verdicts,
+                                      title_first_pass)
 
 ROOT = Path(__file__).resolve().parent.parent
 ENUMERATION = ROOT / "data" / "ree_pdb_entries.json"
 TABLE = ROOT / "data" / "lanthanide_sites.parquet"
+VERDICTS = ROOT / "data" / "curation_verdicts.json"
 
 
 def test_title_first_pass_records_why_it_fired():
@@ -244,3 +246,116 @@ def test_table_records_which_coordinates_each_site_came_from():
     # One entry is one deposition, so it cannot have been parsed both ways.
     per_entry = frame.groupby("pdb_id")["coordinate_source"].nunique()
     assert (per_entry == 1).all(), "an entry parsed from two sources at once"
+
+
+def test_every_curation_verdict_names_its_evidence():
+    """A hand verdict without recorded evidence is an opinion in a data file.
+
+    The whole reason `class_basis` exists is that an unexplained label cannot
+    be audited, and a curated label is exactly the kind that most needs it --
+    nobody can re-derive it from the title the way they can for `title:xoxf`.
+    """
+    document = json.loads(VERDICTS.read_text())
+    declared = set(document["classes"])
+    for group in document["groups"]:
+        assert group["class"] in declared, group["class"]
+        assert group["basis"].startswith("curated:"), group["basis"]
+        assert group["entries"], group["basis"]
+        assert group.get("evidence"), f"{group['basis']} has no evidence"
+
+
+def test_no_entry_carries_two_different_verdicts():
+    """Two verdicts for one deposition means two curators disagreed, and
+    keeping whichever was read last is how a disagreement becomes invisible.
+    `load_verdicts` raises instead; this pins that the shipped file is clean.
+    """
+    verdicts = load_verdicts(VERDICTS)
+    assert len(verdicts) == 33
+    assert verdicts["9VY4"] == ("natural_ln_biology",
+                                "curated:wild-type-PepSY-Q1H2G7")
+    # An entry cannot be both overridden and recorded as needing no override.
+    document = json.loads(VERDICTS.read_text())
+    confirmed = {p.upper() for p in document["confirmed_by_title_pass"]
+                 if not p.startswith("_")}
+    assert not confirmed & set(verdicts), confirmed & set(verdicts)
+
+
+@pytest.mark.skipif(not TABLE.exists(), reason="site table not built")
+def test_curated_labels_stay_distinguishable_from_guessed_ones():
+    """A machine guess and a human judgement must not read alike in the data.
+
+    Every verdict has to have actually landed, too: a verdict for an entry
+    that is not in the corpus is a silent no-op, which looks exactly like a
+    verdict that worked.
+    """
+    import pandas as pd
+    frame = pd.read_parquet(TABLE)
+    verdicts = load_verdicts(VERDICTS)
+    labelled = frame[frame["pdb_id"].str.upper().isin(verdicts)]
+    assert set(labelled["pdb_id"].str.upper()) == set(verdicts), (
+        "a verdict was written for an entry that is not in this corpus")
+    assert labelled["class_basis"].str.startswith("curated:").all()
+    # And the converse: nothing else may claim to have been curated.
+    other = frame[~frame["pdb_id"].str.upper().isin(verdicts)]
+    assert not other["class_basis"].str.startswith("curated:").any()
+
+
+@pytest.mark.skipif(not TABLE.exists(), reason="site table not built")
+def test_the_positive_class_in_the_table_holds_all_four_families():
+    """The failure this test exists for actually happened.
+
+    `scripts/selectivity_contrast.py` selects its positive class with
+    `class_first_pass == "natural_ln_biology"`. The fourth family (ROADMAP
+    3.19) is titled "Structure of MIF binding with Ytterbium ions" and the
+    title pass left it `unclassified`, so for a while the roadmap, the score
+    and its tests all said n = 4 while the script that was supposed to
+    regenerate the contrast still printed the superseded n = 3 result. The
+    divergence was invisible because both sides were internally consistent.
+    """
+    import pandas as pd
+    from scripts.selectivity_contrast import FAMILIES
+
+    frame = pd.read_parquet(TABLE)
+    positive = frame[frame["class_first_pass"] == "natural_ln_biology"]
+    families = {FAMILIES[p] for p in positive["pdb_id"].str.upper()
+                if p in FAMILIES}
+    assert families == {"lanmodulin", "MDH/XoxF", "LanD", "PepSY/Q1H2G7"}
+
+
+def test_the_positive_class_is_never_admitted_on_its_own_geometry():
+    """The one way this curation step could poison the result it feeds.
+
+    `natural_ln_biology` is the positive class of the 3.17/3.19 contrast, so
+    an entry admitted to it *because* its coordination number looked right
+    would make that contrast circular -- the descriptor would be measuring
+    the rule that selected the data. Evidence for the positive class has to
+    be external: provenance, mutation record, citation, conservation across
+    crystals. The negative classes are not held to this, since letting an
+    artefact in on its geometry can only make the contrast harder to pass.
+    """
+    document = json.loads(VERDICTS.read_text())
+    geometric = ("coordination number", "coordination_number", "cn ",
+                 "bidentate", "carboxylate", "net charge", "sasa",
+                 "solvent accessib", "donor")
+    checked = 0
+    for group in document["groups"]:
+        if group["class"] != "natural_ln_biology":
+            continue
+        checked += 1
+        evidence = " ".join(group["evidence"]).lower()
+        for term in geometric:
+            assert term not in evidence, (
+                f"{group['basis']} admits an entry to the positive class on "
+                f"{term.strip()!r}, which the contrast then measures")
+    # `confirmed_by_title_pass` reaches the positive class the same way -- it
+    # just does it by declining to override the title rule -- so its notes
+    # carry the identical risk and are held to the identical standard.
+    for pdb_id, note in document["confirmed_by_title_pass"].items():
+        if pdb_id.startswith("_") or "natural_ln_biology" not in str(note):
+            continue
+        checked += 1
+        for term in geometric:
+            assert term not in str(note).lower(), (
+                f"{pdb_id} is confirmed into the positive class on "
+                f"{term.strip()!r}, which the contrast then measures")
+    assert checked, "no positive-class verdict to check -- test is vacuous"

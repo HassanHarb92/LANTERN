@@ -58,8 +58,8 @@ with st.sidebar:
         st.success(detail) if ok else st.warning(detail)
     st.caption("Research prototype, not a validated affinity predictor.")
 
-st.info(f"**Scientific limitation:** {SCORE_LIMITATION} Coordination number and bidentate "
-        "carboxylate count are what separate the two, and both require 3D structure.")
+st.info(f"**Scientific limitation:** {SCORE_LIMITATION} Coordination number is what separates "
+        "the two, and it requires 3D structure.")
 if st.button("🔎 Run protein discovery", type="primary", width='stretch'):
     try:
         with st.spinner("Collecting proteins and screening sequences..."):
@@ -138,7 +138,7 @@ v.addStyle({{hetflag:true}},{{sphere:{{scale:0.45}}}});v.zoomTo();v.render();</s
             if sites:
                 # RCSB serves the deposited asymmetric unit here, not the
                 # biological assembly, so every call made on this page is
-                # marked "asu" and geometry-v1 downgrades its negatives.
+                # marked "asu" and geometry-v2 downgrades its negatives.
                 resolution = resolution_from_coordinates(text, fmt)
                 calls = [score_site(s, resolution_A=resolution, coordinate_source="asu")
                          for s in sites]
@@ -157,14 +157,17 @@ v.addStyle({{hetflag:true}},{{sphere:{{scale:0.45}}}});v.zoomTo();v.render();</s
                            "included. Biological lanthanide sites typically show CN 9–10; calcium "
                            "sites in the same fold show CN ≈ 7.")
                 st.markdown(f"**{SCORE_VERSION}** calls a site lanthanide-like when it reaches "
-                            "**CN ≥ 9 and ≥ 2 bidentate carboxylates** — the only two descriptors "
-                            "that separate three natural lanthanide families from all 55 calcium "
-                            "accessions with no overlap (ROADMAP §3.17). Net charge and solvent "
-                            "accessibility are measured and shown below, and deliberately **not** "
-                            "scored.")
+                            "**CN ≥ 9** — the one descriptor of nine that separates four natural "
+                            "lanthanide families from all 55 calcium accessions with no overlap "
+                            "(ROADMAP §3.19). Bidentate carboxylate count was scored in v1 and "
+                            "was dropped when a fourth family turned out to reach CN 9 using "
+                            "five *monodentate* carboxylates; at a threshold low enough to keep "
+                            "that family, 30 of the 55 calcium accessions pass it too. It is "
+                            "shown above, with net charge and solvent accessibility below, and "
+                            "all three are deliberately **not** scored.")
                 shown = {c for call in calls for c in call["caveats"]}
                 st.warning("  \n".join(f"• {c}" for c in sorted(shown)))
-                with st.expander("Per-site donor atoms and full geometry-v1 output"):
+                with st.expander("Per-site donor atoms and full geometry-v2 output"):
                     st.json([{"site": s, SCORE_VERSION: c} for s, c in zip(sites, calls)])
             else:
                 st.info("No deposited rare-earth or calcium ions found. No hypothetical "

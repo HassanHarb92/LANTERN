@@ -438,7 +438,7 @@ def test_net_charge_does_not_separate_lanthanide_from_calcium_ef_hands():
 
 
 def test_resolution_is_read_from_both_coordinate_formats():
-    """geometry-v1 gates on resolution, so a silent None would turn the gate
+    """geometry-v2 gates on resolution, so a silent None would turn the gate
     into a caveat on every entry."""
     pdb = ("REMARK   2\n"
            "REMARK   2 RESOLUTION.    1.85 ANGSTROMS.\n")
@@ -451,7 +451,7 @@ def test_resolution_is_read_from_both_coordinate_formats():
 
 
 def test_an_entry_with_no_diffraction_resolution_returns_none():
-    """NMR entries say so in words. None is the honest answer and geometry-v1
+    """NMR entries say so in words. None is the honest answer and geometry-v2
     turns it into a caveat; inventing a number would admit entries the
     contrast behind the thresholds excluded.
     """
