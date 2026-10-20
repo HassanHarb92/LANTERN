@@ -9,6 +9,8 @@ The assertions are mostly about what the record REFUSES to say. Each step of
 this pipeline is careful on its own; the failure mode of joining them is a
 record that is true field by field and misleading read as a whole.
 """
+import json
+
 import pytest
 
 from lantern.catalog import load_reference
@@ -16,7 +18,8 @@ from lantern.design import SELECTION_IS_NOT_AFFINITY
 from lantern.discover import (LANTHANIDE_ELEMENTS, PREDICTION_HAS_NO_METAL,
                               SIZE_MATCH_IS_NOT_BINDING, SIZE_RANK_SELF_CHECK,
                               SPHERE_CLOSED_AROUND_THE_DEPOSITED_ION,
-                              _element_of, _rank_of, answer, headline)
+                              _element_of, _rank_of, answer, exportable,
+                              headline, narrate, narration_payload)
 from lantern.models import Protein
 from lantern.plan import SOURCE_FALLBACK
 
@@ -283,3 +286,152 @@ class TestTheRecordIsSelfDescribing:
         for site in every_site(run):
             if site["call"] == "calcium-like":
                 assert site["call_reliable"] is False
+
+
+def key_paths(node, prefix=""):
+    """Every dict key reachable in a nested record, as dotted paths.
+
+    List indices collapse, so `evidence.sites.call` appears once however many
+    sites there are -- and a key missing from a *single* site still shrinks the
+    set. That is the point: it turns "nothing was quietly lost" into one
+    comparison that keeps working as fields are added.
+    """
+    if isinstance(node, dict):
+        found = set()
+        for key, value in node.items():
+            found.add(prefix + key)
+            found |= key_paths(value, f"{prefix}{key}.")
+        return found
+    if isinstance(node, list):
+        return set().union(set(), *(key_paths(item, prefix) for item in node))
+    return set()
+
+
+class TestTheDownloadKeepsEveryJustification:
+    """`exportable()` is the only place the record is deliberately shrunk, so
+    it is the only place a measurement can go missing without anyone noticing.
+    """
+
+    def test_it_drops_the_two_fields_that_only_draw_pictures(self, run):
+        after = key_paths(exportable(run))
+        assert "evidence.coordinates" not in after
+        assert "evidence.sites.raw" not in after
+
+    def test_and_drops_nothing_else_whatsoever(self, run):
+        """The assertion that survives new fields being added to a site."""
+        removed = key_paths(run) - key_paths(exportable(run))
+        collateral = {path for path in removed
+                      if path != "evidence.coordinates"
+                      and path != "evidence.sites.raw"
+                      and not path.startswith("evidence.sites.raw.")}
+        assert not collateral, f"exportable() also dropped {sorted(collateral)}"
+
+    def test_and_invents_nothing(self, run):
+        assert not key_paths(exportable(run)) - key_paths(run)
+
+    def test_every_caveat_and_basis_survives_the_trim(self, run):
+        trimmed = exportable(run)
+        assert trimmed["caveats"] == run["caveats"]
+        for before, after in zip(run["evidence"], trimmed["evidence"]):
+            for site_before, site_after in zip(before["sites"], after["sites"]):
+                assert site_after["caveats"] == site_before["caveats"]
+                assert ([c["basis"] for c in site_after["criteria"]]
+                        == [c["basis"] for c in site_before["criteria"]])
+
+    def test_it_leaves_the_viewers_copy_intact(self, run):
+        """The download and the 3D viewer read the same record in one page
+        load. A trim that mutated its argument would blank the structure the
+        moment someone clicked download."""
+        exportable(run)
+        assert all("coordinates" in ev for ev in run["evidence"])
+        assert all("raw" in site for site in every_site(run))
+
+    def test_it_is_json_serialisable(self, run):
+        """It is handed straight to a download button; a stray non-JSON value
+        would raise in the user's face rather than in a test."""
+        assert json.loads(json.dumps(exportable(run)))["answered"] is True
+
+    def test_a_refused_question_still_exports(self):
+        assert exportable(answer("hello"))["answered"] is False
+
+
+class StubClient:
+    """Records the one call `narrate` makes instead of answering it."""
+
+    def __init__(self, reply="a summary"):
+        self.reply, self.messages = reply, None
+
+    def configured(self):
+        return True
+
+    def chat(self, messages, **kwargs):
+        self.messages = messages
+        return self.reply
+
+
+class TestTheNarrationIsShownTheQualifications:
+    """The narration is the one place a model writes user-facing text. It can
+    only stay honest if the qualifications reach it alongside the numbers, so
+    these tests are about the payload rather than the prose.
+    """
+
+    def test_every_caveat_travels_with_the_numbers(self, run):
+        payload = narration_payload(run)
+        assert payload["caveats_that_must_not_be_contradicted"] == run["caveats"]
+        assert SIZE_MATCH_IS_NOT_BINDING in payload[
+            "caveats_that_must_not_be_contradicted"]
+
+    def test_the_model_is_told_the_shortlist_ignored_the_ion(self, run):
+        payload = narration_payload(run)
+        assert payload["shortlist_used_the_target_ion"] is False
+        assert payload["target_ion"] == "Ce3+"
+
+    def test_each_site_carries_its_counterfactual_flag(self, run):
+        sites = [s for ev in narration_payload(run)["structural_evidence"]
+                 for s in ev["sites"]]
+        assert sites, "the narration was shown no sites at all"
+        for site in sites:
+            assert site["target_size_fit_is_counterfactual"] is True
+            assert site["element_in_the_crystal"].upper() != "CE"
+
+    def test_each_site_carries_the_scores_own_calibration(self, run):
+        """`deposited_rank` is what stops the model ranking ions by fit."""
+        for ev in narration_payload(run)["structural_evidence"]:
+            for site in ev["sites"]:
+                assert "rank_of_the_ion_actually_bound_here" in site
+
+    def test_the_payload_is_json_serialisable(self, run):
+        """`narrate` json.dumps() this; a non-JSON value would surface as a
+        failed narration with no explanation."""
+        assert json.dumps(narration_payload(run))
+
+
+class TestTheNarrationCannotSmuggleInFacts:
+
+    def test_the_system_prompt_states_the_three_rules(self, run):
+        client = StubClient()
+        narrate(run, client)
+        system = client.messages[0]["content"]
+        assert client.messages[0]["role"] == "system"
+        assert "shortlist_used_the_target_ion says false" in system
+        assert "counterfactual" in system
+        assert "rank_of_the_ion_actually_bound_here" in system
+
+    def test_the_caveats_reach_the_model_in_the_user_turn(self, run):
+        client = StubClient()
+        narrate(run, client)
+        assert SIZE_MATCH_IS_NOT_BINDING in client.messages[1]["content"]
+
+    def test_a_failed_narration_raises_rather_than_inventing_one(self, run):
+        class Broken(StubClient):
+            def chat(self, messages, **kwargs):
+                raise RuntimeError("gateway down")
+
+        with pytest.raises(RuntimeError):
+            narrate(run, Broken())
+
+    def test_a_user_question_is_passed_through_but_bounded(self, run):
+        client = StubClient()
+        narrate(run, client, question="x" * 5000)
+        assert "x" * 2000 in client.messages[1]["content"]
+        assert "x" * 2001 not in client.messages[1]["content"]

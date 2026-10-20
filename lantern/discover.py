@@ -47,6 +47,9 @@ This module therefore reports a prediction as `structure_kind="predicted"`
 with a pLDDT summary and no sites at all, rather than as a weaker version of
 a deposited structure.
 """
+import json
+
+from .agent import SYSTEM as CAUTIOUS_ASSISTANT
 from .alphafold import (EVIDENCE as PREDICTION_EVIDENCE, NotAPredictedModel,
                         confidence_gate, fetch_model, residue_plddt)
 from .catalog import load_reference
@@ -136,6 +139,13 @@ def _structure_evidence(target: str, text: str, fmt: str, pdb_id: str) -> dict:
             "protein_donors": site["protein_donor_count"],
             "water_donors": site["water_donor_count"],
             "call": call["call"], "call_reliable": call["call_reliable"],
+            # The threshold each call was measured against, and the basis for
+            # that threshold. Without this the record carries "lanthanide-like"
+            # -- the strongest claim it makes about a site -- with no way to
+            # see that the bar is CN 9 and that 0 of 55 calcium accessions
+            # clear it. The caveats say the threshold was fitted on its own
+            # points; only this says what it is.
+            "criteria": call["criteria"],
             "caveats": call["caveats"],
             "size_match": fit,
             # True whenever the ion asked about is not the ion in the crystal.
@@ -144,6 +154,10 @@ def _structure_evidence(target: str, text: str, fmt: str, pdb_id: str) -> dict:
                                         site["coordination_number"],
                                         site["mean_donor_distance_A"]),
             "site_id": call["site_id"],
+            # The full parsed site, kept so the viewer can draw the donor
+            # atoms without re-parsing the file and arriving at a second,
+            # possibly different, set of sites. Stripped by exportable().
+            "raw": site,
         })
     return {
         "structure_kind": "deposited",
@@ -352,6 +366,7 @@ def answer(question, *, client=None, proteins=None, live=False,
                                  timeout=timeout)
         evidence["accession"] = candidate["accession"]
         evidence["name"] = candidate["name"]
+        evidence["organism"] = getattr(protein, "organism", None)
         record["evidence"].append(evidence)
 
     if any(ev["structure_kind"] == "deposited" for ev in record["evidence"]):
@@ -365,6 +380,117 @@ def answer(question, *, client=None, proteins=None, live=False,
             f"was observed binding {target}.",
             SPHERE_CLOSED_AROUND_THE_DEPOSITED_ION]
     return record
+
+
+# What the narration step is allowed to be. The model reads a summary of the
+# record and writes prose about it; it never supplies a fact. Everything it is
+# given was measured by the deterministic pipeline, and the caveats go in with
+# the numbers so the model is told in the same breath what they do not show.
+NARRATION_IS_NOT_A_SOURCE = (
+    "This summary was written by a language model from the measurements "
+    "above. The model contributed no data: every number, verdict and caveat "
+    "it was shown came from the deterministic pipeline, and it was instructed "
+    "not to add any. Treat it as a reading of the evidence, not as evidence."
+)
+
+# Built on agent.SYSTEM, which already forbids inventing affinities, citations
+# and sequences, plus the three things that are specific to this record and
+# that a fluent summary slides into without noticing.
+NARRATION_SYSTEM = CAUTIOUS_ASSISTANT + """
+
+You are reading one LANTERN discovery record. Three further rules apply.
+
+1. The shortlist was produced by architecture rules that do not involve the
+   target ion. Never write that a protein was selected *for* the target, or
+   that it prefers the target over another lanthanide. The record field
+   shortlist_used_the_target_ion says false; do not contradict it.
+2. A size fit marked counterfactual was computed against a site holding a
+   different element. Report it as "would this ion fit the sphere measured
+   around X", never as evidence of binding the target.
+3. rank_of_the_ion_actually_bound_here is where the size score puts the ion
+   known to occupy that site. When it is not 1, the score failed its own
+   calibration at that site; say so plainly rather than ranking ions by fit.
+
+Every caveat under caveats_that_must_not_be_contradicted is a constraint on
+what you may write, not background to summarise away."""
+
+
+def narration_payload(record: dict) -> dict:
+    """The compact, caveat-carrying summary the narration step is shown.
+
+    Deliberately small and deliberately complete in one respect: every caveat
+    travels with the numbers. A model handed coordination numbers and size
+    fits with the qualifications stripped out will write the confident version
+    of this page, which is the version the whole pipeline exists to avoid.
+    """
+    shortlist = record["shortlist"] or {}
+    return {
+        "question": record["question"],
+        "target_ion": record["plan"].get("target"),
+        "how_the_question_was_parsed": record["plan"].get("parsed_by"),
+        "selection_rules": shortlist.get("rules", []),
+        "shortlist": [
+            {"name": c["name"], "accession": c["accession"],
+             "selected": c["selected"], "rules_passed": f"{c['passed']}/{c['of']}",
+             "rule_verdicts": {r["id"]: r["verdict"] for r in c["rules"]}}
+            for c in shortlist.get("candidates", [])[:12]],
+        "shortlist_used_the_target_ion": shortlist.get("target_was_used"),
+        "structural_evidence": [
+            {"accession": ev["accession"], "kind": ev["structure_kind"],
+             "pdb_id": ev.get("pdb_id"), "resolution_A": ev.get("resolution_A"),
+             "sites": [
+                 {"chain": s["chain"], "site": s["site"],
+                  "element_in_the_crystal": s["deposited_element"],
+                  "coordination_number": s["coordination_number"],
+                  "mean_donor_distance_A": s["mean_donor_distance_A"],
+                  "geometry_call": s["call"],
+                  "geometry_call_reliable": s["call_reliable"],
+                  "target_size_fit": s["size_match"].get("fit"),
+                  "target_size_fit_is_counterfactual":
+                      s["size_match_is_counterfactual"],
+                  "rank_of_the_ion_actually_bound_here":
+                      s["ion_context"]["deposited_rank"]}
+                 for s in ev["sites"][:8]],
+             "notes": ev.get("notes", [])}
+            for ev in record["evidence"]],
+        "caveats_that_must_not_be_contradicted": record["caveats"],
+        "pipeline_notes": record["notes"],
+    }
+
+
+def narrate(record: dict, client, question: str = "") -> str:
+    """Ask a language model to read the record back in prose.
+
+    Raises whatever the client raises. The caller decides what a failed
+    narration means; for this project it means the page renders without one,
+    because every number on it was computed without a model.
+    """
+    ask = question.strip() or (
+        "Summarise what this screen found, what it does not show, and the "
+        "single most informative experiment to run next.")
+    return client.chat([
+        {"role": "system", "content": NARRATION_SYSTEM},
+        {"role": "user",
+         "content": f"Evidence JSON:\n{json.dumps(narration_payload(record))}\n"
+                    f"User question: {ask[:2000]}"}])
+
+
+def exportable(record: dict) -> dict:
+    """The record without the two fields that exist only to draw pictures.
+
+    `coordinates` is a whole coordinate file and `raw` is every donor atom of
+    every site; both belong in the viewer and neither belongs in a download a
+    user is meant to read. Nothing that justifies a number is removed -- every
+    measurement, verdict, caveat and basis survives, which is the property
+    that makes this safe to call on the export path.
+    """
+    evidence = []
+    for item in record["evidence"]:
+        trimmed = {k: v for k, v in item.items() if k != "coordinates"}
+        trimmed["sites"] = [{k: v for k, v in site.items() if k != "raw"}
+                            for site in item["sites"]]
+        evidence.append(trimmed)
+    return {**record, "evidence": evidence}
 
 
 def headline(record: dict) -> str:
