@@ -228,9 +228,26 @@ class ArgoClient:
             raise ArgoError("Argo returned a response with no message content.") from exc
         if not isinstance(content, str) or not content.strip():
             raise ArgoError("Argo returned an empty or non-text response.")
-        # Argo is OpenAI-shaped, so it reports a clipped completion the same
-        # way. Disclosing it keeps all three providers interchangeable: a
-        # narration that stops mid-caveat must not read as a finished answer.
-        if isinstance(choice, dict) and choice.get("finish_reason") == "length":
+        # Disclosing a clipped completion keeps all three providers
+        # interchangeable: a narration that stops mid-caveat must not read as a
+        # finished answer.
+        #
+        # Argo is OpenAI-shaped but does NOT report truncation the way the API
+        # it imitates does. Measured live against the gateway: a completion
+        # stopped at exactly the cap comes back finish_reason "stop", with
+        # usage.completion_tokens equal to the cap and the text ending
+        # mid-word. Asking for 60, 400 and 900 tokens each returned "stop"; the
+        # only honest signal is the token count. So the count is what decides,
+        # and finish_reason is still read because it is correct on genuinely
+        # OpenAI-shaped deployments and costs nothing to keep.
+        #
+        # Compared against the cap actually sent, not the argument: Anthropic
+        # models have theirs lowered to ANTHROPIC_MAX_TOKENS on the way out, and
+        # comparing with the un-capped argument would miss every clip they make.
+        cap = payload.get("max_tokens") or payload.get("max_completion_tokens")
+        used = (body.get("usage") or {}).get("completion_tokens")
+        clipped = choice.get("finish_reason") == "length" or (
+            isinstance(cap, int) and isinstance(used, int) and used >= cap)
+        if clipped:
             content += TRUNCATION_NOTE
         return content

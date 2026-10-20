@@ -458,12 +458,30 @@ def narration_payload(record: dict) -> dict:
     }
 
 
+# Measured against the live gateway on the canonical question, because the
+# default cap of 900 was clipping every narration this platform had ever
+# produced -- and clipping it inside "what it does not show", the half that
+# carries the caveats. The narration spends ~1800 completion tokens: at a cap
+# of 1800 it spends all 1800 and stops mid-word; at 3000 it spends 1768 and
+# ends on a finished sentence. This is the longest single thing the platform
+# asks a model for, so it is the one call that needs its own budget.
+NARRATION_MAX_TOKENS = 3000
+
+# The same measurement: ~24 s, against a default of 25 s chosen for short calls
+# like question parsing. These two numbers are a pair -- raising the cap without
+# the timeout converts a silent truncation into a timeout, which is how this was
+# first found. Kept here rather than in the page so they cannot drift apart.
+NARRATION_TIMEOUT_S = 90
+
+
 def narrate(record: dict, client, question: str = "") -> str:
     """Ask a language model to read the record back in prose.
 
     Raises whatever the client raises. The caller decides what a failed
     narration means; for this project it means the page renders without one,
     because every number on it was computed without a model.
+
+    The client should be built with `NARRATION_TIMEOUT_S`; see the constant.
     """
     ask = question.strip() or (
         "Summarise what this screen found, what it does not show, and the "
@@ -472,7 +490,8 @@ def narrate(record: dict, client, question: str = "") -> str:
         {"role": "system", "content": NARRATION_SYSTEM},
         {"role": "user",
          "content": f"Evidence JSON:\n{json.dumps(narration_payload(record))}\n"
-                    f"User question: {ask[:2000]}"}])
+                    f"User question: {ask[:2000]}"}],
+        max_tokens=NARRATION_MAX_TOKENS)
 
 
 def exportable(record: dict) -> dict:

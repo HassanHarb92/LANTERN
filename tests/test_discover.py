@@ -18,6 +18,7 @@ from lantern.design import SELECTION_IS_NOT_AFFINITY
 from lantern.discover import (LANTHANIDE_ELEMENTS, PREDICTION_HAS_NO_METAL,
                               SIZE_MATCH_IS_NOT_BINDING, SIZE_RANK_SELF_CHECK,
                               SPHERE_CLOSED_AROUND_THE_DEPOSITED_ION,
+                              NARRATION_MAX_TOKENS, NARRATION_TIMEOUT_S,
                               _element_of, _rank_of, answer, exportable,
                               headline, narrate, narration_payload)
 from lantern.models import Protein
@@ -359,13 +360,13 @@ class StubClient:
     """Records the one call `narrate` makes instead of answering it."""
 
     def __init__(self, reply="a summary"):
-        self.reply, self.messages = reply, None
+        self.reply, self.messages, self.kwargs = reply, None, None
 
     def configured(self):
         return True
 
     def chat(self, messages, **kwargs):
-        self.messages = messages
+        self.messages, self.kwargs = messages, kwargs
         return self.reply
 
 
@@ -435,3 +436,21 @@ class TestTheNarrationCannotSmuggleInFacts:
         narrate(run, client, question="x" * 5000)
         assert "x" * 2000 in client.messages[1]["content"]
         assert "x" * 2001 not in client.messages[1]["content"]
+
+    def test_it_asks_for_a_budget_the_narration_actually_fits_in(self, run):
+        """Measured live: this narration spends ~1800 completion tokens, so
+        the clients' default of 900 cut every one of them off mid-caveat. The
+        cap has to be sent explicitly or the default silently returns."""
+        client = StubClient()
+        narrate(run, client)
+        assert client.kwargs["max_tokens"] == NARRATION_MAX_TOKENS
+        assert NARRATION_MAX_TOKENS > 1800, (
+            "the measured spend; a cap at or below it truncates")
+
+    def test_the_timeout_leaves_room_for_the_measured_call(self, run):
+        """The cap and the timeout are a pair. Raising one without the other
+        converts a silent truncation into a timeout, which is how the
+        truncation was found in the first place."""
+        assert NARRATION_TIMEOUT_S >= 60, (
+            "the narration takes ~24 s against a 25 s default built for "
+            "question parsing; it needs its own headroom")

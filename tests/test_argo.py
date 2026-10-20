@@ -301,10 +301,18 @@ class TestConfiguration:
 
 
 class TestTruncationDisclosure:
-    """Argo is OpenAI-shaped, so it reports a clipped completion as
-    finish_reason "length". The README promises all three providers disclose
-    truncation; without this the default provider would be the one that
-    silently renders a narration cut off where its caveat belonged."""
+    """The README promises all three providers disclose truncation; without it
+    the default provider is the one that silently renders a narration cut off
+    where its caveat belonged.
+
+    Argo is OpenAI-shaped but does not report truncation the way the API it
+    imitates does. Measured live: a completion stopped at exactly the cap comes
+    back finish_reason "stop", with usage.completion_tokens equal to the cap
+    and the text ending mid-word -- at caps of 60, 400 and 900 alike. These
+    tests therefore cover the token-count signal first; the finish_reason case
+    is kept because it is correct elsewhere, but on this gateway it never
+    fires, and a suite that only exercised it passed while every live
+    narration was being silently cut."""
 
     @staticmethod
     def _respond(monkeypatch, body):
@@ -330,6 +338,50 @@ class TestTruncationDisclosure:
     def test_complete_answer_is_not_annotated(self, monkeypatch):
         self._respond(monkeypatch, {
             "id": "chatcmpl-ok", "usage": {"total_tokens": 900},
+            "choices": [{"finish_reason": "stop", "message": {"content": "A full answer."}}]})
+        assert ArgoClient(user="u", model="gpt-4o").chat(
+            [{"role": "user", "content": "x"}]) == "A full answer."
+
+    def test_spending_the_whole_budget_is_disclosed_despite_stop(self, monkeypatch):
+        """The live failure, reproduced: the gateway says "stop" on a
+        completion it clipped, and only the token count gives it away."""
+        self._respond(monkeypatch, {
+            "id": "chatcmpl-ok",
+            "usage": {"completion_tokens": 900, "total_tokens": 5085},
+            "choices": [{"finish_reason": "stop",
+                         "message": {"content": "What it does not show: the sho"}}]})
+        out = ArgoClient(user="u", model="gpt-4o").chat(
+            [{"role": "user", "content": "x"}], max_tokens=900)
+        assert "truncated" in out
+
+    def test_an_answer_short_of_the_budget_is_left_alone(self, monkeypatch):
+        self._respond(monkeypatch, {
+            "id": "chatcmpl-ok",
+            "usage": {"completion_tokens": 5, "total_tokens": 25},
+            "choices": [{"finish_reason": "stop", "message": {"content": "OK."}}]})
+        assert ArgoClient(user="u", model="gpt-4o").chat(
+            [{"role": "user", "content": "x"}], max_tokens=800) == "OK."
+
+    def test_it_measures_against_the_cap_actually_sent(self, monkeypatch):
+        """Anthropic models have their cap lowered to ANTHROPIC_MAX_TOKENS on
+        the way out. Comparing with the caller's argument instead of the sent
+        value would miss every clip the lowered cap causes -- which is every
+        clip, for the whole claude family."""
+        self._respond(monkeypatch, {
+            "id": "chatcmpl-ok",
+            "usage": {"completion_tokens": argo.ANTHROPIC_MAX_TOKENS,
+                      "total_tokens": argo.ANTHROPIC_MAX_TOKENS + 10},
+            "choices": [{"finish_reason": "stop", "message": {"content": "cut off here"}}]})
+        out = ArgoClient(user="u", model="claudeopus5").chat(
+            [{"role": "user", "content": "x"}],
+            max_tokens=argo.ANTHROPIC_MAX_TOKENS * 2)
+        assert "truncated" in out
+
+    def test_missing_usage_does_not_crash_the_call(self, monkeypatch):
+        """A gateway that omits usage must still return the answer; the
+        disclosure is best-effort, the content is not."""
+        self._respond(monkeypatch, {
+            "id": "chatcmpl-ok",
             "choices": [{"finish_reason": "stop", "message": {"content": "A full answer."}}]})
         assert ArgoClient(user="u", model="gpt-4o").chat(
             [{"role": "user", "content": "x"}]) == "A full answer."

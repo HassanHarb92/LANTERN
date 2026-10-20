@@ -17,8 +17,8 @@ import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
 from lantern.catalog import load_reference
-from lantern.discover import (NARRATION_IS_NOT_A_SOURCE, answer, exportable,
-                              headline, narrate)
+from lantern.discover import (NARRATION_IS_NOT_A_SOURCE, NARRATION_TIMEOUT_S,
+                              answer, exportable, headline, narrate)
 from lantern.geometry import SCORE_VERSION
 from lantern.llm import LLMError, PROVIDERS, make_client, provider_status
 from lantern.plan import SOURCE_LLM, TARGETS
@@ -332,9 +332,15 @@ for tab, ev in zip(tabs, record["evidence"]):
         # Keyed on the accession so a new structure starts at its own opening
         # site. Without that, two entries with the same number of sites share
         # a widget identity and the second one inherits the first's selection.
+        # `v=views` binds this structure's labels now. A bare `views[i]` would
+        # close over the loop variable, so every structure's formatter would
+        # read the last structure's list -- harmless while Streamlit calls it
+        # inside this line, wrong the moment anything calls it later, and an
+        # IndexError when an earlier structure has more sites than the last
+        # one (8FNR has 15, 8FNS has 5).
         chosen = st.selectbox(
             "View", range(len(views)), index=opening,
-            format_func=lambda i: views[i], key=f"view_{ev['accession']}",
+            format_func=lambda i, v=views: v[i], key=f"view_{ev['accession']}",
             help="Pick a metal site to see its first coordination shell, or "
                  "keep the whole fold for orientation.")
         if chosen == 0:
@@ -429,7 +435,12 @@ ask = st.text_input("Anything specific you want addressed?",
 if st.button(f"✨ Summarise with {llm.label}", disabled=not llm.configured()):
     try:
         with st.spinner("Reading the evidence…"):
-            st.session_state.narration = narrate(record, llm, ask)
+            # A separate client, because this is the one long call on the page
+            # (~24 s measured) and the shared one is sized for question
+            # parsing. Giving the shared client this timeout would let a dead
+            # gateway stall the question box for a minute and a half.
+            narrator = make_client(provider, timeout=NARRATION_TIMEOUT_S)
+            st.session_state.narration = narrate(record, narrator, ask)
     except LLMError as exc:
         st.error(str(exc))
     except Exception as exc:
