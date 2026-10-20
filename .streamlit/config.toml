@@ -6,3 +6,8 @@ textColor = "#EFF6F5"
 font = "sans serif"
 [server]
 headless = true
+# Serves ./static at /app/static. The binding-site viewer loads its copy of
+# 3Dmol.js from there, so the one externally-hosted asset the demo depended on
+# is gone and the whole core workflow -- reference set, cached structures,
+# coordination analysis, viewer -- runs with no network at all.
+enableStaticServing = true
