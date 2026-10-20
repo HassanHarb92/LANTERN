@@ -1334,7 +1334,7 @@ CN 9** — they run CN 0–4 with `other_ligand_donor_count` 0, i.e. bare surfac
 chelator flag correctly declined to fire on. Both DOTA entries are caught 4/4 by the chelator flag.
 **0 false positives on 12 entries of known-artefact ground truth.**
 
-**There is no fifth family in Corpus A.** With keywords added the shortlist is **60 strong, 0
+**No fifth family has turned up in Corpus A.** With keywords added the shortlist is **60 strong, 0
 family, 2 supporting, 574 none** — double the first run — and all 62 have now been read
 individually. The entries outside the four known families return no new natural biology. What they
 return is the non-biology classes, now identifiable rather than merely unclassified: twelve
@@ -1347,6 +1347,29 @@ Fe³⁺ site), and soaks.
 **Raising *n* beyond four requires enlarging the corpus, not re-reading it** — the PDB contains
 four natural lanthanide protein families and a great deal of lanthanide reagent.
 
+> **How far that claim actually reaches, measured.** "No fifth family in Corpus A" is a statement
+> about the corpus; the evidence is that every *shortlisted* entry was read. Those are not the same
+> thing unless the shortlist recalls everything worth reading, which was never checked. It can be
+> checked, because geometry-v2 shares none of the shortlist's four signals — it is coordination
+> geometry, they are depositor vocabulary — so the two disagreeing is informative. Of the 1667
+> scoreable lanthanide sites, **174 reach CN ≥ 9, and 81 of them, in 38 entries, sit in entries the
+> shortlist tiered `none`.** `scripts/curate_corpus.py` prints this as a recall audit and
+> `tests/test_corpus.py` pins the three counts, so improving the signals forces this number to be
+> restated rather than quietly dropped.
+>
+> The case that exposed it: **5HLK** is EcoRV–DNA–Lu with *cleaved* substrate, the same experiment
+> and the same Lu site as the shortlisted 5F8A, and **not one of the four signals fired on it** —
+> 5F8A reached the shortlist only because its depositors happened to put the word "Lanthanide" in
+> the title. A whole category is invisible this way: lanthanides substituted into the catalytic
+> Mg²⁺ sites of nucleases and ribozymes, which depositors describe as "Lutetium", "two metal ions",
+> "di- and trivalent metal ions". None of the 38 looks like a fifth natural family on its title —
+> they are Dps/Dpr iron-storage proteins, aldehyde dehydrogenases, an LBT nanobody fusion (6Y1R
+> "Nb22-LBT"), a surface gadolinium cluster (4AHX) — so the conclusion survives. **The confidence
+> behind it does not: it rests on a shortlist with measured imperfect recall, and the honest
+> statement is that no fifth family has been found by either of two independent probes.** Reading
+> those 38 is the next curation step, and a better-ordered one than the unclassified tail, because
+> the score chose them.
+
 The last six were the ones whose titles promised least, and they are worth naming because reading
 them is what turns "no fifth family" from an inference into a check. **4IRW** co-crystallizes
 streptavidin with a Tb–dipicolinate complex; **7O9P** is an adhesin A-domain whose own keywords say
@@ -1358,7 +1381,11 @@ selected DNA aptamer, which the scheme could not express either, even after lact
 pushed it from four classes to five — hence a sixth, `not_protein`. The parse agrees with the
 metadata there from the coordinates alone: that site's signature is `DC15;DG17;DC18`. It also
 exposes a parser limitation worth naming, since those three nucleotides are counted in
-`protein_donor_count` — the count keys on polymer residues without asking which polymer.
+`protein_donor_count` — the count keys on polymer residues without asking which polymer. Scope
+measured and pinned by a test: **22 sites in 10 entries**, all of them lanthanide, **none in the
+four families and none in the 55 calcium accessions**, so the contrast and everything derived from
+it are untouched. One site changes if the nucleotide is excluded — 5HLK's Lu, CN 9 → 8 — and that
+entry turns out not to have been shortlisted at all, which is what led to the recall audit above.
 
 Two findings came out of those six that the four families could not have produced:
 
@@ -1822,10 +1849,12 @@ These are cheap, they are what unblocks the headline screen, and none of them ne
   of inside it. The same six showed the chelator filter is load-bearing: 4IRW has 8 CN ≥ 9 sites
   with zero protein donors, all cage, all filtered — a failure the 28 crystallophore sites (CN 0–4)
   could never have caught.
-- **Still open:** *n* = 4 and Corpus A has no fifth family — all 62 shortlisted entries have now
-  been read, and the ones outside the four families are phasing reagents, designed binders, NMR
-  tags, a metal-substituted catalytic site and one DNA aptamer (§3.19). Raising *n* further means
-  **enlarging the corpus**, not re-reading it.
+- **Still open:** *n* = 4 and no fifth family has been found by either of two independent probes —
+  all 62 shortlisted entries are read (phasing reagents, designed binders, NMR tags, a
+  metal-substituted catalytic site, one DNA aptamer), and a recall audit of the shortlist against
+  geometry-v2 turned up **38 further entries the signals never proposed and the score flags**, none
+  of which looks like natural lanthanide biology either (§3.19). Reading those 38 is the next
+  curation step. Raising *n* further still means **enlarging the corpus**.
 
 > **Two external baselines to beat, both verified to exist.** A descriptor that cannot outperform
 > these is not worth shipping.

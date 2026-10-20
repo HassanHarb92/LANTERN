@@ -104,7 +104,7 @@ REE-Finder/
 ├── data/assembly_counts.json     # Chains deposited vs chains in the biological assembly, per entry
 ├── data/curation_candidates.json # Four structured signals per entry, tiered for hand-curation
 ├── data/curation_verdicts.json   # The hand verdicts reached, with evidence; overrides the title pass
-├── tests/                        # Offline regression tests (129, no network)
+├── tests/                        # Offline regression tests (131, no network)
 ├── docs/SCIENTIFIC_CONTRACT.md   # Scientific claims and evidence gates
 ├── ROADMAP.md                    # Verified state, defects, milestones M0-M6
 ├── IMPLEMENTATION_PLAN.md        # Earlier aspirational plan, superseded in part
@@ -231,6 +231,14 @@ pytest -q
   label is carried beside the call rather than folded into it. The same six entries are what shows
   the chelator refusal is load-bearing: 4IRW's Tb–dipicolinate cage produces **8 sites at CN ≥ 9
   with zero protein donors**, and the filter removes all of them.
+- **How far "no fifth family" reaches, measured rather than asserted.** That claim rested on having
+  read every shortlisted entry — which says nothing about entries the shortlist never proposed. The
+  shortlist keys on depositor vocabulary and `geometry-v2` keys on coordination geometry, so the
+  two can audit each other: of 1667 scoreable lanthanide sites, 174 reach CN ≥ 9 and **81 of them,
+  in 38 entries, were tiered "not worth reading"**. None looks like natural lanthanide biology, so
+  the conclusion holds — but it now rests on two independent probes instead of one shortlist, and
+  reading those 38 is the next curation step. `scripts/curate_corpus.py` prints the audit; the
+  counts are pinned by tests so that improving recall forces the number to be restated.
 - Argo text explanations constrained to screening output, with rejected credentials failing closed.
 
 ## Measured baseline

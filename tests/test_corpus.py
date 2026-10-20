@@ -359,3 +359,84 @@ def test_the_positive_class_is_never_admitted_on_its_own_geometry():
                 f"{pdb_id} is confirmed into the positive class on "
                 f"{term.strip()!r}, which the contrast then measures")
     assert checked, "no positive-class verdict to check -- test is vacuous"
+
+
+CANDIDATES = ROOT / "data" / "curation_candidates.json"
+
+
+@pytest.mark.skipif(not TABLE.exists(), reason="site table not built")
+@pytest.mark.skipif(not CANDIDATES.exists(), reason="shortlist not built")
+def test_the_shortlist_misses_entries_the_score_itself_flags():
+    """Reading all of the shortlist says nothing about what it never proposed.
+
+    §3.19 claims there is no fifth family *in Corpus A*, and the evidence is
+    that every shortlisted entry was read. That is a claim about the corpus
+    resting on a shortlist whose recall was never measured. Measuring it
+    against geometry-v2 -- which shares none of the shortlist's four signals,
+    being coordination geometry rather than depositor vocabulary -- puts a
+    number on the gap, and the number is not zero.
+
+    The exact counts are pinned deliberately. If someone widens the signals,
+    this test fails and the roadmap's number has to move with it; silently
+    improving recall while §3.19 still quotes 38 is the failure mode.
+    """
+    import pandas as pd
+    entries = json.loads(CANDIDATES.read_text())["entries"]
+    tier = {p.upper(): e["tier"] for p, e in entries.items()}
+
+    frame = pd.read_parquet(TABLE)
+    lanthanide = frame[frame["family"] == "lanthanide"]
+    scoreable = lanthanide[~lanthanide["chelator_flagged"]
+                           & (lanthanide["resolution_A"] <= 2.5)]
+    hits = scoreable[scoreable["coordination_number"] >= 9]
+    missed = hits[hits["pdb_id"].str.upper().map(
+        lambda p: tier.get(p, "none")) == "none"]
+
+    assert len(hits) == 174, len(hits)
+    assert len(missed) == 81, len(missed)
+    assert missed["pdb_id"].nunique() == 38, missed["pdb_id"].nunique()
+
+    # The case that exposed it: same experiment as a shortlisted entry, same
+    # Lu site, and not one of the four signals fired on it.
+    assert tier["5HLK"] == "none"
+    assert entries["5HLK"]["matched"] == {}
+    assert "5HLK" in set(missed["pdb_id"].str.upper())
+
+
+@pytest.mark.skipif(not TABLE.exists(), reason="site table not built")
+def test_nucleotide_donors_are_counted_as_protein_donors():
+    """A known parser limitation, pinned to the scope at which it is harmless.
+
+    `protein_donor_count` keys on polymer residues without asking which
+    polymer, so a lanthanide contacting DNA or RNA has those contacts counted
+    as protein donors. Found via 7QB3, a DNA aptamer whose site signature is
+    `DC15;DG17;DC18`.
+
+    What makes it tolerable is not that it is rare but *where* it falls: no
+    site in the four lanthanide families and none in the 55 calcium
+    accessions is affected, so the §3.17/§3.19 contrast and every number
+    derived from it are untouched. That is the property worth pinning -- if a
+    future corpus puts a nucleic-acid complex into the contrast, this fails
+    before the descriptors go wrong.
+    """
+    import re
+    import pandas as pd
+    from scripts.selectivity_contrast import FAMILIES
+
+    nucleotides = {"DA", "DC", "DG", "DT", "DU", "A", "C", "G", "U"}
+
+    def nucleotide_donors(signature):
+        if not signature:
+            return 0
+        return sum(re.sub(r"\d+$", "", token) in nucleotides
+                   for token in str(signature).split(";"))
+
+    frame = pd.read_parquet(TABLE)
+    affected = frame[frame["site_signature"].map(nucleotide_donors) > 0]
+    assert len(affected) == 22, len(affected)
+    assert affected["pdb_id"].nunique() == 10, affected["pdb_id"].nunique()
+    assert not set(affected["pdb_id"].str.upper()) & set(FAMILIES), (
+        "a nucleic-acid complex entered the positive class of the contrast")
+    # The other arm: no calcium site is affected either, so the 55-accession
+    # denominator is clean for the same reason.
+    assert set(affected["family"]) == {"lanthanide"}, set(affected["family"])

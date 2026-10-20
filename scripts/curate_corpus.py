@@ -65,6 +65,7 @@ GRAPHQL = "https://data.rcsb.org/graphql"
 ENUMERATION = ROOT / "data" / "ree_pdb_entries.json"
 DEFAULT_OUT = ROOT / "data" / "curation_candidates.json"
 VERDICTS = ROOT / "data" / "curation_verdicts.json"
+TABLE = ROOT / "data" / "lanthanide_sites.parquet"
 BATCH = 50
 TIMEOUT = 90
 
@@ -274,7 +275,52 @@ def main() -> int:
             print(f"  {tier:11s} {len(done):3d} verdicted, {len(todo):3d} to read"
                   + (f": {', '.join(todo[:12])}"
                      + (" ..." if len(todo) > 12 else "") if todo else ""))
+    report_recall(tiers)
     return 0
+
+
+def report_recall(tiers: dict[str, list[str]]) -> None:
+    """Score the shortlist against geometry-v2, which does not use its signals.
+
+    Reading the whole shortlist says nothing about the entries the shortlist
+    never proposed, and "no fifth family in Corpus A" is a claim about the
+    corpus, not about the shortlist. The four signals here are vocabulary
+    matches on depositor prose; the score is coordination geometry. They are
+    independent enough that disagreement is informative, so: how many sites
+    does geometry-v2 call lanthanide-like inside entries tiered `none`?
+
+    Found by accident and worth keeping automatic. 5F8A reached the shortlist
+    because its depositors wrote "Lanthanide binding to EcoRV-DNA complex
+    inhibits cleavage" in the title. 5HLK is the same experiment on cleaved
+    substrate, matched NO signal at all, and holds the same Lu site.
+    """
+    if not TABLE.is_file():
+        return
+    import pandas as pd
+
+    tier_of = {p.upper(): t for t, ids in tiers.items() for p in ids}
+    frame = pd.read_parquet(TABLE)
+    lanthanide = frame[frame["family"] == "lanthanide"]
+    # The refusals the shipped score applies before it will call anything.
+    scoreable = lanthanide[~lanthanide["chelator_flagged"]
+                           & (lanthanide["resolution_A"] <= 2.5)]
+    hits = scoreable[scoreable["coordination_number"] >= 9]
+    missed = hits[hits["pdb_id"].str.upper().map(
+        lambda p: tier_of.get(p, "none")) == "none"]
+
+    print(f"\nrecall audit -- geometry-v2 against this shortlist, on "
+          f"{len(scoreable)} scoreable Ln sites:")
+    print(f"  {len(hits)} sites reach CN >= 9, in "
+          f"{hits['pdb_id'].nunique()} entries")
+    print(f"  of those, {len(missed)} sites in {missed['pdb_id'].nunique()} "
+          f"entries are in entries this shortlist tiered `none`")
+    if len(missed):
+        print("  the score flags them and the signals never proposed them, so "
+              "they are unread\n  for a reason the shortlist cannot see. "
+              "Highest-count entries:")
+        for pdb_id, n in missed["pdb_id"].value_counts().head(8).items():
+            title = frame.loc[frame["pdb_id"] == pdb_id, "title"].iloc[0]
+            print(f"    {pdb_id} {n:>3} sites  {title[:58]}")
 
 
 if __name__ == "__main__":
