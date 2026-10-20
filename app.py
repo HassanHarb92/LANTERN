@@ -14,10 +14,8 @@ from lantern.geometry import SCORE_VERSION, score_site
 from lantern.structure import (ALL_METAL_CODES, fetch_structure, binding_neighborhood,
                                  resolution_from_coordinates)
 from lantern.uniprot import TOPICS
-
-# Pinned rather than floating: an unversioned third-party script can change
-# under the demo. Vendor this locally before any judged or offline run.
-TMOL_SRC = "https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js"
+from lantern.viewer import (RARE_EARTH_ELEMENTS, overview_html, site_viewer_html,
+                              viewer_spec)
 
 load_dotenv()
 st.set_page_config(page_title="LANTERN · Protein Discovery", page_icon="🧬", layout="wide")
@@ -28,6 +26,33 @@ st.markdown("""<style>
 .small{color:#a9bcc9;font-size:.86rem}
 </style>""", unsafe_allow_html=True)
 st.markdown('<div class="hero"><h1>🧬 LANTERN</h1><p>Lanthanide-Aware Network for Targeted Exploration and Recognition in Nature · Chemistry-guided · Evidence-aware</p></div>', unsafe_allow_html=True)
+
+
+def embed(html: str, height: int) -> None:
+    """Put a self-contained HTML document on the page, inside an iframe.
+
+    Streamlit has renamed this API twice, and requirements.txt allows any
+    1.x, so resolve it in order instead of pinning one spelling. st.iframe is
+    current and does take a raw HTML string -- anything that is not a URL, a
+    "/" path or a Path is embedded as HTML. st.components.v1.html is the old
+    name, and it is a deprecate_func_name shim whose stated removal date of
+    2026-06-01 has passed, so prefer the st._main._html it delegates to over
+    the shim itself. st.html is not a candidate at any version: it is not
+    iframed and it drops the <script> that draws the scene.
+
+    The iframe is *not* a security boundary. Streamlit's own warning on both
+    functions is that it "allows JavaScript execution and same-origin access
+    to the Streamlit app", so a script that got in could reach the parent
+    document. What makes a deposited coordinate file safe to embed is
+    viewer._js(), which escapes < > & so the text can neither leave its JSON
+    string literal nor close the <script> element around it.
+    """
+    iframe = getattr(st, "iframe", None)
+    if iframe is not None:
+        iframe(html, height=height)
+        return
+    renderer = getattr(getattr(st, "_main", None), "_html", None) or components.html
+    renderer(html, height=height)
 
 
 @st.cache_data(ttl=300, show_spinner=False)
@@ -138,55 +163,86 @@ with tab2:
             st.warning(f"Could not load structure: {type(exc).__name__}.")
     if st.session_state.get("coords") and st.session_state.get("pdb_id") == pdb_id.upper():
         text, fmt = st.session_state.coords
-        # Embed coordinates as a JSON literal; never inject fetched metadata as HTML.
-        coords_js = json.dumps(text)
-        html = f'''<div id="viewer" style="width:100%;height:460px;background:#0c1424;border-radius:12px"></div>
-<script src="{TMOL_SRC}"></script>
-<script>const v=$3Dmol.createViewer(document.getElementById('viewer'),{{backgroundColor:'#0c1424'}});
-v.addModel({coords_js},'{fmt}');v.setStyle({{}},{{cartoon:{{color:'spectrum'}}}});
-v.addStyle({{hetflag:true}},{{sphere:{{scale:0.45}}}});v.zoomTo();v.render();</script>'''
-        components.html(html, height=480)
+        # Parse before drawing: the site list decides what the viewer offers.
+        sites, calls, parse_error = [], [], None
         try:
             sites = binding_neighborhood(text, fmt, metals=ALL_METAL_CODES)
-            if sites:
-                # RCSB serves the deposited asymmetric unit here, not the
-                # biological assembly, so every call made on this page is
-                # marked "asu" and geometry-v2 downgrades its negatives.
-                resolution = resolution_from_coordinates(text, fmt)
-                calls = [score_site(s, resolution_A=resolution, coordinate_source="asu")
-                         for s in sites]
-                st.success(f"Found {len(sites)} deposited metal site(s) in these coordinates.")
-                st.dataframe(pd.DataFrame([{
-                    "Element": s["element"], "Chain": s["chain"], "Site": s["site"],
-                    "Coordination number": s["coordination_number"],
-                    "Bidentate carboxylates": s["chemistry"]["bidentate_carboxylates"],
-                    "Protein donors": s["protein_donor_count"],
-                    "Water donors": s["water_donor_count"],
-                    "Mean donor distance (Å)": s["mean_donor_distance_A"],
-                    f"{SCORE_VERSION} call": c["call"],
-                    "Call reliable": c["call_reliable"],
-                } for s, c in zip(sites, calls)]), width='stretch', hide_index=True)
-                st.caption("Coordination number counts O/N/S first-shell donors within 3.2 Å, waters "
-                           "included. Biological lanthanide sites typically show CN 9–10; calcium "
-                           "sites in the same fold show CN ≈ 7.")
-                st.markdown(f"**{SCORE_VERSION}** calls a site lanthanide-like when it reaches "
-                            "**CN ≥ 9** — the one descriptor of nine that separates four natural "
-                            "lanthanide families from all 55 calcium accessions with no overlap "
-                            "(ROADMAP §3.19). Bidentate carboxylate count was scored in v1 and "
-                            "was dropped when a fourth family turned out to reach CN 9 using "
-                            "five *monodentate* carboxylates; at a threshold low enough to keep "
-                            "that family, 30 of the 55 calcium accessions pass it too. It is "
-                            "shown above, with net charge and solvent accessibility below, and "
-                            "all three are deliberately **not** scored.")
-                shown = {c for call in calls for c in call["caveats"]}
-                st.warning("  \n".join(f"• {c}" for c in sorted(shown)))
-                with st.expander("Per-site donor atoms and full geometry-v2 output"):
-                    st.json([{"site": s, SCORE_VERSION: c} for s, c in zip(sites, calls)])
-            else:
-                st.info("No deposited rare-earth or calcium ions found. No hypothetical "
-                        "coordinates have been invented.")
+            # RCSB serves the deposited asymmetric unit here, not the
+            # biological assembly, so every call made on this page is
+            # marked "asu" and geometry-v2 downgrades its negatives.
+            resolution = resolution_from_coordinates(text, fmt)
+            calls = [score_site(s, resolution_A=resolution, coordinate_source="asu")
+                     for s in sites]
         except Exception as exc:
-            st.warning(f"Coordinate parsing unavailable: {type(exc).__name__}")
+            parse_error = type(exc).__name__
+
+        views = ["Whole structure"] + [
+            f"{s['element']} {s['site']} · chain {s['chain']} — CN {s['coordination_number']}"
+            for s in sites]
+        # Open on a site rather than the fold: the question this page exists
+        # to answer is where the element binds, and a whole-chain cartoon does
+        # not answer it. Prefer a rare-earth site; fall back to the first site
+        # of any element, so a calcium-only structure still opens on a shell.
+        opening = next((i for i, s in enumerate(sites, start=1)
+                        if s["element"] in RARE_EARTH_ELEMENTS), 1 if sites else 0)
+        # Keyed on the accession so a new structure starts at its own opening
+        # site. Without that, two entries with the same number of sites share
+        # a widget identity and the second one inherits the first's selection.
+        chosen = st.selectbox("View", range(len(views)), index=opening,
+                              format_func=lambda i: views[i],
+                              key=f"site_view_{st.session_state.get('pdb_id')}",
+                              help="Pick a metal site to see its first coordination shell, "
+                                   "or keep the whole fold for orientation.")
+        if chosen == 0:
+            embed(overview_html(text, fmt, sites), 480)
+            if sites:
+                st.caption("Every deposited metal is marked and named. Select one above to see "
+                           "the donor atoms it binds and the distance to each.")
+        else:
+            site = sites[chosen - 1]
+            call = calls[chosen - 1] if calls else None
+            embed(site_viewer_html(text, fmt, site, call=call), 620)
+            st.caption(f"**{site['element']} {site['site']}, chain {site['chain']}** — "
+                       f"{viewer_spec(site)['summary']}. Dashed bonds run from the ion to each "
+                       "O/N/S atom within 3.2 Å; the view is cropped to that first shell, so "
+                       "atoms further out are not drawn. Distances are measured from the "
+                       "deposited coordinates, not modelled.")
+            if call:
+                st.caption(f"{SCORE_VERSION} call for this site: **{call['call']}**"
+                           f"{'' if call['call_reliable'] else ' — not reliable from these coordinates'}.")
+        if parse_error:
+            st.warning(f"Coordinate parsing unavailable: {parse_error}")
+        elif sites:
+            st.success(f"Found {len(sites)} deposited metal site(s) in these coordinates.")
+            st.dataframe(pd.DataFrame([{
+                "Element": s["element"], "Chain": s["chain"], "Site": s["site"],
+                "Coordination number": s["coordination_number"],
+                "Bidentate carboxylates": s["chemistry"]["bidentate_carboxylates"],
+                "Protein donors": s["protein_donor_count"],
+                "Water donors": s["water_donor_count"],
+                "Mean donor distance (Å)": s["mean_donor_distance_A"],
+                f"{SCORE_VERSION} call": c["call"],
+                "Call reliable": c["call_reliable"],
+            } for s, c in zip(sites, calls)]), width='stretch', hide_index=True)
+            st.caption("Coordination number counts O/N/S first-shell donors within 3.2 Å, waters "
+                       "included. Biological lanthanide sites typically show CN 9–10; calcium "
+                       "sites in the same fold show CN ≈ 7.")
+            st.markdown(f"**{SCORE_VERSION}** calls a site lanthanide-like when it reaches "
+                        "**CN ≥ 9** — the one descriptor of nine that separates four natural "
+                        "lanthanide families from all 55 calcium accessions with no overlap "
+                        "(ROADMAP §3.19). Bidentate carboxylate count was scored in v1 and "
+                        "was dropped when a fourth family turned out to reach CN 9 using "
+                        "five *monodentate* carboxylates; at a threshold low enough to keep "
+                        "that family, 30 of the 55 calcium accessions pass it too. It is "
+                        "shown above, with net charge and solvent accessibility below, and "
+                        "all three are deliberately **not** scored.")
+            shown = {caveat for c in calls for caveat in c["caveats"]}
+            st.warning("  \n".join(f"• {c}" for c in sorted(shown)))
+            with st.expander("Per-site donor atoms and full geometry-v2 output"):
+                st.json([{"site": s, SCORE_VERSION: c} for s, c in zip(sites, calls)])
+        else:
+            st.info("No deposited rare-earth or calcium ions found. No hypothetical "
+                    "coordinates have been invented.")
         st.download_button(f"Download deposited {fmt.upper()}", text,
                            file_name=f"{pdb_id.upper()}.{fmt}")
 with tab3:

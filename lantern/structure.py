@@ -183,8 +183,13 @@ def _parse(text: str, fmt: str):
     return parser.get_structure("protein", io.StringIO(text))
 
 
-def _donor_class(donor: dict) -> str:
-    """Chemical class of one first-shell donor atom."""
+def donor_class(donor: dict) -> str:
+    """Chemical class of one first-shell donor atom.
+
+    Public because the viewer colours the coordination shell by this, and a
+    second copy of the rules would be free to drift from the one the chemistry
+    counts use.
+    """
     if donor["kind"] != "protein":
         return donor["kind"]  # water / ligand
     key = (donor["residue"].strip().upper(), donor["atom"].strip().upper())
@@ -210,7 +215,7 @@ def donor_chemistry(donors: list[dict]) -> dict:
     case, and dividing by it would discard exactly that signal. Aggregate the
     counts across sites instead.
     """
-    classes = [_donor_class(d) for d in donors]
+    classes = [donor_class(d) for d in donors]
     counts = {name: classes.count(name) for name in
               ("carboxylate", "backbone_carbonyl", "sidechain_amide",
                "hydroxyl", "water", "ligand", "other")}
@@ -394,7 +399,11 @@ def binding_neighborhood(coordinate_text: str, fmt: str = "pdb",
             donors.append({"kind": kind, "chain": residue.parent.id,
                            "residue_number": residue.id[1], "residue": residue.resname,
                            "atom": atom.get_id(), "element": (atom.element or "").strip().upper(),
-                           "distance_A": round(distance, 2)})
+                           "distance_A": round(distance, 2),
+                           # float() per the note in _sasa_by_ion: Bio.PDB hands
+                           # back numpy scalars, which survive every in-process
+                           # check and then fail at json.dump().
+                           "xyz": [round(float(c), 3) for c in atom.coord]})
 
         donors.sort(key=lambda d: d["distance_A"])
         counts = {k: sum(1 for d in donors if d["kind"] == k) for k in ("protein", "water", "ligand")}
@@ -406,6 +415,10 @@ def binding_neighborhood(coordinate_text: str, fmt: str = "pdb",
             "element": table[resname],
             "chain": ion.parent.parent.id,
             "site": str(ion.parent.id[1]),
+            # Deposited position of the ion. Carried so the viewer can draw the
+            # coordination shell without re-parsing the file; it is the same
+            # frame as the coordinate text handed to 3Dmol, so they align.
+            "xyz": [round(float(c), 3) for c in ion.coord],
             "coordination_number": len(donors),
             "protein_donor_count": counts["protein"],
             "water_donor_count": counts["water"],

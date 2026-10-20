@@ -4,7 +4,7 @@
 
 **An evidence-aware prototype for exploring naturally occurring rare-earth-binding proteins.**
 
-This is a *prototype*, not a validated discovery pipeline. It includes a working web UI, synthetic offline demo, live sequence retrieval from UniProt and InterPro, deterministic exploratory sequence scores, a structure viewer, first-shell coordination analysis of deposited rare-earth sites, and LLM-written explanations from Argonne Argo, OpenAI or Anthropic. **It does not yet compute a calibrated selectivity descriptor, experimentally grounded metal selectivity, or autonomous multi-tool planning.** See `ROADMAP.md` for the measured state of the code and the path to those.
+This is a *prototype*, not a validated discovery pipeline. It includes a working web UI, a fully offline demo over six authentic UniProt sequences, live sequence retrieval from UniProt and InterPro, deterministic exploratory sequence scores, first-shell coordination analysis of deposited rare-earth sites, a binding-site visualiser that draws each ion with a labelled bond to every donor it touches, and LLM-written explanations from Argonne Argo, OpenAI or Anthropic. **It does not yet compute a calibrated selectivity descriptor, experimentally grounded metal selectivity, or autonomous multi-tool planning.** See `ROADMAP.md` for the measured state of the code and the path to those.
 
 ## Quick start (macOS/Linux)
 
@@ -23,6 +23,18 @@ reference set is six **authentic UniProt sequences** — two lanmodulins, two ca
 negatives — screened offline with no network access. The scores are exploratory sequence heuristics
 and must never be described as measured binding or selectivity. No language model is needed for any
 of this.
+
+Then open **🔬 Protein explorer**, type `9PI2`, and click **View structure**. The viewer opens on
+the first rare-earth site and the **View** selector steps through the other seven. 9PI2 is the
+structure to look at first: three Nd³⁺ ions at coordination number 10, each with eight carboxylate
+oxygens, sitting in the same protein as a Ca²⁺ at CN 7. That gap is the entire thesis of the
+project, and it is the one thing a sequence score cannot see. Those four sites appear twice in the
+selector because the deposited asymmetric unit holds two copies of the chain, and the page analyses
+what was deposited rather than inventing a biological assembly. The two copies are not identical:
+all six Nd³⁺ read CN 10, but chain B's Ca²⁺ reads CN 5 against chain A's 7. That is the asymmetric-unit
+caveat in the flesh — coordination number from a deposition is a *lower bound* — which is why every
+call on this page is marked unreliable no matter which way it goes. `8FNR` (Dy), `8FNS` (Nd), `8DQ2` (La)
+and `1CLL` (calmodulin, calcium only) are cached too and need no network.
 
 ## Language model configuration
 
@@ -105,6 +117,7 @@ LANTERN/
 │   ├── uniprot.py                # UniProt search + InterPro family retrieval
 │   ├── structure.py              # Structure fetch + first-shell coordination analysis
 │   ├── geometry.py               # geometry-v2: the structural call, and what it refuses to score
+│   ├── viewer.py                 # Binding-site scene: pure spec, then the 3Dmol serialisation
 │   ├── llm.py                    # Provider layer: OpenAI + Anthropic clients, and the factory
 │   ├── argo.py                   # Argo chat client, fails closed on rejected credentials
 │   └── agent.py                  # Fixed retrieve-then-score pipeline (not a planner)
@@ -136,7 +149,7 @@ LANTERN/
 ├── data/assembly_counts.json     # Chains deposited vs chains in the biological assembly, per entry
 ├── data/curation_candidates.json # Four structured signals per entry, tiered for hand-curation
 ├── data/curation_verdicts.json   # The hand verdicts reached, with evidence; overrides the title pass
-├── tests/                        # Offline regression tests (192, no network)
+├── tests/                        # Offline regression tests (234, no network)
 ├── docs/SCIENTIFIC_CONTRACT.md   # Scientific claims and evidence gates
 ├── ROADMAP.md                    # Verified state, defects, milestones M0-M6
 ├── IMPLEMENTATION_PLAN.md        # Earlier aspirational plan, superseded in part
@@ -176,6 +189,15 @@ pytest -q
 - Interactive result table, workflow trace, downloadable JSON.
 - Structure retrieval with automatic mmCIF fallback (RCSB publishes no legacy `.pdb` for large
   entries such as 6EK0, 7K00, 3J3Q); pinned 3Dmol.js viewer, which still needs CDN connectivity.
+- **Binding-site visualiser** (`lantern/viewer.py`). Pick any deposited metal site and see the
+  ion, a dashed bond to every first-shell donor, and the measured distance on each bond, with
+  donors coloured by chemical class and toggles for residue labels, distances, waters and
+  cartoon. The whole-fold view marks and names every ion for orientation. Each shape is placed
+  from the coordinates `binding_neighborhood()` already measured rather than re-derived in the
+  browser, so the distance on a bond is the same float the geometry-v2 table scored and the
+  bond count is the coordination number by construction — a picture that cannot drift from the
+  claim beneath it. Load 9PI2 for the contrast the whole project turns on: three Nd³⁺ at CN 10
+  beside a Ca²⁺ at CN 7, in the same protein.
 - **First-shell coordination analysis** of *experimentally deposited* rare-earth ions: O/N/S donors
   within 3.2 Å, waters included and labelled, reported as coordination number with a protein/water
   split. Verified against 8FNS (4 Nd sites, CN 9–10), 8FNR (Dy), 8DQ2 (La) and 9PI2 (Nd + Ca).

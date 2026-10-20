@@ -1990,10 +1990,26 @@ explicitly marked unmeasured.
 - The LLM narrates and selects among validated tools; it never writes a score or a citation.
 - UI: candidate cards, 3D site inspector with donor atoms and distances labelled, evidence ledger,
   CSV/JSON export with versions and access dates.
+- **3D site inspector — done.** `lantern/viewer.py` draws one site at a time: the ion, a dashed
+  bond to each first-shell donor, the measured distance on every bond, donors coloured by the
+  class `structure.donor_class` assigns, and toggles for residue labels, distances, waters and
+  cartoon. Two design decisions are load-bearing rather than cosmetic.
+  - *Every shape is placed from coordinates the analysis already measured*, not re-derived in
+    the browser. `binding_neighborhood()` now carries `xyz` for the ion and for each donor, so
+    the bond count equals the coordination number by construction and the distance on a bond is
+    the float geometry-v2 scored. A viewer that re-found its own neighbours could show CN 8
+    under a table saying CN 9, and the picture is the more persuasive of the two.
+  - *One ion radius for every element.* Ln³⁺ and Ca²⁺ ionic radii differ by hundredths of an
+    ångström — that near-identity is the selectivity problem — so drawing them to scale would
+    imply a distinction the chemistry does not offer. Colour carries identity instead.
+  Coverage: `tests/test_viewer.py` (42 tests) pins the spec, and, where `node` is installed,
+  executes the generated JavaScript against a stubbed `$3Dmol` and asserts on the shapes drawn
+  — a blank viewer raises nothing on the Python side, so it is the only layer that can catch it.
 - Self-host 3Dmol.js rather than CDN-loading it, so the demo survives a hostile network. Current
-  release is **2.5.5**. The interim step has landed — `app.py` pins
-  `https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js` at `TMOL_SRC` — but it is still a
-  third-party origin; vendoring it from npm (`3dmol@2.5.5`) remains open.
+  release is **2.5.5**. The interim step has landed — `lantern/viewer.py` pins
+  `https://cdn.jsdelivr.net/npm/3dmol@2.5.5/build/3Dmol-min.js` at `TMOL_SRC`, and both scenes
+  now say so on the canvas when the script fails to load rather than leaving a black rectangle
+  — but it is still a third-party origin; vendoring it from npm (`3dmol@2.5.5`) remains open.
 - **Provider independence — done.** `lantern/llm.py` adds OpenAI and Anthropic clients beside Argo,
   selected by `LLM_PROVIDER` or in the sidebar, so the project is no longer gated on an
   Argonne-internal host. This closes the "Argo account not provisioned" risk in §8 for the
