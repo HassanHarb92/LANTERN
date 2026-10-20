@@ -51,7 +51,7 @@ LANTERN_TIMEOUT=25
 # argo — Argonne gateway, needs ANL network access
 ARGO_BASE_URL=https://apps.inside.anl.gov/argoapi/v1
 ARGO_USER=your_anl_domain_username
-ARGO_MODEL=Claude Sonnet 5
+ARGO_MODEL=claudeopus5              # optional; defaults to gpt56terra
 
 # openai
 OPENAI_API_KEY=sk-...
@@ -66,9 +66,11 @@ ANTHROPIC_MODEL=claude-sonnet-5-5   # optional
 credentials or full coordinates, and no error message or health badge ever echoes a key value.
 
 `ARGO_USER` is an **ANL domain username, not a secret API key** — Argo authenticates a username.
-(`ARGO_API_KEY`, the former name, is still read as a fallback.) Use a model name exactly as Argo
-lists it: `curl -s https://apps.inside.anl.gov/argoapi/v1/models`. The OpenAI and Anthropic keys
-*are* real secrets. Argo's host is an Argonne-internal name, so access may depend on your network.
+(`ARGO_API_KEY`, the former name, is still read as a fallback.) `ARGO_MODEL` accepts either
+spelling — the compact id from the Argo docs (`claudeopus5`) or the display name the gateway's own
+catalogue returns (`Claude Opus 5`); both were sent live and both answered. List them with
+`curl -s https://apps.inside.anl.gov/argoapi/v1/models`. The OpenAI and Anthropic keys *are* real
+secrets. Argo's host is an Argonne-internal name, so access may depend on your network.
 
 Each provider fails closed in the way it can actually fail:
 
