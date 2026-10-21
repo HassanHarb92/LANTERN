@@ -11,6 +11,16 @@ from .lineage import is_lineage
 from .types import Claim, Evidence
 
 SNIPPET_CHARS = 600
+MIN_ABSTRACT_CHARS = 80
+# PDB depositions are the measured data under test, not commentary on it. The first live run ranked the deposition of
+# 8FNR itself as the best "evidence" for a claim about 8FNR; citing the data in support of itself is circular.
+DATA_DEPOSIT_PREFIXES = ("10.2210/",)
+
+
+def is_citable(paper: Paper) -> bool:
+    """A record the judge may cite: literature with an abstract, not a data deposition."""
+    doi = (paper.doi or "").lower()
+    return len(paper.abstract or "") >= MIN_ABSTRACT_CHARS and not doi.startswith(DATA_DEPOSIT_PREFIXES)
 
 
 def snippet_of(paper: Paper, limit: int = SNIPPET_CHARS) -> str:
@@ -23,7 +33,7 @@ def retrieve(claim: Claim, index: BM25Index, lineage: set[str], k: int = 4, star
 
     The pipeline passes a running `start` so evidence numbers are unique across a whole record; the policy matches a
     verdict's citations to evidence by that number and would otherwise mix up claims."""
-    hits = index.search(claim.query or claim.text, k=k)
+    hits = [h for h in index.search(claim.query or claim.text, k=max(k * 5, 20)) if is_citable(h[0])][:k]
     return [Evidence(n=i, cid=p.cid, doi=p.doi, title=p.title, year=p.year, source=p.source, url=p.url,
                      snippet=snippet_of(p), score=float(s), preprint=p.preprint,
                      lineage=is_lineage(p.doi, lineage))

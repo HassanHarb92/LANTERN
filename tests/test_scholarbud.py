@@ -103,7 +103,7 @@ def test_search_params_and_parse():
     c = s.calls[0]
     assert c["url"] == "https://api.crossref.org/works"
     assert c["params"]["query"] == "lanmodulin" and c["params"]["rows"] == 7
-    assert c["params"]["select"] == "DOI,title,abstract,issued,created,license,URL,subtype"
+    assert c["params"]["select"] == "DOI,title,abstract,issued,created,license,URL"
     assert "filter" not in c["params"]
 
 
@@ -252,3 +252,14 @@ def test_scholarbud_imports_nothing_else_from_lantern():
                 assert mod.startswith("lantern.scholarbud"), f"{f.name} imports {mod}"
             if mod.startswith(".."):
                 pytest.fail(f"{f.name} imports from parent package: {mod}")
+
+
+def test_select_fields_are_ones_crossref_accepts():
+    """Found by the first live call: Crossref rejects an unknown `select` field with HTTP 400, which no offline fixture can show.
+
+    The valid set below is the list Crossref itself returned for the /works route.
+    """
+    from lantern.scholarbud import crossref
+    valid = {"abstract", "URL", "resource", "member", "posted", "score", "created", "degree", "update-policy", "short-title",
+             "DOI", "title", "issued", "license"}
+    assert set(crossref.SELECT.split(",")) <= valid

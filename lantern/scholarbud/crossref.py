@@ -14,7 +14,7 @@ from .types import Paper
 
 CROSSREF_URL = "https://api.crossref.org/works"
 CHEMRXIV_PREFIX = "10.26434"
-SELECT = "DOI,title,abstract,issued,created,license,URL,subtype"
+SELECT = "DOI,title,abstract,issued,created,license,URL"
 RETRY_DELAY = 1.5  # seconds before the single retry; module-level so tests can zero it
 _TAG = re.compile(r"<[^>]+>")
 

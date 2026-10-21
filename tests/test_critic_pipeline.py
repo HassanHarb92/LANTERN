@@ -162,3 +162,23 @@ class TestTheHook:
         import json
         out = critique(record, ScriptedJudge(), _index(EXTERNAL), lineage=set())
         json.dumps(out)
+
+
+class TestRetrievalFilters:
+    """Found by the first live run: the PDB deposition of the very structure under test ranked first as 'evidence'."""
+
+    def test_pdb_deposition_is_not_evidence(self, record):
+        deposit = Paper(doi="10.2210/pdb8fnr/pdb", title="X-ray crystal structure of lanmodulin lanthanide coordination number",
+                        abstract="Lanthanide coordination number in EF-hand lanmodulin sites. " * 3, year=2022, source="crossref")
+        out = critique(record, None, _index(deposit, EXTERNAL), lineage=set())
+        dois = {e["doi"] for es in out["critic"]["evidence"].values() for e in es}
+        assert deposit.doi not in dois and EXTERNAL.doi in dois
+
+    def test_records_without_an_abstract_are_not_evidence(self, record):
+        bare = Paper(doi="10.1/bare", title="Lanthanide coordination number EF-hand lanmodulin", abstract="", year=2020)
+        out = critique(record, None, _index(bare), lineage=set())
+        assert all(not es for es in out["critic"]["evidence"].values())
+
+    def test_retrieval_without_a_judge_is_still_recorded(self, record):
+        out = critique(record, None, _index(EXTERNAL), lineage=set())
+        assert out["critic"]["ran"] is False and any(out["critic"]["evidence"].values())

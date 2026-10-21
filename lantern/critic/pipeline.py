@@ -31,14 +31,20 @@ def critique(record: dict, client, index, *, params: Params = FROZEN, lineage: s
     claims = claims_from_record(record, max_claims=max_claims)
     section = {"version": CRITIC_VERSION, "note": COMMENTARY_IS_NOT_VALIDATION, "params": asdict(params),
                "claims": [c.as_dict() for c in claims], "verdicts": [], "evidence": {}, "decisions": {}, "ran": False}
-    if not claims or index is None or client is None:
-        section["skipped"] = ("no claims" if not claims else "no literature index" if index is None else "no judge client")
+    if not claims or index is None:
+        section["skipped"] = "no claims" if not claims else "no literature index"
         out["critic"] = section
         return out
     ev, nxt = {}, 1
     for c in claims:
         ev[c.id] = retrieve(c, index, lineage, k=k, start=nxt)
         nxt += len(ev[c.id])
+    if client is None:
+        # Retrieval alone is still worth recording: it shows what the literature offers even with no judge to read it.
+        section["skipped"] = "no judge client"
+        section["evidence"] = {cid: [e.as_dict() for e in es] for cid, es in ev.items()}
+        out["critic"] = section
+        return out
     verdicts = judge(claims, ev, client)
     section.update(ran=True, verdicts=[v.as_dict() for v in verdicts],
                    evidence={cid: [e.as_dict() for e in es] for cid, es in ev.items()})
