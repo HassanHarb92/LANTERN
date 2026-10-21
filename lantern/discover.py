@@ -373,7 +373,7 @@ def _evidence_for(candidate: dict, protein, target: str, *, live: bool,
 
 def answer(question, *, client=None, proteins=None, live=False,
            allow_predictions=False, verify=True, max_structures: int = 3,
-           timeout: int = 25) -> dict:
+           timeout: int = 25, critic=None) -> dict:
     """Run the whole loop on one question.
 
     Returns a record with `answered` False and the plan's own notes when the
@@ -381,6 +381,11 @@ def answer(question, *, client=None, proteins=None, live=False,
     language model offered one the question text does not support. Nothing
     downstream runs in that case: a shortlist printed under an unvalidated
     target is worse than no shortlist, because it looks like an answer.
+
+    `critic`, when given, is a callable record -> record run on a fully
+    answered record (see lantern.critic.pipeline.critique). It is off by
+    default and cannot change a number; it may add commentary and move a
+    contradicted candidate behind the others.
     """
     plan = parse_question(question, client)
     record = {
@@ -442,7 +447,7 @@ def answer(question, *, client=None, proteins=None, live=False,
             "measured around another ion; it is not evidence that this protein "
             f"was observed binding {target}.",
             SPHERE_CLOSED_AROUND_THE_DEPOSITED_ION]
-    return record
+    return critic(record) if critic is not None else record
 
 
 # What the narration step is allowed to be. The model reads a summary of the

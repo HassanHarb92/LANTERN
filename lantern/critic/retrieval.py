@@ -1,0 +1,41 @@
+"""Turn a claim into numbered Evidence from a local scholarbud index.
+
+Retrieval is lexical and local on purpose: the judge may only cite what is in this list, so the list has to be auditable and
+reproducible. Records the rule under test was derived from are tagged `lineage`, never dropped, so the policy can discount them.
+"""
+from __future__ import annotations
+
+from ..scholarbud import BM25Index, Library, search_chemrxiv
+from ..scholarbud.types import Paper
+from .lineage import is_lineage
+from .types import Claim, Evidence
+
+SNIPPET_CHARS = 600
+
+
+def snippet_of(paper: Paper, limit: int = SNIPPET_CHARS) -> str:
+    text = (paper.abstract or paper.title).strip()
+    return text if len(text) <= limit else text[:limit].rsplit(" ", 1)[0] + " ..."
+
+
+def retrieve(claim: Claim, index: BM25Index, lineage: set[str], k: int = 4, start: int = 1) -> list[Evidence]:
+    """Top-k records for one claim, numbered from `start` in rank order.
+
+    The pipeline passes a running `start` so evidence numbers are unique across a whole record; the policy matches a
+    verdict's citations to evidence by that number and would otherwise mix up claims."""
+    hits = index.search(claim.query or claim.text, k=k)
+    return [Evidence(n=i, cid=p.cid, doi=p.doi, title=p.title, year=p.year, source=p.source, url=p.url,
+                     snippet=snippet_of(p), score=float(s), preprint=p.preprint,
+                     lineage=is_lineage(p.doi, lineage))
+            for i, (p, s) in enumerate(hits, start)]
+
+
+def build_index(queries: list[str], *, library: Library | None = None, rows: int = 20, live: bool = False,
+                search=search_chemrxiv) -> BM25Index:
+    """Index the library, optionally topped up from Crossref first. `live=False` never touches the network."""
+    lib = library if library is not None else Library()
+    if live:
+        for q in queries:
+            for paper in search(q, rows=rows):
+                lib.upsert(paper)
+    return BM25Index(lib.all())
