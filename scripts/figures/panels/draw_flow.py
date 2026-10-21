@@ -41,34 +41,35 @@ def draw_flow_detailed(ax):
 
 # Rough category of action -> (tinted fill, saturated border). Chosen to avoid orange (= Ca elsewhere in the figures).
 CATS = {"Acquire": ("#dff3ec", AQUA), "Process": ("#e9e5fa", VIOLET), "Select": ("#fbf0d3", YELLOW),
-        "Verify and present": ("#dce9fa", BLUE)}
+        "Verify and present": ("#dce9fa", BLUE), "Critique": ("#f8e4f0", "#c2478f")}
 
 
 def draw_flow(ax):
-    """Panel A, simplified: short labels, thick coloured boxes; colour = the kind of action the stage performs."""
+    """Panel A: short labels, thick coloured boxes; colour = the kind of action the stage performs.
+    Six columns. The literature critic follows Verify and feeds the shortlist; it comments, it never scores."""
     ax.set_xlim(-1, 101); ax.set_ylim(10, 100); ax.set_axis_off()
-    W, G, H = 17.6, 3.0, 22
-    xs = [i * (W + G) for i in range(5)]
+    W, G, H = 14.2, 3.0, 22
+    xs = [i * (W + G) for i in range(6)]
     yt, yb = 66, 30
     ax.text(0, 99, "structures", fontsize=FS_SMALL, style="italic", color=MUTED, va="top")
     ax.text(0, 60, "sequences", fontsize=FS_SMALL, style="italic", color=MUTED, va="top")
-    top = [("PDB", "636 entries", "Acquire"), ("Parse", "3,375 sites", "Process"), ("Curate", "62 entries", "Process"),
-           ("Descriptor", "CN \u2265 9", "Select"), ("Verify", "measured", "Verify and present")]
-    bot = [("UniProt", "165,902 seqs", "Acquire"), ("Spacing rule", "EF loops", "Select"), ("Candidates", "156 hits", "Select"),
-           ("Structures", "PDB, AlphaFold", "Verify and present"), ("Shortlist + UI", "cards, 3D viewer", "Verify and present")]
+    top = [(0, "PDB", "636 entries", "Acquire"), (1, "Parse", "3,375 sites", "Process"), (2, "Curate", "62 entries", "Process"),
+           (3, "Descriptor", "CN \u2265 9", "Select"), (4, "Verify", "measured", "Verify and present"),
+           (5, "Critic", "literature flags", "Critique")]
+    bot = [(0, "UniProt", "165,902 seqs", "Acquire"), (1, "Spacing rule", "EF loops", "Select"), (2, "Candidates", "156 hits", "Select"),
+           (4, "Structures", "PDB, AlphaFold", "Verify and present"), (5, "Shortlist + UI", "cards, 3D viewer", "Verify and present")]
     for row, y in ((top, yt), (bot, yb)):
-        for i, (t, b, cat) in enumerate(row):
+        for c, t, b, cat in row:
             fc, ec = CATS[cat]
-            box(ax, xs[i], y, W, H, t, b, ASPECT, fc=fc, ec=ec, lw=2.4, tsize=FS + 1.2, bsize=FS_SMALL + .4)
+            box(ax, xs[c], y, W, H, t, b, ASPECT, fc=fc, ec=ec, lw=2.4, tsize=FS + .5, bsize=FS_SMALL + .1)
     ym_t, ym_b = yt + H / 2 - 5, yb + H / 2 - 5
-    for i in range(4):
+    for i in (0, 1, 2, 3, 4):                       # top row, left to right
         arrow(ax, (xs[i] + W, ym_t), (xs[i + 1], ym_t), lw=1.3, scale=8)
-        arrow(ax, (xs[i] + W, ym_b), (xs[i + 1], ym_b), lw=1.3, scale=8)
-    bx = xs[3] + W + G / 2   # structures also feed Verify, through a bus in the gap
-    line(ax, [(xs[3] + W, ym_b + 5), (bx, ym_b + 5), (bx, ym_t)], lw=1.3)
-    arrow(ax, (xs[4] + W / 2, yt), (xs[4] + W / 2, yb + H), lw=1.3, scale=8)
-    # legend: one swatch per category, along the bottom
-    x = 0.0
+    for a, b in ((0, 1), (1, 2), (2, 4), (4, 5)):   # bottom row; Candidates -> Structures spans the empty column
+        arrow(ax, (xs[a] + W, ym_b), (xs[b], ym_b), lw=1.3, scale=8)
+    arrow(ax, (xs[4] + W / 2, yb + H), (xs[4] + W / 2, yt), lw=1.3, scale=8)    # structures feed Verify
+    arrow(ax, (xs[5] + W / 2, yt), (xs[5] + W / 2, yb + H), lw=1.3, scale=8)    # critic -> shortlist
+    x = 0.0   # legend, one swatch per category, along the bottom
     for name, (fc, ec) in CATS.items():
         ax.add_patch(plt.Rectangle((x, 14.5), 3.2, 7.5, fc=fc, ec=ec, lw=1.8, zorder=2))
         ax.text(x + 4.6, 18.25, name, fontsize=FS_SMALL, va="center", color=INK2)
