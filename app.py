@@ -132,7 +132,9 @@ def ion_banner(report: dict, own: dict | None = None) -> None:
                     f"{report['sites_measured']} metal sites below",
         "counterfactual": f"in none of the {report['sites_measured']} "
                           f"candidate sites below{found}",
-    }.get(report["verdict_kind"], f"nothing structural was measured{found}")
+    }.get(report["verdict_kind"],
+          f"nothing structural was measured on the candidates{found}"
+          if found else "nothing structural was measured")
     st.markdown(
         f'<div class="ion {tone}">'
         f'<div class="sym">{symbol}<sup>{charge}</sup></div>'

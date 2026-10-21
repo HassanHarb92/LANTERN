@@ -527,10 +527,20 @@ def _ion_report(target: str, evidence: list[dict],
     }
     if not sites:
         report["verdict_kind"] = "no_sites"
+        # "the candidates", not "this run": when the ion has a structure of
+        # its own the run did measure something about the element, and it is
+        # on the same page. Saying nothing was measured would be contradicted
+        # by the block underneath.
         report["statement"] = (
-            f"No deposited metal sites were measured, so this run says nothing "
-            f"about {target} beyond the sequence rules above, which are "
-            f"ion-independent.")
+            f"No deposited metal sites were measured on the candidates, so "
+            f"they say nothing about {target} beyond the sequence rules "
+            f"above, which are ion-independent.")
+        if ion_structure:
+            report["statement"] += (
+                f" {ion_structure['pdb_id']} is shown below as a structure of "
+                f"{element} itself -- it holds the element asked about, and it "
+                f"was found by looking that element up in the index rather "
+                f"than by any rule on this page.")
         return report
 
     counts = and_list(others) or "other elements"

@@ -19,7 +19,9 @@ from lantern.discover import (LANTHANIDE_ELEMENTS, PREDICTION_HAS_NO_METAL,
                               SIZE_MATCH_IS_NOT_BINDING, SIZE_RANK_SELF_CHECK,
                               SPHERE_CLOSED_AROUND_THE_DEPOSITED_ION,
                               NARRATION_MAX_TOKENS, NARRATION_TIMEOUT_S,
-                              _element_of, _is_the_ion_asked_for,
+                              _element_of, _ion_report,
+                              _ion_structure_evidence,
+                              _is_the_ion_asked_for,
                               _rank_of, answer, exportable,
                               headline, narrate, narration_payload)
 from lantern.models import Protein
@@ -469,6 +471,21 @@ class TestTheIonAskedAboutIsSomewhereOnThePage:
         statement = record["ion_report"]["statement"]
         assert "none was measured here" not in statement
         assert record["ion_structure"]["pdb_id"] in statement
+
+    def test_a_page_with_no_candidate_sites_still_admits_what_it_measured(self):
+        """The fourth sentence that goes false when the ion gets its own
+        block. If no candidate has a measurable site the report takes an
+        early branch that used to say "this run says nothing about Eu3+" --
+        on a page carrying four measured Eu sites."""
+        own = _ion_structure_evidence("Eu3+")
+        report = _ion_report("Eu3+", [], own)
+        assert report["verdict_kind"] == "no_sites"
+        assert "says nothing about Eu3+" not in report["statement"]
+        assert own["pdb_id"] in report["statement"]
+        # ... and does not promise a structure when there is none to show.
+        bare = _ion_report("Eu3+", [], None)
+        assert "6FKW" not in bare["statement"]
+        assert "shown below" not in bare["statement"]
 
     def test_the_coordinates_are_read_from_the_cache_and_not_the_network(self):
         """answer(live=False) must stay offline. A block that quietly fetches
