@@ -1,0 +1,766 @@
+{
+ "version": "critic-0.1",
+ "note": "Literature commentary from an automated critic. Evidence is abstract-level and often preprint; absence of a paper is not evidence; sources the rules were derived from count at a reduced weight. It can flag a candidate for review and never raises a rank or changes a number.",
+ "params": {
+  "alpha_lineage": 0.3,
+  "w_external": 1.0,
+  "preprint_discount": 0.8,
+  "conf_floor": 0.3,
+  "relevance_floor": 0.0,
+  "tau_review": 0.5,
+  "tau_badge": 0.5,
+  "min_independent": 1
+ },
+ "claims": [
+  {
+   "id": "c1",
+   "text": "Site A201 of 8FNR holds Dy3+ with coordination number 9 (O/N/S donors within 3.2 A)",
+   "kind": "number",
+   "query": "lanthanide Dy dysprosium lanmodulin hansschlegelia quercus EF-hand coordination number 9",
+   "source_field": "evidence[0].sites[0].coordination_number",
+   "value": 9.0
+  },
+  {
+   "id": "c2",
+   "text": "Site A201 of 8FNS holds Nd3+ with coordination number 9 (O/N/S donors within 3.2 A)",
+   "kind": "number",
+   "query": "lanthanide Nd neodymium lanmodulin EF-hand coordination number 9",
+   "source_field": "evidence[1].sites[0].coordination_number",
+   "value": 9.0
+  },
+  {
+   "id": "c3",
+   "text": "Site A202 of 8FNR holds Dy3+ with coordination number 9 (O/N/S donors within 3.2 A)",
+   "kind": "number",
+   "query": "lanthanide Dy dysprosium lanmodulin hansschlegelia quercus EF-hand coordination number 9",
+   "source_field": "evidence[0].sites[1].coordination_number",
+   "value": 9.0
+  },
+  {
+   "id": "c4",
+   "text": "Site A202 of 8FNS holds Nd3+ with coordination number 9 (O/N/S donors within 3.2 A)",
+   "kind": "number",
+   "query": "lanthanide Nd neodymium lanmodulin EF-hand coordination number 9",
+   "source_field": "evidence[1].sites[1].coordination_number",
+   "value": 9.0
+  },
+  {
+   "id": "c5",
+   "text": "Site A203 of 8FNR holds Dy3+ with coordination number 9 (O/N/S donors within 3.2 A)",
+   "kind": "number",
+   "query": "lanthanide Dy dysprosium lanmodulin hansschlegelia quercus EF-hand coordination number 9",
+   "source_field": "evidence[0].sites[2].coordination_number",
+   "value": 9.0
+  },
+  {
+   "id": "c6",
+   "text": "Site A203 of 8FNS holds Nd3+ with coordination number 9 (O/N/S donors within 3.2 A)",
+   "kind": "number",
+   "query": "lanthanide Nd neodymium lanmodulin EF-hand coordination number 9",
+   "source_field": "evidence[1].sites[2].coordination_number",
+   "value": 9.0
+  },
+  {
+   "id": "c7",
+   "text": "Site A204 of 8FNR holds Dy3+ with coordination number 7 (O/N/S donors within 3.2 A)",
+   "kind": "number",
+   "query": "lanthanide Dy dysprosium lanmodulin hansschlegelia quercus EF-hand coordination number 7",
+   "source_field": "evidence[0].sites[3].coordination_number",
+   "value": 7.0
+  },
+  {
+   "id": "c8",
+   "text": "Site A204 of 8FNS holds Nd3+ with coordination number 10 (O/N/S donors within 3.2 A)",
+   "kind": "number",
+   "query": "lanthanide Nd neodymium lanmodulin EF-hand coordination number 10",
+   "source_field": "evidence[1].sites[3].coordination_number",
+   "value": 10.0
+  },
+  {
+   "id": "c9",
+   "text": "Site B201 of 8FNR holds Dy3+ with coordination number 9 (O/N/S donors within 3.2 A)",
+   "kind": "number",
+   "query": "lanthanide Dy dysprosium lanmodulin hansschlegelia quercus EF-hand coordination number 9",
+   "source_field": "evidence[0].sites[4].coordination_number",
+   "value": 9.0
+  },
+  {
+   "id": "c10",
+   "text": "Lanthanide-binding proteins of the lanmodulin architecture answer yes to the design rule 'Is it shorter than 200 residues?' (measured 133 in A0A4V2JDD3, 133 in C5B164)",
+   "kind": "qualitative",
+   "query": "lanmodulin lanthanide shorter 200 residues",
+   "source_field": "shortlist.rules[0]",
+   "value": null
+  },
+  {
+   "id": "c11",
+   "text": "Lanthanide-binding proteins of the lanmodulin architecture answer yes to the design rule 'Does it carry at least 4 EF-hand loops?' (measured 4 in A0A4V2JDD3, 4 in C5B164)",
+   "kind": "qualitative",
+   "query": "lanmodulin lanthanide 4 ef-hand loops",
+   "source_field": "shortlist.rules[1]",
+   "value": null
+  },
+  {
+   "id": "c12",
+   "text": "Lanthanide-binding proteins of the lanmodulin architecture answer yes to the design rule 'Are two adjacent EF-hands fewer than 14 residues apart?' (measured 12 in A0A4V2JDD3, 12 in C5B164)",
+   "kind": "qualitative",
+   "query": "lanmodulin lanthanide adjacent ef-hands fewer 14 residues apart",
+   "source_field": "shortlist.rules[2]",
+   "value": null
+  }
+ ],
+ "verdicts": [],
+ "evidence": {
+  "c1": [
+   {
+    "n": 1,
+    "cid": "doi:10.26434/chemrxiv-2025-q7jl8",
+    "doi": "10.26434/chemrxiv-2025-q7jl8",
+    "title": "Peptide Charge Modulates Ion Binding to EF-Hand Motifs: A Molecular Dynamics Study",
+    "year": 2025,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv-2025-q7jl8",
+    "snippet": "Rare earth elements (REEs), particularly lanthanides (Ln), are of significant interest due to their critical roles in modern technology and medicine. However, their extraction, isolation, and purification remain challenging. Lanmodulin (LanM), a recently discovered EF-hand protein, exhibits high affinity and selectivity for binding Ln3+ ions. This enhanced affinity is partly attributed to the presence of additional acidic residues within its EF-hand metal binding loops. Previous studies have demonstrated that reducing the number of ligating acidic residues within EF-hand motifs significantly ...",
+    "score": 9.43868451840169,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 2,
+    "cid": "doi:10.26434/chemrxiv.15005421/v1",
+    "doi": "10.26434/chemrxiv.15005421/v1",
+    "title": "Quantum-Guided Binding-Site Engineering of Lanmodulin for Zero-Waste Separation of Critical Rare-Earth Elements",
+    "year": 2026,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.15005421/v1",
+    "snippet": "Rare-earth separation remains energy-intensive and waste-generating, motivating aqueous alternatives for selective lanthanide capture. We report a deterministic computational workflow that couples binding-site engineering of lanmodulin with multireference quantum characterization toward dysprosium prioritization. Four experimentally solved lanmodulin structures were harmonized, residue roles were assigned to preserve the first-shell coordination environment while allowing selected second-sphere and interface positions to mutate, and ProteinMPNN, LigandMPNN, Rosetta triage, and reduced OpenMM ...",
+    "score": 9.053261112378735,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 3,
+    "cid": "doi:10.26434/chemrxiv.15009104/v1",
+    "doi": "10.26434/chemrxiv.15009104/v1",
+    "title": "Water Layering and Orientation Modulate Lanthanide Hydration in Carbon Nanotubes",
+    "year": 2026,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.15009104/v1",
+    "snippet": "Nanoscale confinement can reorganize water molecules and alter ionic hydration, offering a potential route to separating chemically similar ions. We use molecular dynamics simulations with the MACE-MH-1 foundation machine-learning interatomic potential to investigate the hydration of eight trivalent lanthanide ions (Ln 3+ : La 3+ , Pr 3+ , Nd 3+ , Gd 3+ , Tb 3+ , Dy 3+ , Tm 3+ , and Lu 3+ ) in carbon nanotubes (CNTs) with diameters of 1.09\u20131.49 nm. We first evaluate MACE-MH-1 for Ln 3+ hydration in bulk solution. The OMOL model of MACE-MH-1 reproduces the reported Ln\u2013O distances and ...",
+    "score": 8.020758157660913,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 4,
+    "cid": "doi:10.1096/fasebj.2022.36.s1.r4572",
+    "doi": "10.1096/fasebj.2022.36.s1.r4572",
+    "title": "Investigating Landmodulin's EF Hands in Relation to Lanthanide Recycling Methods",
+    "year": 2022,
+    "source": "crossref",
+    "url": "https://doi.org/10.1096/fasebj.2022.36.s1.r4572",
+    "snippet": "Rare earth elements (REEs) have distinct and varied electronic properties that have been applied for military and civilian use in electronics, such as cell phones and computer chip technologies. The recycling methods for REEs are complex and require a multitude of resources that prompt new studies to improve REEs separations. Lanmodulin (LanM), a protein that naturally bind to lanthanides, may provide a biological route for REE separation. Understanding the structure of LanM\u2019s EF\u2010hands will explain how the lanthanides bond to them and lead to a greater understanding of how LanM can be used to ...",
+    "score": 7.747364282024508,
+    "preprint": false,
+    "lineage": false
+   }
+  ],
+  "c2": [
+   {
+    "n": 5,
+    "cid": "doi:10.26434/chemrxiv-2025-q7jl8",
+    "doi": "10.26434/chemrxiv-2025-q7jl8",
+    "title": "Peptide Charge Modulates Ion Binding to EF-Hand Motifs: A Molecular Dynamics Study",
+    "year": 2025,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv-2025-q7jl8",
+    "snippet": "Rare earth elements (REEs), particularly lanthanides (Ln), are of significant interest due to their critical roles in modern technology and medicine. However, their extraction, isolation, and purification remain challenging. Lanmodulin (LanM), a recently discovered EF-hand protein, exhibits high affinity and selectivity for binding Ln3+ ions. This enhanced affinity is partly attributed to the presence of additional acidic residues within its EF-hand metal binding loops. Previous studies have demonstrated that reducing the number of ligating acidic residues within EF-hand motifs significantly ...",
+    "score": 9.43868451840169,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 6,
+    "cid": "doi:10.26434/chemrxiv.6008294.v1",
+    "doi": "10.26434/chemrxiv.6008294.v1",
+    "title": "Bright near Infrared Neodymium Emission from Europium Sensitisation in \u03b2-Triketonate Coordination Polymers",
+    "year": 2018,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.6008294.v1",
+    "snippet": "Isomorphous \u03b2 -triketonate-based lanthanoid polymers containing tris(4-methylbenzoyl)methane ( mtbm ) and RbOH with formula, {[Ln(Rb)( mtbm ) 4 ] 2 } n (Ln = Eu 3+ and Nd 3+ ) have been synthesised and structurally characterised. The photophysical properties for the Nd 3+ complex presented long lifetimes and relatively high quantum yields in comparison with analogous \u03b2 -diketonate complexes. Mixed lanthanoid complexes were also formed and their luminescence properties studied, with effective sensitisation of the 4 F 3/2 of Nd 3+ via the 5 D 0 of Eu 3+ , which is to the best of our knowledge ...",
+    "score": 9.191384898379056,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 7,
+    "cid": "doi:10.26434/chemrxiv.15005421/v1",
+    "doi": "10.26434/chemrxiv.15005421/v1",
+    "title": "Quantum-Guided Binding-Site Engineering of Lanmodulin for Zero-Waste Separation of Critical Rare-Earth Elements",
+    "year": 2026,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.15005421/v1",
+    "snippet": "Rare-earth separation remains energy-intensive and waste-generating, motivating aqueous alternatives for selective lanthanide capture. We report a deterministic computational workflow that couples binding-site engineering of lanmodulin with multireference quantum characterization toward dysprosium prioritization. Four experimentally solved lanmodulin structures were harmonized, residue roles were assigned to preserve the first-shell coordination environment while allowing selected second-sphere and interface positions to mutate, and ProteinMPNN, LigandMPNN, Rosetta triage, and reduced OpenMM ...",
+    "score": 8.580453761426194,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 8,
+    "cid": "doi:10.26434/chemrxiv.15009104/v1",
+    "doi": "10.26434/chemrxiv.15009104/v1",
+    "title": "Water Layering and Orientation Modulate Lanthanide Hydration in Carbon Nanotubes",
+    "year": 2026,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.15009104/v1",
+    "snippet": "Nanoscale confinement can reorganize water molecules and alter ionic hydration, offering a potential route to separating chemically similar ions. We use molecular dynamics simulations with the MACE-MH-1 foundation machine-learning interatomic potential to investigate the hydration of eight trivalent lanthanide ions (Ln 3+ : La 3+ , Pr 3+ , Nd 3+ , Gd 3+ , Tb 3+ , Dy 3+ , Tm 3+ , and Lu 3+ ) in carbon nanotubes (CNTs) with diameters of 1.09\u20131.49 nm. We first evaluate MACE-MH-1 for Ln 3+ hydration in bulk solution. The OMOL model of MACE-MH-1 reproduces the reported Ln\u2013O distances and ...",
+    "score": 8.36610126794234,
+    "preprint": true,
+    "lineage": false
+   }
+  ],
+  "c3": [
+   {
+    "n": 9,
+    "cid": "doi:10.26434/chemrxiv-2025-q7jl8",
+    "doi": "10.26434/chemrxiv-2025-q7jl8",
+    "title": "Peptide Charge Modulates Ion Binding to EF-Hand Motifs: A Molecular Dynamics Study",
+    "year": 2025,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv-2025-q7jl8",
+    "snippet": "Rare earth elements (REEs), particularly lanthanides (Ln), are of significant interest due to their critical roles in modern technology and medicine. However, their extraction, isolation, and purification remain challenging. Lanmodulin (LanM), a recently discovered EF-hand protein, exhibits high affinity and selectivity for binding Ln3+ ions. This enhanced affinity is partly attributed to the presence of additional acidic residues within its EF-hand metal binding loops. Previous studies have demonstrated that reducing the number of ligating acidic residues within EF-hand motifs significantly ...",
+    "score": 9.43868451840169,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 10,
+    "cid": "doi:10.26434/chemrxiv.15005421/v1",
+    "doi": "10.26434/chemrxiv.15005421/v1",
+    "title": "Quantum-Guided Binding-Site Engineering of Lanmodulin for Zero-Waste Separation of Critical Rare-Earth Elements",
+    "year": 2026,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.15005421/v1",
+    "snippet": "Rare-earth separation remains energy-intensive and waste-generating, motivating aqueous alternatives for selective lanthanide capture. We report a deterministic computational workflow that couples binding-site engineering of lanmodulin with multireference quantum characterization toward dysprosium prioritization. Four experimentally solved lanmodulin structures were harmonized, residue roles were assigned to preserve the first-shell coordination environment while allowing selected second-sphere and interface positions to mutate, and ProteinMPNN, LigandMPNN, Rosetta triage, and reduced OpenMM ...",
+    "score": 9.053261112378735,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 11,
+    "cid": "doi:10.26434/chemrxiv.15009104/v1",
+    "doi": "10.26434/chemrxiv.15009104/v1",
+    "title": "Water Layering and Orientation Modulate Lanthanide Hydration in Carbon Nanotubes",
+    "year": 2026,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.15009104/v1",
+    "snippet": "Nanoscale confinement can reorganize water molecules and alter ionic hydration, offering a potential route to separating chemically similar ions. We use molecular dynamics simulations with the MACE-MH-1 foundation machine-learning interatomic potential to investigate the hydration of eight trivalent lanthanide ions (Ln 3+ : La 3+ , Pr 3+ , Nd 3+ , Gd 3+ , Tb 3+ , Dy 3+ , Tm 3+ , and Lu 3+ ) in carbon nanotubes (CNTs) with diameters of 1.09\u20131.49 nm. We first evaluate MACE-MH-1 for Ln 3+ hydration in bulk solution. The OMOL model of MACE-MH-1 reproduces the reported Ln\u2013O distances and ...",
+    "score": 8.020758157660913,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 12,
+    "cid": "doi:10.1096/fasebj.2022.36.s1.r4572",
+    "doi": "10.1096/fasebj.2022.36.s1.r4572",
+    "title": "Investigating Landmodulin's EF Hands in Relation to Lanthanide Recycling Methods",
+    "year": 2022,
+    "source": "crossref",
+    "url": "https://doi.org/10.1096/fasebj.2022.36.s1.r4572",
+    "snippet": "Rare earth elements (REEs) have distinct and varied electronic properties that have been applied for military and civilian use in electronics, such as cell phones and computer chip technologies. The recycling methods for REEs are complex and require a multitude of resources that prompt new studies to improve REEs separations. Lanmodulin (LanM), a protein that naturally bind to lanthanides, may provide a biological route for REE separation. Understanding the structure of LanM\u2019s EF\u2010hands will explain how the lanthanides bond to them and lead to a greater understanding of how LanM can be used to ...",
+    "score": 7.747364282024508,
+    "preprint": false,
+    "lineage": false
+   }
+  ],
+  "c4": [
+   {
+    "n": 13,
+    "cid": "doi:10.26434/chemrxiv-2025-q7jl8",
+    "doi": "10.26434/chemrxiv-2025-q7jl8",
+    "title": "Peptide Charge Modulates Ion Binding to EF-Hand Motifs: A Molecular Dynamics Study",
+    "year": 2025,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv-2025-q7jl8",
+    "snippet": "Rare earth elements (REEs), particularly lanthanides (Ln), are of significant interest due to their critical roles in modern technology and medicine. However, their extraction, isolation, and purification remain challenging. Lanmodulin (LanM), a recently discovered EF-hand protein, exhibits high affinity and selectivity for binding Ln3+ ions. This enhanced affinity is partly attributed to the presence of additional acidic residues within its EF-hand metal binding loops. Previous studies have demonstrated that reducing the number of ligating acidic residues within EF-hand motifs significantly ...",
+    "score": 9.43868451840169,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 14,
+    "cid": "doi:10.26434/chemrxiv.6008294.v1",
+    "doi": "10.26434/chemrxiv.6008294.v1",
+    "title": "Bright near Infrared Neodymium Emission from Europium Sensitisation in \u03b2-Triketonate Coordination Polymers",
+    "year": 2018,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.6008294.v1",
+    "snippet": "Isomorphous \u03b2 -triketonate-based lanthanoid polymers containing tris(4-methylbenzoyl)methane ( mtbm ) and RbOH with formula, {[Ln(Rb)( mtbm ) 4 ] 2 } n (Ln = Eu 3+ and Nd 3+ ) have been synthesised and structurally characterised. The photophysical properties for the Nd 3+ complex presented long lifetimes and relatively high quantum yields in comparison with analogous \u03b2 -diketonate complexes. Mixed lanthanoid complexes were also formed and their luminescence properties studied, with effective sensitisation of the 4 F 3/2 of Nd 3+ via the 5 D 0 of Eu 3+ , which is to the best of our knowledge ...",
+    "score": 9.191384898379056,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 15,
+    "cid": "doi:10.26434/chemrxiv.15005421/v1",
+    "doi": "10.26434/chemrxiv.15005421/v1",
+    "title": "Quantum-Guided Binding-Site Engineering of Lanmodulin for Zero-Waste Separation of Critical Rare-Earth Elements",
+    "year": 2026,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.15005421/v1",
+    "snippet": "Rare-earth separation remains energy-intensive and waste-generating, motivating aqueous alternatives for selective lanthanide capture. We report a deterministic computational workflow that couples binding-site engineering of lanmodulin with multireference quantum characterization toward dysprosium prioritization. Four experimentally solved lanmodulin structures were harmonized, residue roles were assigned to preserve the first-shell coordination environment while allowing selected second-sphere and interface positions to mutate, and ProteinMPNN, LigandMPNN, Rosetta triage, and reduced OpenMM ...",
+    "score": 8.580453761426194,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 16,
+    "cid": "doi:10.26434/chemrxiv.15009104/v1",
+    "doi": "10.26434/chemrxiv.15009104/v1",
+    "title": "Water Layering and Orientation Modulate Lanthanide Hydration in Carbon Nanotubes",
+    "year": 2026,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.15009104/v1",
+    "snippet": "Nanoscale confinement can reorganize water molecules and alter ionic hydration, offering a potential route to separating chemically similar ions. We use molecular dynamics simulations with the MACE-MH-1 foundation machine-learning interatomic potential to investigate the hydration of eight trivalent lanthanide ions (Ln 3+ : La 3+ , Pr 3+ , Nd 3+ , Gd 3+ , Tb 3+ , Dy 3+ , Tm 3+ , and Lu 3+ ) in carbon nanotubes (CNTs) with diameters of 1.09\u20131.49 nm. We first evaluate MACE-MH-1 for Ln 3+ hydration in bulk solution. The OMOL model of MACE-MH-1 reproduces the reported Ln\u2013O distances and ...",
+    "score": 8.36610126794234,
+    "preprint": true,
+    "lineage": false
+   }
+  ],
+  "c5": [
+   {
+    "n": 17,
+    "cid": "doi:10.26434/chemrxiv-2025-q7jl8",
+    "doi": "10.26434/chemrxiv-2025-q7jl8",
+    "title": "Peptide Charge Modulates Ion Binding to EF-Hand Motifs: A Molecular Dynamics Study",
+    "year": 2025,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv-2025-q7jl8",
+    "snippet": "Rare earth elements (REEs), particularly lanthanides (Ln), are of significant interest due to their critical roles in modern technology and medicine. However, their extraction, isolation, and purification remain challenging. Lanmodulin (LanM), a recently discovered EF-hand protein, exhibits high affinity and selectivity for binding Ln3+ ions. This enhanced affinity is partly attributed to the presence of additional acidic residues within its EF-hand metal binding loops. Previous studies have demonstrated that reducing the number of ligating acidic residues within EF-hand motifs significantly ...",
+    "score": 9.43868451840169,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 18,
+    "cid": "doi:10.26434/chemrxiv.15005421/v1",
+    "doi": "10.26434/chemrxiv.15005421/v1",
+    "title": "Quantum-Guided Binding-Site Engineering of Lanmodulin for Zero-Waste Separation of Critical Rare-Earth Elements",
+    "year": 2026,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.15005421/v1",
+    "snippet": "Rare-earth separation remains energy-intensive and waste-generating, motivating aqueous alternatives for selective lanthanide capture. We report a deterministic computational workflow that couples binding-site engineering of lanmodulin with multireference quantum characterization toward dysprosium prioritization. Four experimentally solved lanmodulin structures were harmonized, residue roles were assigned to preserve the first-shell coordination environment while allowing selected second-sphere and interface positions to mutate, and ProteinMPNN, LigandMPNN, Rosetta triage, and reduced OpenMM ...",
+    "score": 9.053261112378735,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 19,
+    "cid": "doi:10.26434/chemrxiv.15009104/v1",
+    "doi": "10.26434/chemrxiv.15009104/v1",
+    "title": "Water Layering and Orientation Modulate Lanthanide Hydration in Carbon Nanotubes",
+    "year": 2026,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.15009104/v1",
+    "snippet": "Nanoscale confinement can reorganize water molecules and alter ionic hydration, offering a potential route to separating chemically similar ions. We use molecular dynamics simulations with the MACE-MH-1 foundation machine-learning interatomic potential to investigate the hydration of eight trivalent lanthanide ions (Ln 3+ : La 3+ , Pr 3+ , Nd 3+ , Gd 3+ , Tb 3+ , Dy 3+ , Tm 3+ , and Lu 3+ ) in carbon nanotubes (CNTs) with diameters of 1.09\u20131.49 nm. We first evaluate MACE-MH-1 for Ln 3+ hydration in bulk solution. The OMOL model of MACE-MH-1 reproduces the reported Ln\u2013O distances and ...",
+    "score": 8.020758157660913,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 20,
+    "cid": "doi:10.1096/fasebj.2022.36.s1.r4572",
+    "doi": "10.1096/fasebj.2022.36.s1.r4572",
+    "title": "Investigating Landmodulin's EF Hands in Relation to Lanthanide Recycling Methods",
+    "year": 2022,
+    "source": "crossref",
+    "url": "https://doi.org/10.1096/fasebj.2022.36.s1.r4572",
+    "snippet": "Rare earth elements (REEs) have distinct and varied electronic properties that have been applied for military and civilian use in electronics, such as cell phones and computer chip technologies. The recycling methods for REEs are complex and require a multitude of resources that prompt new studies to improve REEs separations. Lanmodulin (LanM), a protein that naturally bind to lanthanides, may provide a biological route for REE separation. Understanding the structure of LanM\u2019s EF\u2010hands will explain how the lanthanides bond to them and lead to a greater understanding of how LanM can be used to ...",
+    "score": 7.747364282024508,
+    "preprint": false,
+    "lineage": false
+   }
+  ],
+  "c6": [
+   {
+    "n": 21,
+    "cid": "doi:10.26434/chemrxiv-2025-q7jl8",
+    "doi": "10.26434/chemrxiv-2025-q7jl8",
+    "title": "Peptide Charge Modulates Ion Binding to EF-Hand Motifs: A Molecular Dynamics Study",
+    "year": 2025,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv-2025-q7jl8",
+    "snippet": "Rare earth elements (REEs), particularly lanthanides (Ln), are of significant interest due to their critical roles in modern technology and medicine. However, their extraction, isolation, and purification remain challenging. Lanmodulin (LanM), a recently discovered EF-hand protein, exhibits high affinity and selectivity for binding Ln3+ ions. This enhanced affinity is partly attributed to the presence of additional acidic residues within its EF-hand metal binding loops. Previous studies have demonstrated that reducing the number of ligating acidic residues within EF-hand motifs significantly ...",
+    "score": 9.43868451840169,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 22,
+    "cid": "doi:10.26434/chemrxiv.6008294.v1",
+    "doi": "10.26434/chemrxiv.6008294.v1",
+    "title": "Bright near Infrared Neodymium Emission from Europium Sensitisation in \u03b2-Triketonate Coordination Polymers",
+    "year": 2018,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.6008294.v1",
+    "snippet": "Isomorphous \u03b2 -triketonate-based lanthanoid polymers containing tris(4-methylbenzoyl)methane ( mtbm ) and RbOH with formula, {[Ln(Rb)( mtbm ) 4 ] 2 } n (Ln = Eu 3+ and Nd 3+ ) have been synthesised and structurally characterised. The photophysical properties for the Nd 3+ complex presented long lifetimes and relatively high quantum yields in comparison with analogous \u03b2 -diketonate complexes. Mixed lanthanoid complexes were also formed and their luminescence properties studied, with effective sensitisation of the 4 F 3/2 of Nd 3+ via the 5 D 0 of Eu 3+ , which is to the best of our knowledge ...",
+    "score": 9.191384898379056,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 23,
+    "cid": "doi:10.26434/chemrxiv.15005421/v1",
+    "doi": "10.26434/chemrxiv.15005421/v1",
+    "title": "Quantum-Guided Binding-Site Engineering of Lanmodulin for Zero-Waste Separation of Critical Rare-Earth Elements",
+    "year": 2026,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.15005421/v1",
+    "snippet": "Rare-earth separation remains energy-intensive and waste-generating, motivating aqueous alternatives for selective lanthanide capture. We report a deterministic computational workflow that couples binding-site engineering of lanmodulin with multireference quantum characterization toward dysprosium prioritization. Four experimentally solved lanmodulin structures were harmonized, residue roles were assigned to preserve the first-shell coordination environment while allowing selected second-sphere and interface positions to mutate, and ProteinMPNN, LigandMPNN, Rosetta triage, and reduced OpenMM ...",
+    "score": 8.580453761426194,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 24,
+    "cid": "doi:10.26434/chemrxiv.15009104/v1",
+    "doi": "10.26434/chemrxiv.15009104/v1",
+    "title": "Water Layering and Orientation Modulate Lanthanide Hydration in Carbon Nanotubes",
+    "year": 2026,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.15009104/v1",
+    "snippet": "Nanoscale confinement can reorganize water molecules and alter ionic hydration, offering a potential route to separating chemically similar ions. We use molecular dynamics simulations with the MACE-MH-1 foundation machine-learning interatomic potential to investigate the hydration of eight trivalent lanthanide ions (Ln 3+ : La 3+ , Pr 3+ , Nd 3+ , Gd 3+ , Tb 3+ , Dy 3+ , Tm 3+ , and Lu 3+ ) in carbon nanotubes (CNTs) with diameters of 1.09\u20131.49 nm. We first evaluate MACE-MH-1 for Ln 3+ hydration in bulk solution. The OMOL model of MACE-MH-1 reproduces the reported Ln\u2013O distances and ...",
+    "score": 8.36610126794234,
+    "preprint": true,
+    "lineage": false
+   }
+  ],
+  "c7": [
+   {
+    "n": 25,
+    "cid": "doi:10.26434/chemrxiv-2025-q7jl8",
+    "doi": "10.26434/chemrxiv-2025-q7jl8",
+    "title": "Peptide Charge Modulates Ion Binding to EF-Hand Motifs: A Molecular Dynamics Study",
+    "year": 2025,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv-2025-q7jl8",
+    "snippet": "Rare earth elements (REEs), particularly lanthanides (Ln), are of significant interest due to their critical roles in modern technology and medicine. However, their extraction, isolation, and purification remain challenging. Lanmodulin (LanM), a recently discovered EF-hand protein, exhibits high affinity and selectivity for binding Ln3+ ions. This enhanced affinity is partly attributed to the presence of additional acidic residues within its EF-hand metal binding loops. Previous studies have demonstrated that reducing the number of ligating acidic residues within EF-hand motifs significantly ...",
+    "score": 9.43868451840169,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 26,
+    "cid": "doi:10.26434/chemrxiv.15005421/v1",
+    "doi": "10.26434/chemrxiv.15005421/v1",
+    "title": "Quantum-Guided Binding-Site Engineering of Lanmodulin for Zero-Waste Separation of Critical Rare-Earth Elements",
+    "year": 2026,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.15005421/v1",
+    "snippet": "Rare-earth separation remains energy-intensive and waste-generating, motivating aqueous alternatives for selective lanthanide capture. We report a deterministic computational workflow that couples binding-site engineering of lanmodulin with multireference quantum characterization toward dysprosium prioritization. Four experimentally solved lanmodulin structures were harmonized, residue roles were assigned to preserve the first-shell coordination environment while allowing selected second-sphere and interface positions to mutate, and ProteinMPNN, LigandMPNN, Rosetta triage, and reduced OpenMM ...",
+    "score": 9.053261112378735,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 27,
+    "cid": "doi:10.1096/fasebj.2022.36.s1.r4572",
+    "doi": "10.1096/fasebj.2022.36.s1.r4572",
+    "title": "Investigating Landmodulin's EF Hands in Relation to Lanthanide Recycling Methods",
+    "year": 2022,
+    "source": "crossref",
+    "url": "https://doi.org/10.1096/fasebj.2022.36.s1.r4572",
+    "snippet": "Rare earth elements (REEs) have distinct and varied electronic properties that have been applied for military and civilian use in electronics, such as cell phones and computer chip technologies. The recycling methods for REEs are complex and require a multitude of resources that prompt new studies to improve REEs separations. Lanmodulin (LanM), a protein that naturally bind to lanthanides, may provide a biological route for REE separation. Understanding the structure of LanM\u2019s EF\u2010hands will explain how the lanthanides bond to them and lead to a greater understanding of how LanM can be used to ...",
+    "score": 7.030945801165651,
+    "preprint": false,
+    "lineage": false
+   },
+   {
+    "n": 28,
+    "cid": "doi:10.1002/chem.71438",
+    "doi": "10.1002/chem.71438",
+    "title": "Influence of Head\u2010to\u2010Tail Cyclization of Lanmodulin\u2010Inspired Peptides on Lanthanide Affinity and Structure",
+    "year": 2026,
+    "source": "crossref",
+    "url": "https://doi.org/10.1002/chem.71438",
+    "snippet": "ABSTRACT Over the recent years, lanthanide (Ln)\u2010binding proteins such as lanmodulin, a naturally Ln\u2010binding EF\u2010hand protein from Methylorubrum extorquens AM1, as well as protein\u2010inspired short Ln\u2010binding peptides, have become of increasing interest for the development of separation and recycling methods for rare earth elements. Here, we comprehensively examined a set of head\u2010to\u2010tail cyclized lanmodulin\u2010EF\u2010hand sequence\u2010inspired peptides and their complexation behavior toward Lns using time\u2010resolved laser\u2010induced fluorescence spectroscopy (TRLFS), isothermal titration calorimetry (ITC), ...",
+    "score": 6.516635364703531,
+    "preprint": false,
+    "lineage": false
+   }
+  ],
+  "c8": [
+   {
+    "n": 29,
+    "cid": "doi:10.26434/chemrxiv-2025-q7jl8",
+    "doi": "10.26434/chemrxiv-2025-q7jl8",
+    "title": "Peptide Charge Modulates Ion Binding to EF-Hand Motifs: A Molecular Dynamics Study",
+    "year": 2025,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv-2025-q7jl8",
+    "snippet": "Rare earth elements (REEs), particularly lanthanides (Ln), are of significant interest due to their critical roles in modern technology and medicine. However, their extraction, isolation, and purification remain challenging. Lanmodulin (LanM), a recently discovered EF-hand protein, exhibits high affinity and selectivity for binding Ln3+ ions. This enhanced affinity is partly attributed to the presence of additional acidic residues within its EF-hand metal binding loops. Previous studies have demonstrated that reducing the number of ligating acidic residues within EF-hand motifs significantly ...",
+    "score": 9.43868451840169,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 30,
+    "cid": "doi:10.26434/chemrxiv.6008294.v1",
+    "doi": "10.26434/chemrxiv.6008294.v1",
+    "title": "Bright near Infrared Neodymium Emission from Europium Sensitisation in \u03b2-Triketonate Coordination Polymers",
+    "year": 2018,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.6008294.v1",
+    "snippet": "Isomorphous \u03b2 -triketonate-based lanthanoid polymers containing tris(4-methylbenzoyl)methane ( mtbm ) and RbOH with formula, {[Ln(Rb)( mtbm ) 4 ] 2 } n (Ln = Eu 3+ and Nd 3+ ) have been synthesised and structurally characterised. The photophysical properties for the Nd 3+ complex presented long lifetimes and relatively high quantum yields in comparison with analogous \u03b2 -diketonate complexes. Mixed lanthanoid complexes were also formed and their luminescence properties studied, with effective sensitisation of the 4 F 3/2 of Nd 3+ via the 5 D 0 of Eu 3+ , which is to the best of our knowledge ...",
+    "score": 9.191384898379056,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 31,
+    "cid": "doi:10.26434/chemrxiv.15005421/v1",
+    "doi": "10.26434/chemrxiv.15005421/v1",
+    "title": "Quantum-Guided Binding-Site Engineering of Lanmodulin for Zero-Waste Separation of Critical Rare-Earth Elements",
+    "year": 2026,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.15005421/v1",
+    "snippet": "Rare-earth separation remains energy-intensive and waste-generating, motivating aqueous alternatives for selective lanthanide capture. We report a deterministic computational workflow that couples binding-site engineering of lanmodulin with multireference quantum characterization toward dysprosium prioritization. Four experimentally solved lanmodulin structures were harmonized, residue roles were assigned to preserve the first-shell coordination environment while allowing selected second-sphere and interface positions to mutate, and ProteinMPNN, LigandMPNN, Rosetta triage, and reduced OpenMM ...",
+    "score": 8.580453761426194,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 32,
+    "cid": "doi:10.1002/chem.71438",
+    "doi": "10.1002/chem.71438",
+    "title": "Influence of Head\u2010to\u2010Tail Cyclization of Lanmodulin\u2010Inspired Peptides on Lanthanide Affinity and Structure",
+    "year": 2026,
+    "source": "crossref",
+    "url": "https://doi.org/10.1002/chem.71438",
+    "snippet": "ABSTRACT Over the recent years, lanthanide (Ln)\u2010binding proteins such as lanmodulin, a naturally Ln\u2010binding EF\u2010hand protein from Methylorubrum extorquens AM1, as well as protein\u2010inspired short Ln\u2010binding peptides, have become of increasing interest for the development of separation and recycling methods for rare earth elements. Here, we comprehensively examined a set of head\u2010to\u2010tail cyclized lanmodulin\u2010EF\u2010hand sequence\u2010inspired peptides and their complexation behavior toward Lns using time\u2010resolved laser\u2010induced fluorescence spectroscopy (TRLFS), isothermal titration calorimetry (ITC), ...",
+    "score": 6.516635364703531,
+    "preprint": false,
+    "lineage": false
+   }
+  ],
+  "c9": [
+   {
+    "n": 33,
+    "cid": "doi:10.26434/chemrxiv-2025-q7jl8",
+    "doi": "10.26434/chemrxiv-2025-q7jl8",
+    "title": "Peptide Charge Modulates Ion Binding to EF-Hand Motifs: A Molecular Dynamics Study",
+    "year": 2025,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv-2025-q7jl8",
+    "snippet": "Rare earth elements (REEs), particularly lanthanides (Ln), are of significant interest due to their critical roles in modern technology and medicine. However, their extraction, isolation, and purification remain challenging. Lanmodulin (LanM), a recently discovered EF-hand protein, exhibits high affinity and selectivity for binding Ln3+ ions. This enhanced affinity is partly attributed to the presence of additional acidic residues within its EF-hand metal binding loops. Previous studies have demonstrated that reducing the number of ligating acidic residues within EF-hand motifs significantly ...",
+    "score": 9.43868451840169,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 34,
+    "cid": "doi:10.26434/chemrxiv.15005421/v1",
+    "doi": "10.26434/chemrxiv.15005421/v1",
+    "title": "Quantum-Guided Binding-Site Engineering of Lanmodulin for Zero-Waste Separation of Critical Rare-Earth Elements",
+    "year": 2026,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.15005421/v1",
+    "snippet": "Rare-earth separation remains energy-intensive and waste-generating, motivating aqueous alternatives for selective lanthanide capture. We report a deterministic computational workflow that couples binding-site engineering of lanmodulin with multireference quantum characterization toward dysprosium prioritization. Four experimentally solved lanmodulin structures were harmonized, residue roles were assigned to preserve the first-shell coordination environment while allowing selected second-sphere and interface positions to mutate, and ProteinMPNN, LigandMPNN, Rosetta triage, and reduced OpenMM ...",
+    "score": 9.053261112378735,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 35,
+    "cid": "doi:10.26434/chemrxiv.15009104/v1",
+    "doi": "10.26434/chemrxiv.15009104/v1",
+    "title": "Water Layering and Orientation Modulate Lanthanide Hydration in Carbon Nanotubes",
+    "year": 2026,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv.15009104/v1",
+    "snippet": "Nanoscale confinement can reorganize water molecules and alter ionic hydration, offering a potential route to separating chemically similar ions. We use molecular dynamics simulations with the MACE-MH-1 foundation machine-learning interatomic potential to investigate the hydration of eight trivalent lanthanide ions (Ln 3+ : La 3+ , Pr 3+ , Nd 3+ , Gd 3+ , Tb 3+ , Dy 3+ , Tm 3+ , and Lu 3+ ) in carbon nanotubes (CNTs) with diameters of 1.09\u20131.49 nm. We first evaluate MACE-MH-1 for Ln 3+ hydration in bulk solution. The OMOL model of MACE-MH-1 reproduces the reported Ln\u2013O distances and ...",
+    "score": 8.020758157660913,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 36,
+    "cid": "doi:10.1096/fasebj.2022.36.s1.r4572",
+    "doi": "10.1096/fasebj.2022.36.s1.r4572",
+    "title": "Investigating Landmodulin's EF Hands in Relation to Lanthanide Recycling Methods",
+    "year": 2022,
+    "source": "crossref",
+    "url": "https://doi.org/10.1096/fasebj.2022.36.s1.r4572",
+    "snippet": "Rare earth elements (REEs) have distinct and varied electronic properties that have been applied for military and civilian use in electronics, such as cell phones and computer chip technologies. The recycling methods for REEs are complex and require a multitude of resources that prompt new studies to improve REEs separations. Lanmodulin (LanM), a protein that naturally bind to lanthanides, may provide a biological route for REE separation. Understanding the structure of LanM\u2019s EF\u2010hands will explain how the lanthanides bond to them and lead to a greater understanding of how LanM can be used to ...",
+    "score": 7.747364282024508,
+    "preprint": false,
+    "lineage": false
+   }
+  ],
+  "c10": [
+   {
+    "n": 37,
+    "cid": "doi:10.1002/ejic.202500258",
+    "doi": "10.1002/ejic.202500258",
+    "title": "Lanthanide\u2010Binding Lanmodulin\u2010Based Peptides: Insights from Advanced Mass Spectrometry Techniques",
+    "year": 2025,
+    "source": "crossref",
+    "url": "https://doi.org/10.1002/ejic.202500258",
+    "snippet": "Selective peptide ligands for lanthanides (Ln) have multiple applications in, for example, Ln\u2010separation and recycling or as lanthanide\u2010binding tags. Optimizing peptides for Ln\u2010binding can be cumbersome and many techniques need high sample volumes. Here short 12\u2010aminoacid peptides are investigated based on the metal\u2010binding loops of the natural Ln\u2010binding protein lanmodulin with advanced gas\u2010phase techniques such as ion mobility spectrometry, collision\u2010induced dissociation, and electrospray ionization to gain insight into binding residues and possible differences between sequences. Both the ...",
+    "score": 5.1561360897552495,
+    "preprint": false,
+    "lineage": false
+   },
+   {
+    "n": 38,
+    "cid": "doi:10.26434/chemrxiv-2025-q7jl8",
+    "doi": "10.26434/chemrxiv-2025-q7jl8",
+    "title": "Peptide Charge Modulates Ion Binding to EF-Hand Motifs: A Molecular Dynamics Study",
+    "year": 2025,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv-2025-q7jl8",
+    "snippet": "Rare earth elements (REEs), particularly lanthanides (Ln), are of significant interest due to their critical roles in modern technology and medicine. However, their extraction, isolation, and purification remain challenging. Lanmodulin (LanM), a recently discovered EF-hand protein, exhibits high affinity and selectivity for binding Ln3+ ions. This enhanced affinity is partly attributed to the presence of additional acidic residues within its EF-hand metal binding loops. Previous studies have demonstrated that reducing the number of ligating acidic residues within EF-hand motifs significantly ...",
+    "score": 5.0614453007994165,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 39,
+    "cid": "doi:10.1101/2023.10.05.559649",
+    "doi": "10.1101/2023.10.05.559649",
+    "title": "Enhanced Ca 2+ Binding to EF-Hands through Phosphorylation of Conserved Serine Residues Activates MpRBOHB and Chitin-Triggered ROS Production",
+    "year": 2023,
+    "source": "crossref",
+    "url": "https://doi.org/10.1101/2023.10.05.559649",
+    "snippet": "Abstract NADPH oxidases/RBOHs catalyze apoplastic ROS production and act as key signaling nodes, integrating multiple signal transduction pathways regulating plant development and stress responses. Although RBOHs have been suggested to be activated by Ca 2+ binding and phosphorylation by various protein kinases, a mechanism linking Ca 2+ binding and phosphorylation in the activity regulation remained elusive. Chitin-triggered ROS production required cytosolic Ca 2+ elevation and Ca 2+ binding to MpRBOHB in a liverwort Marchantia polymorpha . Heterologous expression analysis of truncated ...",
+    "score": 4.0016988904939,
+    "preprint": false,
+    "lineage": false
+   },
+   {
+    "n": 40,
+    "cid": "doi:10.1096/fasebj.2022.36.s1.r4572",
+    "doi": "10.1096/fasebj.2022.36.s1.r4572",
+    "title": "Investigating Landmodulin's EF Hands in Relation to Lanthanide Recycling Methods",
+    "year": 2022,
+    "source": "crossref",
+    "url": "https://doi.org/10.1096/fasebj.2022.36.s1.r4572",
+    "snippet": "Rare earth elements (REEs) have distinct and varied electronic properties that have been applied for military and civilian use in electronics, such as cell phones and computer chip technologies. The recycling methods for REEs are complex and require a multitude of resources that prompt new studies to improve REEs separations. Lanmodulin (LanM), a protein that naturally bind to lanthanides, may provide a biological route for REE separation. Understanding the structure of LanM\u2019s EF\u2010hands will explain how the lanthanides bond to them and lead to a greater understanding of how LanM can be used to ...",
+    "score": 3.3440469371598818,
+    "preprint": false,
+    "lineage": false
+   }
+  ],
+  "c11": [
+   {
+    "n": 41,
+    "cid": "doi:10.26434/chemrxiv-2025-q7jl8",
+    "doi": "10.26434/chemrxiv-2025-q7jl8",
+    "title": "Peptide Charge Modulates Ion Binding to EF-Hand Motifs: A Molecular Dynamics Study",
+    "year": 2025,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv-2025-q7jl8",
+    "snippet": "Rare earth elements (REEs), particularly lanthanides (Ln), are of significant interest due to their critical roles in modern technology and medicine. However, their extraction, isolation, and purification remain challenging. Lanmodulin (LanM), a recently discovered EF-hand protein, exhibits high affinity and selectivity for binding Ln3+ ions. This enhanced affinity is partly attributed to the presence of additional acidic residues within its EF-hand metal binding loops. Previous studies have demonstrated that reducing the number of ligating acidic residues within EF-hand motifs significantly ...",
+    "score": 7.9435452253998005,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 42,
+    "cid": "doi:10.26434/chemrxiv-2021-36s56",
+    "doi": "10.26434/chemrxiv-2021-36s56",
+    "title": "LanM Peptides \u2013 Unravelling the Binding Properties of the EF-Hand Loop Sequences Stripped from the Structural Corset",
+    "year": 2021,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv-2021-36s56",
+    "snippet": "Since the discovery of the biological relevance of lanthanides (Lns) for methylotrophic bacteria in the last decade, the field has seen a steady rise in discoveries of bacteria using Lns. The major role of lanthanides here is in the active sites of enzymes: methanol dehydrogenases. Additionally, lanthanide binding proteins have also been identified. One such protein is lanmodulin (LanM) and, with a remarkable selectivity for Lns over Ca(II) and affinities in the picomolar range, it makes an attractive target to address challenges in lanthanide separation. Why LanM has such a high selectivity ...",
+    "score": 7.623247272987877,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 43,
+    "cid": "doi:10.1002/chem.71438",
+    "doi": "10.1002/chem.71438",
+    "title": "Influence of Head\u2010to\u2010Tail Cyclization of Lanmodulin\u2010Inspired Peptides on Lanthanide Affinity and Structure",
+    "year": 2026,
+    "source": "crossref",
+    "url": "https://doi.org/10.1002/chem.71438",
+    "snippet": "ABSTRACT Over the recent years, lanthanide (Ln)\u2010binding proteins such as lanmodulin, a naturally Ln\u2010binding EF\u2010hand protein from Methylorubrum extorquens AM1, as well as protein\u2010inspired short Ln\u2010binding peptides, have become of increasing interest for the development of separation and recycling methods for rare earth elements. Here, we comprehensively examined a set of head\u2010to\u2010tail cyclized lanmodulin\u2010EF\u2010hand sequence\u2010inspired peptides and their complexation behavior toward Lns using time\u2010resolved laser\u2010induced fluorescence spectroscopy (TRLFS), isothermal titration calorimetry (ITC), ...",
+    "score": 5.759983042965233,
+    "preprint": false,
+    "lineage": false
+   },
+   {
+    "n": 44,
+    "cid": "doi:10.1021/acs.biochem.6c00566",
+    "doi": "10.1021/acs.biochem.6c00566",
+    "title": "EF-Hand Binding Order and Conformational Control of Lanthanide Ion Binding in M. extorquens Lanmodulin",
+    "year": 2026,
+    "source": "crossref",
+    "url": "https://doi.org/10.1021/acs.biochem.6c00566",
+    "snippet": "Abstract Biomolecular chelators have emerged recently as potential alternatives to conventional, energy-intensive methods for the challenging separation of rare earth elements (REEs), including the lanthanide (LnIII) ions. Lanmodulin (LanM) from Methylobacterium extorquens is the archetype for highly selective biological REE chelation and has been applied for recovery and separations of REEs. LanM\u2019s high affinity and selectivity are driven by a large disorder-to-order conformational transition in response to cooperative binding of LnIII ions to three of its EF-hand motifs, with one site being ...",
+    "score": 5.2963216089191825,
+    "preprint": false,
+    "lineage": false
+   }
+  ],
+  "c12": [
+   {
+    "n": 45,
+    "cid": "doi:10.1096/fasebj.2022.36.s1.r4572",
+    "doi": "10.1096/fasebj.2022.36.s1.r4572",
+    "title": "Investigating Landmodulin's EF Hands in Relation to Lanthanide Recycling Methods",
+    "year": 2022,
+    "source": "crossref",
+    "url": "https://doi.org/10.1096/fasebj.2022.36.s1.r4572",
+    "snippet": "Rare earth elements (REEs) have distinct and varied electronic properties that have been applied for military and civilian use in electronics, such as cell phones and computer chip technologies. The recycling methods for REEs are complex and require a multitude of resources that prompt new studies to improve REEs separations. Lanmodulin (LanM), a protein that naturally bind to lanthanides, may provide a biological route for REE separation. Understanding the structure of LanM\u2019s EF\u2010hands will explain how the lanthanides bond to them and lead to a greater understanding of how LanM can be used to ...",
+    "score": 10.421564690011246,
+    "preprint": false,
+    "lineage": false
+   },
+   {
+    "n": 46,
+    "cid": "doi:10.26434/chemrxiv-2025-q7jl8",
+    "doi": "10.26434/chemrxiv-2025-q7jl8",
+    "title": "Peptide Charge Modulates Ion Binding to EF-Hand Motifs: A Molecular Dynamics Study",
+    "year": 2025,
+    "source": "chemrxiv",
+    "url": "https://doi.org/10.26434/chemrxiv-2025-q7jl8",
+    "snippet": "Rare earth elements (REEs), particularly lanthanides (Ln), are of significant interest due to their critical roles in modern technology and medicine. However, their extraction, isolation, and purification remain challenging. Lanmodulin (LanM), a recently discovered EF-hand protein, exhibits high affinity and selectivity for binding Ln3+ ions. This enhanced affinity is partly attributed to the presence of additional acidic residues within its EF-hand metal binding loops. Previous studies have demonstrated that reducing the number of ligating acidic residues within EF-hand motifs significantly ...",
+    "score": 7.747575787068852,
+    "preprint": true,
+    "lineage": false
+   },
+   {
+    "n": 47,
+    "cid": "doi:10.1101/2023.10.05.559649",
+    "doi": "10.1101/2023.10.05.559649",
+    "title": "Enhanced Ca 2+ Binding to EF-Hands through Phosphorylation of Conserved Serine Residues Activates MpRBOHB and Chitin-Triggered ROS Production",
+    "year": 2023,
+    "source": "crossref",
+    "url": "https://doi.org/10.1101/2023.10.05.559649",
+    "snippet": "Abstract NADPH oxidases/RBOHs catalyze apoplastic ROS production and act as key signaling nodes, integrating multiple signal transduction pathways regulating plant development and stress responses. Although RBOHs have been suggested to be activated by Ca 2+ binding and phosphorylation by various protein kinases, a mechanism linking Ca 2+ binding and phosphorylation in the activity regulation remained elusive. Chitin-triggered ROS production required cytosolic Ca 2+ elevation and Ca 2+ binding to MpRBOHB in a liverwort Marchantia polymorpha . Heterologous expression analysis of truncated ...",
+    "score": 7.380339796294286,
+    "preprint": false,
+    "lineage": false
+   },
+   {
+    "n": 48,
+    "cid": "doi:10.1002/ejic.202500258",
+    "doi": "10.1002/ejic.202500258",
+    "title": "Lanthanide\u2010Binding Lanmodulin\u2010Based Peptides: Insights from Advanced Mass Spectrometry Techniques",
+    "year": 2025,
+    "source": "crossref",
+    "url": "https://doi.org/10.1002/ejic.202500258",
+    "snippet": "Selective peptide ligands for lanthanides (Ln) have multiple applications in, for example, Ln\u2010separation and recycling or as lanthanide\u2010binding tags. Optimizing peptides for Ln\u2010binding can be cumbersome and many techniques need high sample volumes. Here short 12\u2010aminoacid peptides are investigated based on the metal\u2010binding loops of the natural Ln\u2010binding protein lanmodulin with advanced gas\u2010phase techniques such as ion mobility spectrometry, collision\u2010induced dissociation, and electrospray ionization to gain insight into binding residues and possible differences between sequences. Both the ...",
+    "score": 5.1561360897552495,
+    "preprint": false,
+    "lineage": false
+   }
+  ]
+ },
+ "decisions": {},
+ "ran": false,
+ "skipped": "no judge client"
+}

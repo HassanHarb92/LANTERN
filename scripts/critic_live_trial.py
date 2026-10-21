@@ -66,10 +66,15 @@ def main():
     if not a.no_judge:
         try:
             client = make_client(a.provider)
-            if not client.configured():
-                client = None
-        except Exception:
-            client = None
+        except Exception as e:
+            sys.exit(f"Cannot build a judge client ({e}). Set LLM_PROVIDER and its key in .env, or pass --no-judge.")
+        if not client.configured():
+            sys.exit("The judge provider is not configured (missing key or username). Fill in .env (see .env.example), "
+                     "or pass --no-judge to run retrieval only.")
+        ok, detail = client.health()
+        print(f"judge health: {ok} - {detail}")
+        if not ok:
+            sys.exit("The judge provider failed its health check; fix that first (network, key, model id).")
     out = critique(record, client, index, lineage=None)
     crit = out["critic"]
     verdicts = {v["claim_id"]: v for v in crit["verdicts"]}
@@ -97,6 +102,12 @@ def main():
         L.append(f"| {i} | {c['accession']} | {cell(c['name'], 50)} | {c['passed']}/{c['of']} | {c.get('critic_action', 'keep')} |")
     L.append(f"\n_Numbers unchanged by the critic: {_unchanged(record, out)}_\n")
     pathlib.Path(a.out).write_text("\n".join(L))
+    pathlib.Path(a.out).with_suffix(".json").write_text(json.dumps(crit, indent=1, default=str))
+    labels = {}
+    for v in crit["verdicts"]:
+        labels[v["label"]] = labels.get(v["label"], 0) + 1
+    print("verdicts:", labels, "| downgraded by post-check:", sum(1 for v in crit["verdicts"] if v["downgraded"]),
+          "| actions:", {d["action"] for d in crit["decisions"].values()} or "none")
     print("wrote", a.out, "| judge:", getattr(client, "model", "not run"), "| claims:", len(claims), "| library:", len(lib))
 
 

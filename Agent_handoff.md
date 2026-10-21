@@ -1,5 +1,54 @@
 # Agent handoff
 
+## PRIORITY 1 (do this before anything else): finish the live test of the literature critic
+Branch `arxiv_rag` holds a built, offline-tested literature critic (`lantern/scholarbud/`, `lantern/critic/`). It has **never run with a real
+judge model**. Finishing that test outranks every other task. **Do not push the branch until the live test is done and its table is
+committed** (commits are fine). A collaborator holds the API key; the original author's cluster has no key and cannot reach Argo.
+
+### Run it (about 10 minutes once a key exists)
+```bash
+git checkout arxiv_rag
+pip install -r requirements.txt
+cp .env.example .env     # set LLM_PROVIDER=anthropic (or openai, or argo on the Argonne network) and its key. Never commit .env
+PYTHONPATH=. python -m pytest -q tests/test_critic_policy.py tests/test_critic_judge.py tests/test_critic_pipeline.py tests/test_scholarbud.py
+PYTHONPATH=. python scripts/critic_live_trial.py --out docs/critic/CRITIC_LIVE_TRIAL.md --cache .critic_cache
+```
+The script health-checks the provider first and exits with a plain message if the key or network is wrong. It writes the stage-by-stage
+table (`docs/critic/CRITIC_LIVE_TRIAL.md`) and the raw record (`.json`), and prints verdict counts, how many verdicts the post-check
+downgraded, and the actions. Retrieval is live (Crossref, no key). `--no-judge` runs retrieval only; Crossref needs internet, nothing else.
+Set `LANTERN_MAILTO` to your email so Crossref's polite pool gets a contact in the User-Agent.
+
+### What a good result looks like
+- Every one of the 12 claims has a verdict; every cited evidence number exists; `Numbers unchanged by the critic: True`.
+- The shortlist order is unchanged unless a protein is marked `review`, and no protein moves up.
+- Read the table by eye. Check that `contradicts` verdicts are real contradictions, not a mismatch of words, and that `supports` are not
+  just the retrieved papers restating the rule. Note any wrong verdict; that is the judge-accuracy data point we lack.
+- If the judge returns unusable JSON, all verdicts degrade to `no_evidence` and decisions to `keep`; the table will show it. Fix the prompt or
+  the model choice (`ARGO_MODEL`, `OPENAI_MODEL`, `ANTHROPIC_MODEL`), not the post-check.
+
+### Then, in order
+1. Commit the table and any fixes. 2. Consolidate per-site claims to distinct (element, CN) pairs (judge calls are redundant today).
+3. Fill `data/critic_lineage.json` with the DOIs of the papers the CN >= 9 and loop-spacing rules came from (otherwise the 0.3 lineage weight
+does nothing). 4. Hand-label at least 30 claims, score the judge, and run the with/without-critic ablation on the controls (two lanmodulins,
+calcium and negative sequences). 5. Pass verdicts into the narration with a citation check. 6. Only then push and open a PR. Exit criteria are in
+`ROADMAP.md` (M7) and `IMPLEMENTATION_PLAN.md` (Sprint 3b).
+
+### Problems the live run found that offline tests could not confirm (all fixed, regression-tested)
+1. Crossref answered HTTP 400 to an unsupported `select` field (`subtype`). Recorded fixtures cannot show a bad request.
+2. With no judge, retrieval was thrown away, so a retrieval-only trial printed an empty table.
+3. The top "evidence" for claims about 8FNR was the PDB deposition of 8FNR itself (DOI 10.2210/pdb8fnr/pdb): circular. Now excluded, with abstract-less records.
+Open: redundant per-site claims; empty lineage list. Expect more such problems: anything that touches a real service or a real model can fail in ways a
+scripted test cannot, so read the live table before trusting the green tests.
+
+### Caveats to carry into any write-up
+Abstract-level evidence only (ChemRxiv full text is behind Cloudflare; about 479 reachable through Europe PMC, mostly COVID-era); preprints are not peer
+reviewed; BM25 retrieval; the judge may share a model family with the narrator; literature is biased toward reported successes and a missing
+paper is not evidence; judge accuracy is unmeasured; the policy is frozen, not trained. The critic never writes or edits a number and never
+promotes a candidate: `contradicts` -> `review` (moved last), `supports` -> badge only. Lineage evidence counts at 0.3. Policy parameters are a
+vector (`lantern/critic/policy.py`: `Params`, `PARAM_BOUNDS`, `objective`) for later GP/Bayesian tuning once labels exist; no training has been done.
+
+---
+
 For the next agent (or person) picking this up. Read this first, then `README.md`, `ROADMAP.md` and `docs/SCIENTIFIC_CONTRACT.md`.
 Everything described here works from a clone of this repository alone; nothing needs the private notes folder.
 
