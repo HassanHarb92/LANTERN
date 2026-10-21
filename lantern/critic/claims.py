@@ -10,8 +10,10 @@ restates. A site missing a number yields no claim rather than a plausible one.
 
 WHICH CLAIMS SURVIVE THE CAP. The canonical question measures 14 sites in 8FNR and 4
 in 8FNS. Taken in record order, a cap of 12 would be all 8FNR and would drop the only
-CN 10 site in the record. Sites are therefore interleaved across structures, and the
-selection rules get reserved slots, because a rule is what a whole shortlist rests on.
+CN 10 site in the record. Coordination numbers are therefore grouped by (element, CN),
+which keeps a rare CN as its own claim however late its site appears; donor distances
+are still per site and interleaved across structures; and the selection rules get
+reserved slots, because a rule is what a whole shortlist rests on.
 """
 from __future__ import annotations
 
@@ -83,47 +85,103 @@ def _ion_label(element: str) -> str:
     return element[:1].upper() + element[1:].lower() + CHARGE.get(sym, "")
 
 
-def _site_claims(record: dict, ef_hand: bool) -> tuple[list[list[Claim]], list[list[Claim]]]:
-    """Per-structure lists of coordination-number and donor-distance claims."""
-    cn_lists, dist_lists = [], []
+def _site_rows(record: dict) -> list[dict]:
+    """One row per measured site of a deposited structure, in record order.
+
+    A site identical to one already seen in the same entry is dropped. Chain and
+    number identify a site, so the repeat is the same site recorded twice, and a
+    claim that counts it would overstate how often a coordination number was
+    measured.
+    """
+    rows, seen = [], set()
     for i, ev in enumerate(record.get("evidence") or []):
         if not isinstance(ev, dict) or ev.get("structure_kind") != "deposited":
             continue
         pdb = str(ev.get("pdb_id") or "").upper()
         if not pdb:
             continue
-        cns, dists = [], []
         for j, site in enumerate(ev.get("sites") or []):
             element = str(site.get("deposited_element") or "").strip()
             if not element:
                 continue
-            sym = element.upper()
-            ion = _ion_label(element)
-            label = f"{site.get('chain', '')}{site.get('site', '')}"
-            words = " ".join(w for w in (
-                "lanthanide" if sym in TRIVALENT else "", sym.capitalize(),
-                ELEMENT_NAMES.get(sym, ""), _name_words(ev.get("name")),
-                "EF-hand" if ef_hand else "") if w)
-            where = f"evidence[{i}].sites[{j}]"
-            cn = _number(site.get("coordination_number"))
-            if cn is not None:
-                cns.append(Claim(
-                    id="", kind="number", value=cn,
-                    text=(f"Site {label} of {pdb} holds {ion} with coordination "
-                          f"number {_fmt(cn)} ({DONOR_PHRASE})"),
-                    query=f"{words} coordination number {_fmt(cn)}",
-                    source_field=f"{where}.coordination_number"))
-            dist = _number(site.get("mean_donor_distance_A"))
-            if dist is not None:
-                dists.append(Claim(
-                    id="", kind="number", value=dist,
-                    text=(f"Site {label} of {pdb} holds {ion} with a mean "
-                          f"{ion}-donor distance of {_fmt(dist)} A"),
-                    query=f"{words} metal oxygen bond distance {_fmt(dist)} A",
-                    source_field=f"{where}.mean_donor_distance_A"))
-        cn_lists.append(cns)
-        dist_lists.append(dists)
-    return cn_lists, dist_lists
+            row = {
+                "where": f"evidence[{i}].sites[{j}]", "pdb": pdb, "name": ev.get("name"),
+                "element": element, "cn": _number(site.get("coordination_number")),
+                "label": f"{site.get('chain', '')}{site.get('site', '')}",
+                "dist": _number(site.get("mean_donor_distance_A"))}
+            key = (pdb, row["label"], element, row["cn"], row["dist"])
+            if key in seen:
+                continue
+            seen.add(key)
+            rows.append(row)
+    return rows
+
+
+def _query_words(element: str, name, ef_hand: bool) -> str:
+    sym = element.upper()
+    return " ".join(w for w in (
+        "lanthanide" if sym in TRIVALENT else "", sym.capitalize(),
+        ELEMENT_NAMES.get(sym, ""), _name_words(name),
+        "EF-hand" if ef_hand else "") if w)
+
+
+def _setting(name, ef_hand: bool) -> str:
+    """How a claim names its setting ("lanmodulin EF-hand"), from record fields only."""
+    word = next(iter(re.findall(r"[A-Za-z][A-Za-z-]+", str(name or ""))), "")
+    return " ".join(w for w in (word.lower(), "EF-hand" if ef_hand else "") if w) or "protein"
+
+
+def _cn_claims(rows: list[dict], ef_hand: bool) -> list[Claim]:
+    """One claim per distinct (element, coordination number), not one per site.
+
+    The first live judge run answered "no_evidence" to all nine per-site claims and was
+    right to: no abstract states the coordination number of a named site in a named PDB
+    entry. Several of the nine also restated the same (element, CN) pair, so the judge
+    was asked one question repeatedly and no answerable question at all. Grouping drops
+    the repeats and makes the ion and its coordination number the subject, which a paper
+    can address; the trailing clause keeps the provenance and `source_field` still
+    resolves to one measured site. Nothing is generalised beyond the record: the setting
+    words come from the structure's own name and the rule text.
+
+    Grouping also subsumes what `_interleave` protected coordination numbers from. A
+    rare CN is now its own group rather than a late site of a long structure, so the cap
+    can no longer drop it for being behind fourteen sites of 8FNR.
+    """
+    groups: dict = {}
+    for row in rows:
+        if row["cn"] is not None:
+            groups.setdefault((row["element"].upper(), row["cn"]), []).append(row)
+    claims = []
+    for (_sym, cn), members in groups.items():
+        first = members[0]
+        count = len(members)
+        claims.append(Claim(
+            id="", kind="number", value=cn,
+            text=(f"{_ion_label(first['element'])} in {_setting(first['name'], ef_hand)} "
+                  f"sites has coordination number {_fmt(cn)} ({DONOR_PHRASE}), measured "
+                  f"at {count} such site{'s' if count != 1 else ''} in "
+                  f"{', '.join(sorted({m['pdb'] for m in members}))}"),
+            query=f"{_query_words(first['element'], first['name'], ef_hand)} "
+                  f"coordination number {_fmt(cn)}",
+            source_field=f"{first['where']}.coordination_number"))
+    return claims
+
+
+def _dist_lists(rows: list[dict], ef_hand: bool) -> list[list[Claim]]:
+    """Per-structure donor-distance claims, still one per site so they can interleave."""
+    by_pdb: dict = {}
+    for row in rows:
+        if row["dist"] is None:
+            continue
+        ion = _ion_label(row["element"])
+        by_pdb.setdefault(row["pdb"], []).append(Claim(
+            id="", kind="number", value=row["dist"],
+            text=(f"Site {row['label']} of {row['pdb']} holds {ion} with a mean "
+                  f"{ion}-donor distance of {_fmt(row['dist'])} A"),
+            query=f"{_query_words(row['element'], row['name'], ef_hand)} "
+                  f"metal oxygen bond distance {_fmt(row['dist'])} A",
+            source_field=f"{row['where']}.mean_donor_distance_A"))
+    return list(by_pdb.values())
 
 
 def _interleave(lists: list[list[Claim]]) -> list[Claim]:
@@ -178,19 +236,20 @@ _QUESTION_WORDS = frozenset(
 def claims_from_record(record: dict, max_claims: int = 12) -> list[Claim]:
     """Deterministic claims for the critic, ids "c1".."cN" in a fixed order.
 
-    Order: coordination numbers (interleaved across structures), then rule claims,
-    then mean donor distances. Rule claims keep their slots under the cap; the rest
-    is filled by coordination numbers first, because those are the numbers the
-    page leads with. A record that was not answered, or has neither evidence nor a
-    shortlist, gives [].
+    Order: coordination numbers (one per distinct element and CN), then rule claims,
+    then mean donor distances (one per site, interleaved across structures). Rule
+    claims keep their slots under the cap; the rest is filled by coordination numbers
+    first, because those are the numbers the page leads with. A record that was not
+    answered, or has neither evidence nor a shortlist, gives [].
     """
     if not isinstance(record, dict) or max_claims < 1:
         return []
     rules_text = " ".join(str(r.get("question", "")) for r in
                           ((record.get("shortlist") or {}).get("rules") or []))
-    cn_lists, dist_lists = _site_claims(record, "EF-hand" in rules_text)
+    ef_hand = "EF-hand" in rules_text
+    rows = _site_rows(record)
     rules = _rule_claims(record)
-    sites = _interleave(cn_lists) + _interleave(dist_lists)
+    sites = _cn_claims(rows, ef_hand) + _interleave(_dist_lists(rows, ef_hand))
 
     def unique(items):
         seen, out = set(), []

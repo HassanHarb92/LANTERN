@@ -13,8 +13,9 @@ import pytest
 from lantern.critic.claims import claims_from_record, numbers_in
 from lantern.critic.judge import (FENCE_CLOSE, FENCE_OPEN, JUDGE_SYSTEM,
                                   MAX_CLAIMS_PER_CALL, RATIONALE_MAX_CHARS,
-                                  JudgeFormatError, build_messages, judge,
-                                  parse_judge_output, post_check)
+                                  SNIPPET_MAX_CHARS, JudgeFormatError,
+                                  build_messages, judge, parse_judge_output,
+                                  post_check)
 from lantern.critic.types import LABELS, Claim, Evidence, Verdict
 from lantern.discover import answer
 from lantern.llm import LLMError
@@ -167,12 +168,26 @@ class TestRuleDJudgeIntroducedNumber:
         v = check(cited=[1], rationale="See [1] and [1, 3].")
         assert v.label == "supports"
 
+    def _passage_with_number_at(self, offset):
+        """A passage whose only number sits at `offset` characters in."""
+        pad = "Lanmodulin dysprosium. "
+        return Evidence(n=1, cid="x", title="Lanmodulin",
+                        snippet=pad * (offset // len(pad)) + "Mean distance 2.77 A.")
+
     def test_number_past_the_snippet_cut_is_not_grounded(self):
-        long = Evidence(n=1, cid="x", title="Lanmodulin",
-                        snippet="Lanmodulin dysprosium. " * 80 + "Mean distance 2.77 A.")
+        """Grounding follows what the model was shown, so it has to move with the cap."""
+        long = self._passage_with_number_at(SNIPPET_MAX_CHARS + len("Mean distance 2.77 A."))
         (v,) = post_check([CLAIM], {"c1": [long]},
                           [raw(rationale="Passage [1] gives 2.77 A.")])
         assert v.label == "no_evidence" and "2.77" in v.downgraded
+
+    def test_number_inside_the_snippet_cut_is_grounded(self):
+        """The other side of the same boundary: an abstract states its results last, so
+        a cap that cuts them is why every live coordination claim read 'no_evidence'."""
+        shown = self._passage_with_number_at(SNIPPET_MAX_CHARS // 2)
+        (v,) = post_check([CLAIM], {"c1": [shown]},
+                          [raw(rationale="Passage [1] gives 2.77 A.")])
+        assert v.label == "supports" and v.downgraded == ""
 
     def test_bracketed_number_that_is_not_a_passage_is_caught(self):
         v = check(rationale="Passage [1] says coordination number [8].")
@@ -186,6 +201,34 @@ class TestRuleDJudgeIntroducedNumber:
         v = check(label="no_evidence", cited=[], rationale="Probably CN 8 really.")
         assert v.label == "no_evidence" and v.rationale == ""
         assert "rationale removed" in v.downgraded
+
+
+class TestProsePassageReferences:
+    """Found by the first live judge run: the judge wrote "Passage 44 ..." of evidence
+    [44] and the post-check read the passage id as an invented quantity.
+
+    Evidence numbers are unique across a whole record, so a late claim's passages are
+    numbered in the forties and a bare one is far from any number the claim mentions;
+    an early claim's "passage 4" is often spared by coincidence. The post-check is left
+    strict on purpose -- sparing every bare number that happens to equal a passage id
+    would also wave through "the coordination number is 44" -- so the prompt carries the
+    fix, as `Agent_handoff.md` directs ("fix the prompt ..., not the post-check").
+    """
+
+    def test_bare_passage_id_counts_as_an_introduced_number(self):
+        v = check(label="no_evidence", cited=[], rationale="Passage 3 is off topic.")
+        assert "introduced number" in v.downgraded and v.rationale == ""
+
+    def test_bracketed_passage_id_is_not_a_number(self):
+        v = check(label="no_evidence", cited=[], rationale="Passage [3] is off topic.")
+        assert v.downgraded == ""
+
+    def test_a_bare_id_voids_a_cited_label_not_just_the_rationale(self):
+        v = check(label="supports", cited=[1], rationale="Passage 3 agrees as well.")
+        assert v.label == "no_evidence" and "introduced number" in v.downgraded
+
+    def test_the_prompt_asks_for_brackets(self):
+        assert "brackets" in JUDGE_SYSTEM and "[41]" in JUDGE_SYSTEM
 
 
 class TestRuleEClaimIds:
@@ -422,9 +465,10 @@ class TestClaimsFromRecord:
         numeric = [c for c in claims if c.kind == "number"]
         assert numeric
         for c in numeric:
-            assert c.source_field.endswith(".coordination_number")
             assert c.value == float(resolve(record, c.source_field))
-            assert f"coordination number {c.value:g}" in c.text
+            word = ("coordination number" if c.source_field.endswith("coordination_number")
+                    else "distance of")
+            assert f"{word} {c.value:g}" in c.text
 
     def test_ids_unique_contiguous_and_stable(self, record):
         a, b = claims_from_record(record), claims_from_record(record)
@@ -435,11 +479,39 @@ class TestClaimsFromRecord:
     def test_cap_keeps_both_structures_and_the_rules(self, record):
         claims = claims_from_record(record, max_claims=12)
         assert len(claims) == 12
-        assert {"8FNR", "8FNS"} <= {re.search(r"of (\w+) holds", c.text).group(1)
-                                    for c in claims if c.kind == "number"}
+        numeric = " ".join(c.text for c in claims if c.kind == "number")
+        assert "8FNR" in numeric and "8FNS" in numeric
+        # Grouping by (element, CN) is what keeps the record's one CN 10 site, which
+        # in record order sits behind fourteen sites of 8FNR, from falling off the cap.
+        assert 10 in {c.value for c in claims
+                      if c.source_field.endswith("coordination_number")}
         rules = [c for c in claims if c.source_field.startswith("shortlist.rules")]
         assert len(rules) == len(record["shortlist"]["rules"])
         assert all(c.kind == "qualitative" and c.value is None for c in rules)
+
+    def test_one_coordination_claim_per_element_and_value(self, record):
+        """The judge is asked each (element, CN) question once, and asked all of them.
+
+        Nine per-site claims were nine ways of asking about five pairs, so a judge
+        spent most of its calls re-answering. The trailing clause has to stay true to
+        the record: it is the only part of a claim that counts sites rather than
+        restating one field.
+        """
+        claims = claims_from_record(record, max_claims=100)
+        cn = [c for c in claims if c.source_field.endswith("coordination_number")]
+        sites = [(ev["pdb_id"].upper(), f"{s['chain']}{s['site']}",
+                  str(s["deposited_element"]).upper(), float(s["coordination_number"]))
+                 for ev in record["evidence"] if ev.get("structure_kind") == "deposited"
+                 for s in ev["sites"]
+                 if s.get("deposited_element") and s.get("coordination_number") is not None]
+        asked = [(resolve(record, c.source_field.replace(
+            "coordination_number", "deposited_element")).upper(), c.value) for c in cn]
+        assert len(asked) == len(set(asked)) == len({(e, n) for _, _, e, n in sites})
+        for (element, value), c in zip(asked, cn):
+            matching = {(pdb, label) for pdb, label, e, n in sites
+                        if (e, n) == (element, value)}
+            assert f"measured at {len(matching)} such site" in c.text
+            assert c.text.endswith(" in " + ", ".join(sorted({p for p, _ in matching})))
 
     def test_distances_appear_when_there_is_room(self, record):
         claims = claims_from_record(record, max_claims=100)
@@ -465,9 +537,11 @@ class TestClaimsFromRecord:
             {"structure_kind": "predicted", "sites": [], "name": "Y"}],
             "shortlist": None}
         claims = claims_from_record(rec)
+        # "1 such site", not 2: the repeated site is the same measurement written
+        # twice, and counting it would overstate how often CN 9 was observed.
         assert [c.text for c in claims] == [
-            "Site A201 of 1ABC holds Nd3+ with coordination number 9 "
-            "(O/N/S donors within 3.2 A)"]
+            "Nd3+ in lanmodulin sites has coordination number 9 "
+            "(O/N/S donors within 3.2 A), measured at 1 such site in 1ABC"]
         assert claims[0].source_field == "evidence[0].sites[0].coordination_number"
 
     @pytest.mark.parametrize("rec", [

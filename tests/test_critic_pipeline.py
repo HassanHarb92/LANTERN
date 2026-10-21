@@ -10,8 +10,11 @@ from functools import partial
 import pytest
 
 from lantern.critic.claims import claims_from_record
+from lantern.critic.judge import SNIPPET_MAX_CHARS, _shown
 from lantern.critic.pipeline import critique
 from lantern.critic.policy import FROZEN, Params
+from lantern.critic.retrieval import SNIPPET_CHARS, retrieve
+from lantern.critic.types import Claim
 from lantern.discover import answer
 from lantern.llm import LLMError
 from lantern.scholarbud import BM25Index
@@ -21,6 +24,9 @@ QUESTION = "proteins for capturing Ce3+"
 EXTERNAL = Paper(doi="10.1000/external.1", title="Lanthanide coordination number in EF-hand lanmodulin sites",
                  abstract="Lanthanide ions bind lanmodulin EF-hand loops with a high coordination number of oxygen "
                           "donors, and calcium sites show a lower coordination number.", year=2023, source="crossref")
+CLAIM = Claim(id="c1", kind="number", value=9.0, text="Dy3+ in lanmodulin EF-hand sites has coordination number 9",
+              query="lanthanide lanmodulin EF-hand coordination number 9",
+              source_field="evidence[0].sites[0].coordination_number")
 LINEAGE = Paper(doi="10.1000/lineage.1", title="Lanthanide coordination number in EF-hand lanmodulin loops",
                 abstract="Lanthanide ions bind lanmodulin EF-hand loops with a high coordination number of oxygen "
                          "donors, and calcium sites show a lower coordination number.", year=2018, source="crossref")
@@ -182,3 +188,26 @@ class TestRetrievalFilters:
     def test_retrieval_without_a_judge_is_still_recorded(self, record):
         out = critique(record, None, _index(EXTERNAL), lineage=set())
         assert out["critic"]["ran"] is False and any(out["critic"]["evidence"].values())
+
+
+class TestTheJudgeSeesWhatRankedThePaper:
+    """Found by the second live run: every coordination claim came back "no_evidence"
+    while the one abstract that answered them had its answer cut off.
+
+    BM25 ranks on the whole title and abstract, so a short window ranks a paper on text
+    it then hides. An abstract states its results last, which is the half a short window
+    drops: the sentence "contain a higher number of coordination numbers (8-9) compared
+    to only 7 in Calmodulin" sits at character 1450 of 1663.
+    """
+
+    def test_a_whole_abstract_survives_both_caps(self):
+        tail = "The measured coordination number is 9."
+        paper = Paper(doi="10.1000/long.1", title="Lanthanide coordination number in EF-hand lanmodulin sites",
+                      abstract="Background on rare earth separation. " * 40 + tail, year=2024, source="crossref")
+        assert 1200 < len(paper.abstract) <= SNIPPET_CHARS  # the old 600/1200 caps both cut it
+        shown = _shown(retrieve(CLAIM, _index(paper), set())[0])[1]
+        assert tail in shown
+
+    def test_the_judges_cap_cannot_undercut_what_retrieval_shows(self):
+        """Two caps in series: whichever is smaller wins, so raising one alone does nothing."""
+        assert SNIPPET_MAX_CHARS >= SNIPPET_CHARS

@@ -37,8 +37,34 @@ calcium and negative sequences). 5. Pass verdicts into the narration with a cita
 1. Crossref answered HTTP 400 to an unsupported `select` field (`subtype`). Recorded fixtures cannot show a bad request.
 2. With no judge, retrieval was thrown away, so a retrieval-only trial printed an empty table.
 3. The top "evidence" for claims about 8FNR was the PDB deposition of 8FNR itself (DOI 10.2210/pdb8fnr/pdb): circular. Now excluded, with abstract-less records.
-Open: redundant per-site claims; empty lineage list. Expect more such problems: anything that touches a real service or a real model can fail in ways a
-scripted test cannot, so read the live table before trusting the green tests.
+4. A passage reference written as prose ("Passage 44 ...") was read by the post-check as a quantity the model invented, which voids a verdict. Bracketed `[44]`
+was already spared. Fixed in the prompt, not the post-check: loosening the check would wave through "the coordination number is 44". The false-positive rate grew
+with evidence index, so it was invisible on the early claims that happen to carry small numbers.
+5. **The judge was shown only the first 600 characters of each abstract, while BM25 ranked on the whole thing.** Every coordination claim read `no_evidence`,
+including ones the retrieved literature answers outright. An abstract states its results last, so a short window drops exactly the half that carries them: 12 of
+14 retrieved abstracts were truncated, losing 52-73%, and the sentence "contain a higher number of coordination numbers (8-9) compared to only 7 in Calmodulin"
+(10.1096/fasebj.2022.36.s1.r4572) sat at character 1450 of 1663. Two caps applied in series, so both had to move. This is what took the critic from zero signal
+to 3 supports and 1 contradiction.
+6. `decide()` vetoes on contradiction mass but `_reason()` explained every review with the net rule, so a demotion recorded the false inequality
+"net evidence +0.52 <= -0.5". The decision was right; only the justification a human reads was wrong.
+
+Open, and the reason step 5 of the list above should not start yet: **the verdicts are not reproducible.** Ten identical runs at temperature 0.2 (verified sent
+and accepted, not silently dropped), two batches of five against one fixed retrieval, disagreed about 5 of 12 claims -- and the two batches disagreed about
+*which* claims were unstable, so one stability run understates it. The least reproducible verdict is the only informative one: the CN-7 contradiction, a genuine
+true positive (8FNR does hold sites below the literature's 8-9), appeared in 2 of 5 runs in one batch and 0 of 5 in the other, while the claims the judge is
+stable on are the ones it has nothing to say about. The same protein on the same evidence has come out `keep`, `badge` (once at contradiction mass 0.45, five
+hundredths short of the veto) and `review`, because that mass lands anywhere from 0.00 to past 0.50 against a `tau_review` of 0.50 -- the threshold is reading
+noise. `scripts/critic_judge_stability.py` measures this and `docs/critic/CRITIC_JUDGE_STABILITY.md` records it. Wiring commentary that unstable into the
+narration would put a verdict on the page that changes between identical runs, which is why step 4 (hand labels) has to come first -- and those labels need
+collecting over repeated runs, not once, since one pass cannot score a judge that disagrees with itself.
+
+Also open: the strongest evidence the critic found is a conference-abstract supplement (FASEB vol 36 **s1**, a high-school 3D-modelling outreach project) carrying
+three of the four non-null verdicts at full weight, because `_evidence_weight` discounts preprints and lineage but knows nothing about source type. And the
+premise of step 3 does not hold as written: CN >= 9 was derived from this project's own survey of PDB structures, not from a paper, so there may be no DOI to
+record for it; `load_lineage()` already returns three DOIs scraped from the provenance docs, so the 0.3 weight was never inert.
+
+Expect more such problems: anything that touches a real service or a real model can fail in ways a scripted test cannot, so read the live table before trusting
+the green tests.
 
 ### Caveats to carry into any write-up
 Abstract-level evidence only (ChemRxiv full text is behind Cloudflare; about 479 reachable through Europe PMC, mostly COVID-era); preprints are not peer
@@ -72,7 +98,8 @@ The viewer tests drive a Node scene check: put `node` on PATH or those tests ski
 ```bash
 PYTHONPATH=. python -m pytest -q tests
 ```
-Last full run: 838 passed, 1 xfailed (with Node). `tests/golden/` holds the dark-viewer goldens; do not regenerate them to make a
+Last full run: 1001 passed, 1 skipped, 1 xfailed (without Node; the skip is the Node-only case). `tests/golden/` holds the
+dark-viewer goldens; do not regenerate them to make a
 test pass, since `TestDarkIsUnchanged` exists to catch accidental change to the dark scene.
 
 ## Map of the code
@@ -138,5 +165,6 @@ re-run from the repo and reproduced `data/validation/results.json` exactly.
 - No experimental validation of any shortlisted candidate.
 
 ## Contributing
-Branch: `as_dev`. Write a test first or alongside any change, run the full suite, and keep commits small and described by the
+Branch: `arxiv_rag` (this document's PRIORITY 1 names it; `as_dev` here was stale). Write a test first or alongside any change,
+run the full suite, and keep commits small and described by the
 reason, not only the diff. Do not commit credentials or `.env`.
