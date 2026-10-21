@@ -27,7 +27,7 @@ def draw_shot(name):
 
 W, H = 7.0, 6.59   # H grew by 0.39 in when D/E went from 3.25x1.45 to 3.3x1.84 in (legible UI text); A/B/C unchanged, only shifted up
 # layout in inches: (left, bottom, width, height) measured from the figure bottom-left
-L = {"A": (0.20, 4.45, 6.80, 2.00), "B": (0.20, 2.00, 3.45, 2.50),
+L = {"A": (0.20, 4.65, 6.80, 1.80), "B": (0.20, 2.00, 3.45, 2.50),
      "C": (4.20, 2.12, 2.30, 2.30), "D": (0.20, 0.00, 3.30, 1.84), "E": (3.70, 0.00, 3.30, 1.84)}
 FN = {"A": draw_flow, "B": draw_harness, "C": draw_caricature, "D": draw_shot("ui_shortlist.png"), "E": draw_shot("ui_explorer.png")}
 NAME = {"A": "flow", "B": "harness", "C": "caricature", "D": "ui_shortlist", "E": "ui_explorer"}

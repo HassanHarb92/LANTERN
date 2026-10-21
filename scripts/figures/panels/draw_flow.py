@@ -46,7 +46,7 @@ CATS = {"Acquire": ("#dff3ec", AQUA), "Process": ("#e9e5fa", VIOLET), "Select": 
 
 def draw_flow(ax):
     """Panel A, simplified: short labels, thick coloured boxes; colour = the kind of action the stage performs."""
-    ax.set_xlim(-1, 101); ax.set_ylim(0, 100); ax.set_axis_off()
+    ax.set_xlim(-1, 101); ax.set_ylim(10, 100); ax.set_axis_off()
     W, G, H = 17.6, 3.0, 22
     xs = [i * (W + G) for i in range(5)]
     yt, yb = 66, 30
@@ -70,6 +70,6 @@ def draw_flow(ax):
     # legend: one swatch per category, along the bottom
     x = 0.0
     for name, (fc, ec) in CATS.items():
-        ax.add_patch(plt.Rectangle((x, 5), 3.2, 8, fc=fc, ec=ec, lw=1.8, zorder=2))
-        ax.text(x + 4.6, 9, name, fontsize=FS_SMALL, va="center", color=INK2)
+        ax.add_patch(plt.Rectangle((x, 14.5), 3.2, 7.5, fc=fc, ec=ec, lw=1.8, zorder=2))
+        ax.text(x + 4.6, 18.25, name, fontsize=FS_SMALL, va="center", color=INK2)
         x += 4.6 + 1.05 * len(name) * 0.95 + 5.5
