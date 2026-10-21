@@ -384,6 +384,18 @@ def _structure_choice(protein, measured: str, target: str | None = None) -> dict
     }
 
 
+def and_list(items) -> str:
+    """["Dy", "Nd"] -> "Dy and Nd". For prose a reader has to parse quickly.
+
+    A comma-joined list of two reads as a truncated list of more, and these
+    sentences are the ones carrying the answer about the ion.
+    """
+    items = list(items)
+    if len(items) < 2:
+        return items[0] if items else ""
+    return f"{', '.join(items[:-1])} and {items[-1]}"
+
+
 def _ion_report(target: str, evidence: list[dict]) -> dict:
     """One verdict about the ion that was actually asked for.
 
@@ -436,7 +448,7 @@ def _ion_report(target: str, evidence: list[dict]) -> dict:
             f"ion-independent.")
         return report
 
-    counts = ", ".join(f"{e}" for e in others) or "other elements"
+    counts = and_list(others) or "other elements"
     if holding and len(holding) == len(sites):
         report["verdict_kind"] = "observed"
         report["statement"] = EVERY_MEASURED_SITE_HOLDS_THE_TARGET.format(

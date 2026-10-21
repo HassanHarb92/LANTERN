@@ -96,7 +96,8 @@ SELECTION_IS_NOT_AFFINITY = (
     "These rules select for the lanmodulin architecture -- four tightly spaced "
     "EF-hand loops in a short protein. They are not an affinity, not a "
     "selectivity over calcium, and not specific to any one lanthanide: the "
-    "same rules fire for Ce3+, Nd3+, La3+ and Dy3+ because sequence cannot "
+    "same rules fire for all fifteen trivalent lanthanides because sequence "
+    "cannot "
     "separate them. Telling two lanthanides apart needs ionic radius against "
     "a coordination number measured from structure."
 )
@@ -270,7 +271,7 @@ def rank(proteins, target: str | None = None) -> dict:
     """Evaluate every protein and order them, selected first.
 
     `target` is accepted and recorded, not used. Every rule is a lanmodulin
-    architecture rule and fires identically for all four supported lanthanides;
+    architecture rule and fires identically for every askable lanthanide;
     taking the argument and ignoring it is the honest shape, because the caller
     does have a target and the answer genuinely does not depend on it. The
     returned record says so where a reader will see it.

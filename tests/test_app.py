@@ -59,11 +59,17 @@ class TestTheQuestionBoxProducesAPage:
         """One rules table, then per structure a site table and a table of the
         structures passed over. The curated lanmodulins carry alternatives now
         -- 8FNR/8DQ2 and 8FNS/6MI5 -- so the second table per structure is
-        drawn for the offline set too, where it used to appear only live."""
-        evidence = page.session_state["record"]["evidence"]
+        drawn for the offline set too, where it used to appear only live.
+
+        Plus one more when nothing measured holds the ion asked about: the
+        entries elsewhere in the index that do. Ce3+ is such a question, so
+        the canonical page draws it."""
+        record = page.session_state["record"]
+        evidence = record["evidence"]
         alternatives = sum(1 for ev in evidence
                            if (ev.get("structure_choice") or {}).get("not_measured"))
-        assert len(page.dataframe) == 1 + len(evidence) + alternatives
+        elsewhere = 1 if record["ion_report"]["deposited_elsewhere"] else 0
+        assert len(page.dataframe) == 1 + len(evidence) + alternatives + elsewhere
 
     def test_it_reports_no_errors(self, page):
         assert [e.value for e in page.error] == []
