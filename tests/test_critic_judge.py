@@ -188,6 +188,34 @@ class TestRuleDJudgeIntroducedNumber:
         assert "rationale removed" in v.downgraded
 
 
+class TestProsePassageReferences:
+    """Found by the first live judge run: the judge wrote "Passage 44 ..." of evidence
+    [44] and the post-check read the passage id as an invented quantity.
+
+    Evidence numbers are unique across a whole record, so a late claim's passages are
+    numbered in the forties and a bare one is far from any number the claim mentions;
+    an early claim's "passage 4" is often spared by coincidence. The post-check is left
+    strict on purpose -- sparing every bare number that happens to equal a passage id
+    would also wave through "the coordination number is 44" -- so the prompt carries the
+    fix, as `Agent_handoff.md` directs ("fix the prompt ..., not the post-check").
+    """
+
+    def test_bare_passage_id_counts_as_an_introduced_number(self):
+        v = check(label="no_evidence", cited=[], rationale="Passage 3 is off topic.")
+        assert "introduced number" in v.downgraded and v.rationale == ""
+
+    def test_bracketed_passage_id_is_not_a_number(self):
+        v = check(label="no_evidence", cited=[], rationale="Passage [3] is off topic.")
+        assert v.downgraded == ""
+
+    def test_a_bare_id_voids_a_cited_label_not_just_the_rationale(self):
+        v = check(label="supports", cited=[1], rationale="Passage 3 agrees as well.")
+        assert v.label == "no_evidence" and "introduced number" in v.downgraded
+
+    def test_the_prompt_asks_for_brackets(self):
+        assert "brackets" in JUDGE_SYSTEM and "[41]" in JUDGE_SYSTEM
+
+
 class TestRuleEClaimIds:
     def test_unknown_ids_ignored_and_missing_claim_gets_no_evidence(self):
         (v,) = post_check([CLAIM], EVIDENCE, [raw(claim_id="c99")])
