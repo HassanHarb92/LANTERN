@@ -14,6 +14,8 @@ import json
 import pathlib
 import sys
 
+from dotenv import load_dotenv
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
 from lantern.critic.claims import claims_from_record  # noqa: E402
@@ -42,6 +44,10 @@ def cell(s, n=140):
 
 
 def main():
+    # The run command in Agent_handoff.md puts the credential in .env, and only app.py
+    # was reading it; without this the documented command fails for everyone whose key
+    # lives there and nowhere else.
+    load_dotenv()
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
     ap.add_argument("--question", default="proteins for capturing Ce3+")
