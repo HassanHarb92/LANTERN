@@ -67,10 +67,17 @@ def _sha256(text: str) -> str:
     return hashlib.sha256(text.encode()).hexdigest()
 
 
-def _admissible(sites: list[dict], element: str) -> list[dict]:
-    """The sites of `element` this platform is willing to call real."""
+def _admissible(sites: list[dict]) -> list[dict]:
+    """The sites of this ion that this platform is willing to call real.
+
+    "Is this the ion asked for" is read off the site's own counterfactual
+    flag rather than re-compared here, so the build and the page cannot
+    drift: that flag already knows a YB2 site is ytterbium(II) and does not
+    answer a Yb3+ question, and a second element-string comparison in this
+    file would not.
+    """
     return [s for s in sites
-            if (s["deposited_element"] or "").capitalize() == element
+            if not s["size_match_is_counterfactual"]
             and s["call"] == ADMITTED_CALL and s["call_reliable"]]
 
 
@@ -101,7 +108,7 @@ def prospect(ion: str, limit: int, timeout: int, pause: float) -> dict:
 
         of_element = [s for s in evidence["sites"]
                       if (s["deposited_element"] or "").capitalize() == element]
-        admitted = _admissible(evidence["sites"], element)
+        admitted = _admissible(evidence["sites"])
         if not admitted:
             # Why it failed, in the platform's own words, so the rejection is
             # as checkable as the acceptance.

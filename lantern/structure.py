@@ -27,6 +27,25 @@ REE_LIGAND_CODES = {
     "YB": "Yb", "YB2": "Yb", "LU": "Lu", "YT3": "Y", "Y1": "Y",
 }
 
+# The oxidation state a component code states, for the codes that state one.
+# Read off the code, never inferred: YB is ytterbium with no state given, and
+# YB2 is ytterbium(II).
+#
+# It matters because everything this platform computes assumes Ln(III) -- the
+# Shannon radii, the coordination ranges, the design rules, the question box
+# itself, which only offers trivalent ions. Yb(II) is a different ion with a
+# radius nearer Ca(II) than Yb(III), so a YB2 site is not an observation of
+# the Yb3+ somebody asked about, even though the element symbol matches. The
+# element table above is right to map both to "Yb"; it answers "which element
+# is this", and this answers the question that one cannot.
+#
+# Absent codes state nothing and are left to the element match alone. Y1 is
+# not here because its state is not legible from the code, and guessing it
+# would be exactly the inference this map exists to avoid.
+REE_LIGAND_CHARGE = {
+    "EU3": 3, "GD3": 3, "HO3": 3, "ER3": 3, "YT3": 3, "YB2": 2,
+}
+
 # The other eight rare-earth-containing components in the PDB, deliberately
 # excluded: in every one the metal arrives pre-chelated by a synthetic cage,
 # a polyoxometalate, a buffer molecule or fluoride, so its first shell is the

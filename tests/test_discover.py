@@ -19,7 +19,8 @@ from lantern.discover import (LANTHANIDE_ELEMENTS, PREDICTION_HAS_NO_METAL,
                               SIZE_MATCH_IS_NOT_BINDING, SIZE_RANK_SELF_CHECK,
                               SPHERE_CLOSED_AROUND_THE_DEPOSITED_ION,
                               NARRATION_MAX_TOKENS, NARRATION_TIMEOUT_S,
-                              _element_of, _rank_of, answer, exportable,
+                              _element_of, _is_the_ion_asked_for,
+                              _rank_of, answer, exportable,
                               headline, narrate, narration_payload)
 from lantern.models import Protein
 from lantern.plan import SOURCE_FALLBACK
@@ -352,6 +353,44 @@ class TestVerificationCanBeSkippedButNotFaked:
         record = answer(CANONICAL, max_structures=1)
         assert record["shortlist"]["selected_count"] == 2
         assert len(record["evidence"]) == 1
+
+
+class TestTheOxidationStateIsPartOfTheIon:
+    """"The atom should be the same" includes which ion of it. Six PDB
+    component codes state an oxidation state and one of them, YB2, states a
+    different one from the only ytterbium this platform can be asked about.
+
+    No cached structure contains YB2, so the element check alone has never
+    yet been wrong offline -- which is the whole reason to pin it here rather
+    than wait for a live search to find one."""
+
+    def site(self, metal, element):
+        return {"metal": metal, "element": element}
+
+    def test_a_bare_code_is_judged_on_its_element(self):
+        assert _is_the_ion_asked_for(self.site("YB", "Yb"), "Yb3+")
+        assert _is_the_ion_asked_for(self.site("EU", "Eu"), "Eu3+")
+
+    def test_a_code_stating_the_same_state_still_matches(self):
+        assert _is_the_ion_asked_for(self.site("EU3", "Eu"), "Eu3+")
+        assert _is_the_ion_asked_for(self.site("HO3", "Ho"), "Ho3+")
+
+    def test_ytterbium_two_is_not_the_ytterbium_three_that_was_asked_for(self):
+        assert not _is_the_ion_asked_for(self.site("YB2", "Yb"), "Yb3+")
+
+    def test_a_different_element_never_matches(self):
+        assert not _is_the_ion_asked_for(self.site("DY", "Dy"), "Eu3+")
+
+    def test_the_real_pages_sites_are_unaffected(self):
+        """The fix must not quietly reclassify what already worked. Every
+        site on the Nd3+ page holds a bare ND, which states no oxidation
+        state, so it is judged on its element and still counts."""
+        record = answer("what proteins should I try for capturing Nd3+")
+        nd = [s for ev in record["evidence"] if ev.get("pdb_id") == "8FNS"
+              for s in ev["sites"]]
+        assert nd
+        assert all(s["size_match_is_counterfactual"] is False for s in nd)
+        assert all(s["deposited_charge"] is None for s in nd)
 
 
 class TestTheIonAskedAboutIsSomewhereOnThePage:

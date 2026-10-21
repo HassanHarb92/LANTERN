@@ -58,10 +58,11 @@ from .chemistry import LOOP_LENGTH
 from .design import SELECTION_IS_NOT_AFFINITY, ef_hand_layout, rank
 from .geometry import SCORE_VERSION, score_site
 from .ions import (COORDINATION_FIT_IS_NOT_BINDING, LANTHANIDES_III,
-                   coordination_fit, element_name, rank_by_size_match,
-                   size_match, typical_coordination)
+                   coordination_fit, element_name, ion_charge,
+                   rank_by_size_match, size_match, typical_coordination)
 from .plan import parse_question
-from .structure import (ALL_METAL_CODES, binding_neighborhood, cached_structure,
+from .structure import (ALL_METAL_CODES, REE_LIGAND_CHARGE,
+                        binding_neighborhood, cached_structure,
                         fetch_structure, resolution_from_coordinates)
 from .uniprot import choose_structure, search_proteins
 
@@ -230,7 +231,14 @@ def _structure_evidence(target: str, text: str, fmt: str, pdb_id: str) -> dict:
             "target_coordination_fit": coordination_fit(
                 target, site["coordination_number"]),
             # True whenever the ion asked about is not the ion in the crystal.
-            "size_match_is_counterfactual": deposited != _element_of(target),
+            # The element has to match and, where the deposited component
+            # states an oxidation state, that has to match too: a YB2 site is
+            # ytterbium(II), and answering a Yb3+ question with it would be
+            # the same swap this page exists to stop, one row further down.
+            "size_match_is_counterfactual": not _is_the_ion_asked_for(
+                site, target),
+            "deposited_charge": REE_LIGAND_CHARGE.get(
+                (site.get("metal") or "").upper()),
             "ion_context": _ion_context(target, deposited,
                                         site["coordination_number"],
                                         site["mean_donor_distance_A"]),
@@ -266,6 +274,25 @@ def _structure_evidence(target: str, text: str, fmt: str, pdb_id: str) -> dict:
 def _element_of(ion: str) -> str:
     """"Ce3+" -> "CE". Used only to ask whether two labels name one element."""
     return "".join(c for c in str(ion) if c.isalpha()).upper()
+
+
+def _is_the_ion_asked_for(site: dict, target: str) -> bool:
+    """Whether a parsed site holds the ion in the question, state included.
+
+    The element match is the usual case and is all most components support.
+    Six codes also state an oxidation state, and for those it is checked: the
+    element table maps YB and YB2 both to ytterbium, correctly, because they
+    are both ytterbium -- but YB2 is ytterbium(II), and this platform's radii,
+    coordination ranges and design rules are all Ln(III). Calling that site an
+    observation of Yb3+ would put a different ion behind the green banner.
+
+    A component that states nothing is judged on its element alone rather than
+    assumed trivalent, which is why the map is consulted and not defaulted.
+    """
+    if (site.get("element") or "").upper() != _element_of(target):
+        return False
+    stated = REE_LIGAND_CHARGE.get((site.get("metal") or "").upper())
+    return stated is None or stated == ion_charge(target)
 
 
 def _rank_of(element: str, ordering: list[dict]) -> int | None:
