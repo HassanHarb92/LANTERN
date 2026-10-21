@@ -13,8 +13,9 @@ import pytest
 from lantern.critic.claims import claims_from_record, numbers_in
 from lantern.critic.judge import (FENCE_CLOSE, FENCE_OPEN, JUDGE_SYSTEM,
                                   MAX_CLAIMS_PER_CALL, RATIONALE_MAX_CHARS,
-                                  JudgeFormatError, build_messages, judge,
-                                  parse_judge_output, post_check)
+                                  SNIPPET_MAX_CHARS, JudgeFormatError,
+                                  build_messages, judge, parse_judge_output,
+                                  post_check)
 from lantern.critic.types import LABELS, Claim, Evidence, Verdict
 from lantern.discover import answer
 from lantern.llm import LLMError
@@ -167,12 +168,26 @@ class TestRuleDJudgeIntroducedNumber:
         v = check(cited=[1], rationale="See [1] and [1, 3].")
         assert v.label == "supports"
 
+    def _passage_with_number_at(self, offset):
+        """A passage whose only number sits at `offset` characters in."""
+        pad = "Lanmodulin dysprosium. "
+        return Evidence(n=1, cid="x", title="Lanmodulin",
+                        snippet=pad * (offset // len(pad)) + "Mean distance 2.77 A.")
+
     def test_number_past_the_snippet_cut_is_not_grounded(self):
-        long = Evidence(n=1, cid="x", title="Lanmodulin",
-                        snippet="Lanmodulin dysprosium. " * 80 + "Mean distance 2.77 A.")
+        """Grounding follows what the model was shown, so it has to move with the cap."""
+        long = self._passage_with_number_at(SNIPPET_MAX_CHARS + len("Mean distance 2.77 A."))
         (v,) = post_check([CLAIM], {"c1": [long]},
                           [raw(rationale="Passage [1] gives 2.77 A.")])
         assert v.label == "no_evidence" and "2.77" in v.downgraded
+
+    def test_number_inside_the_snippet_cut_is_grounded(self):
+        """The other side of the same boundary: an abstract states its results last, so
+        a cap that cuts them is why every live coordination claim read 'no_evidence'."""
+        shown = self._passage_with_number_at(SNIPPET_MAX_CHARS // 2)
+        (v,) = post_check([CLAIM], {"c1": [shown]},
+                          [raw(rationale="Passage [1] gives 2.77 A.")])
+        assert v.label == "supports" and v.downgraded == ""
 
     def test_bracketed_number_that_is_not_a_passage_is_caught(self):
         v = check(rationale="Passage [1] says coordination number [8].")

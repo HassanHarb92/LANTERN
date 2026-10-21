@@ -10,7 +10,13 @@ from ..scholarbud.types import Paper
 from .lineage import is_lineage
 from .types import Claim, Evidence
 
-SNIPPET_CHARS = 600
+# Wide enough for a whole abstract. BM25 ranks on the full title and abstract, so a 600-char window used to rank a paper
+# on text it then hid from the judge. The abstract that says LanM EF-hands "contain a higher number of coordination
+# numbers (8-9) compared to only 7 in Calmodulin" puts that sentence at character 1450 of 1663, and every claim about a
+# coordination number came back "no_evidence" while the one passage that answered them was cut off mid-abstract. A
+# scientific abstract states its results last, which is exactly the half a short window drops. Keep this <=
+# judge.SNIPPET_MAX_CHARS, or the judge's own cap silently re-truncates and the window here means nothing.
+SNIPPET_CHARS = 2400
 MIN_ABSTRACT_CHARS = 80
 # PDB depositions are the measured data under test, not commentary on it. The first live run ranked the deposition of
 # 8FNR itself as the best "evidence" for a claim about 8FNR; citing the data in support of itself is circular.
