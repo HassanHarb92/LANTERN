@@ -108,3 +108,24 @@ class TestTheNarrationBudgetIsWiredToThePage:
             "the narration client must be built with the long timeout, not "
             "the shared one sized for question parsing")
         assert NARRATION_TIMEOUT_S > NARRATION_MAX_TOKENS / 100
+
+
+class TestTheViewerBackgroundSwitch:
+    """One Dark/Light radio for the viewer, drawn once above the result tabs.
+    Last in the file because it changes the shared `page` fixture's state."""
+
+    def test_defaults_to_dark_and_has_one_radio(self, page):
+        radios = [r for r in page.radio if r.key == "viewer_theme_choice"]
+        assert len(radios) == 1 and radios[0].value == "Dark"
+        assert page.session_state["viewer_theme"] == "dark"
+
+    def test_light_is_kept_and_the_page_still_renders(self, page):
+        page.radio(key="viewer_theme_choice").set_value("Light").run()
+        assert not page.exception, [str(e.value) for e in page.exception]
+        assert page.session_state["viewer_theme"] == "light"
+
+    def test_choice_survives_a_visit_to_the_explorer(self, page):
+        page.segmented_control(key="section").set_value("Explorer").run()
+        page.segmented_control(key="section").set_value("Ask").run()
+        assert not page.exception, [str(e.value) for e in page.exception]
+        assert page.radio(key="viewer_theme_choice").value == "Light"

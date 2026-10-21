@@ -1,0 +1,118 @@
+{
+ "background": "#0c1424",
+ "bond_radius": 0.055,
+ "call": {
+  "call": "lanthanide-like",
+  "reliable": true,
+  "score_version": "geometry-v2",
+  "text": "geometry-v2: lanthanide-like"
+ },
+ "chain": "A",
+ "donor_radius": 0.28,
+ "donors": [
+  {
+   "atom": "OE1",
+   "color": "#e2574c",
+   "distance_A": 2.41,
+   "donor_class": "carboxylate",
+   "element": "O",
+   "is_water": false,
+   "kind": "protein",
+   "label": "GLU58",
+   "midpoint": [
+    0.5,
+    0.0,
+    0.0
+   ],
+   "xyz": [
+    1.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "atom": "O",
+   "color": "#e8954a",
+   "distance_A": 2.55,
+   "donor_class": "backbone_carbonyl",
+   "element": "O",
+   "is_water": false,
+   "kind": "protein",
+   "label": "ALA61",
+   "midpoint": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "xyz": [
+    0.0,
+    2.0,
+    0.0
+   ]
+  },
+  {
+   "atom": "O",
+   "color": "#6fa8dc",
+   "distance_A": 2.7,
+   "donor_class": "water",
+   "element": "O",
+   "is_water": true,
+   "kind": "water",
+   "label": "HOH401",
+   "midpoint": [
+    0.0,
+    0.0,
+    1.5
+   ],
+   "xyz": [
+    0.0,
+    0.0,
+    3.0
+   ]
+  }
+ ],
+ "element": "Nd",
+ "legend": [
+  {
+   "color": "#e2574c",
+   "count": 1,
+   "donor_class": "carboxylate",
+   "label": "Side-chain carboxylate O"
+  },
+  {
+   "color": "#e8954a",
+   "count": 1,
+   "donor_class": "backbone_carbonyl",
+   "label": "Backbone carbonyl O"
+  },
+  {
+   "color": "#6fa8dc",
+   "count": 1,
+   "donor_class": "water",
+   "label": "Water"
+  }
+ ],
+ "metal": {
+  "color": "#f5b544",
+  "label": "Nd",
+  "radius": 0.85,
+  "xyz": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ "residue_selection": [
+  {
+   "chain": "A",
+   "resi": 58
+  },
+  {
+   "chain": "A",
+   "resi": 61
+  }
+ ],
+ "site": "301",
+ "summary": "CN 3 \u00b7 2 protein donors \u00b7 1 water \u00b7 2.41\u20132.70 \u00c5",
+ "title": "Nd 301 \u00b7 chain A"
+}

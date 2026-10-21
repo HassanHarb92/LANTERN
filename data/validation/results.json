@@ -1,0 +1,183 @@
+{
+ "V1": {
+  "asu_natural_sites": 96,
+  "matched": 96,
+  "exact_agree": 96,
+  "within_1": 96,
+  "disagreements": [],
+  "unmatched": 0,
+  "cn9_repo": 65,
+  "cn9_indep": 65
+ },
+ "V2": {
+  "nat": {
+   "k": 89,
+   "n": 136,
+   "wilson95": [
+    57.12,
+    72.91
+   ],
+   "entry_cluster_bootstrap95": [
+    53.06,
+    79.05
+   ],
+   "entries": 20
+  },
+  "ca": {
+   "k": 5,
+   "n": 664,
+   "wilson95": [
+    0.32,
+    1.75
+   ],
+   "entry_cluster_bootstrap95": [
+    0.16,
+    1.42
+   ],
+   "entries": 171
+  },
+  "fisher_p": 3.774681212250092e-76,
+  "odds_ratio": 249.57872340425533,
+  "per_entry_fraction_cn9_natural": {
+   "entries_with_any": 18,
+   "entries": 20
+  },
+  "per_family": {
+   "LanD": {
+    "sites": 8,
+    "cn_ge9": 4,
+    "median": 9.0
+   },
+   "MDH/XoxF": {
+    "sites": 11,
+    "cn_ge9": 9,
+    "median": 9.0
+   },
+   "PepSY": {
+    "sites": 81,
+    "cn_ge9": 45,
+    "median": 9.0
+   },
+   "lanmodulin": {
+    "sites": 36,
+    "cn_ge9": 31,
+    "median": 10.0
+   }
+  },
+  "paired": {
+   "n": 19,
+   "up": 6,
+   "down": 5,
+   "ties": 8,
+   "sign_p": 1.0,
+   "median": 0.0
+  }
+ },
+ "V3": {
+  "scanned": 165902,
+  "four_loops_any_gap_lt14": 2266,
+  "strict": 156,
+  "strict_in_family": 107,
+  "strict_outside": 49,
+  "outside_with_pro2": 15,
+  "ctrl_recovered": [
+   true,
+   true
+  ],
+  "outside_identity_to_nearest_known_LanM": {
+   "min": 0.278,
+   "median": 0.353,
+   "max": 0.758,
+   "n_ge_0_40": 19,
+   "n_lt_0_25": 0
+  },
+  "in_family_identity_sample": {
+   "median": 0.547,
+   "n": 40
+  },
+  "outside_annotation_top": [
+   [
+    "EF-hand domain-containing protein",
+    36
+   ],
+   [
+    "EF hand",
+    6
+   ],
+   [
+    "Calcium-binding protein",
+    2
+   ],
+   [
+    "Uncharacterized protein",
+    2
+   ],
+   [
+    "Signal transduction protein with CBS",
+    1
+   ]
+  ]
+ },
+ "V4": {
+  "C5B164": {
+   "score": 74.7,
+   "motifs": 3
+  },
+  "A0A4V2JDD3": {
+   "score": 35.1,
+   "motifs": 0
+  },
+  "P0DP23": {
+   "score": 57.0,
+   "motifs": 1
+  },
+  "P02585": {
+   "score": 69.0,
+   "motifs": 2
+  },
+  "P69905": {
+   "score": 23.4,
+   "motifs": 0
+  },
+  "P00766": {
+   "score": 19.1,
+   "motifs": 0
+  }
+ },
+ "V5": {
+  "asu": [
+   {
+    "cn": 5,
+    "carboxylate_residues": 3,
+    "bidentate": 1,
+    "net_charge": -3,
+    "metal": "LA"
+   }
+  ],
+  "assembly1": [
+   {
+    "cn": 10,
+    "carboxylate_residues": 6,
+    "bidentate": 2,
+    "net_charge": -6,
+    "metal": "LA"
+   },
+   {
+    "cn": 10,
+    "carboxylate_residues": 6,
+    "bidentate": 2,
+    "net_charge": -6,
+    "metal": "LA"
+   }
+  ]
+ },
+ "V6": {
+  "family_four_loop_seqs": 110,
+  "median_period": 24.0,
+  "iqr_period": [
+   24.0,
+   25.0
+  ],
+  "pro_at_2_fraction": 0.757
+ }
+}

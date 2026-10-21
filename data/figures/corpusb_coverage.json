@@ -1,0 +1,18 @@
+{
+ "n_accessions": 190,
+ "n_with_model": 110,
+ "by_loops": {
+  "4_loops": {
+   "with_model": 66,
+   "without_model": 44
+  },
+  "3_loops": {
+   "with_model": 44,
+   "without_model": 36
+  },
+  "other": {
+   "with_model": 0,
+   "without_model": 0
+  }
+ }
+}

@@ -1,0 +1,8 @@
+# Publication figures (scripts/figures). The app/tests need only requirements.txt.
+matplotlib
+numpy
+pandas
+pyarrow
+Pillow
+# optional: only for scripts/figures/capture_ui.py (UI screenshots; then run `playwright install chromium`)
+# playwright

@@ -1,0 +1,37 @@
+<div id="lantern-overview" style="width:100%;height:460px;
+ background:#0c1424;border-radius:12px;overflow:hidden"></div>
+<script src="/s.js"></script>
+<script>
+(function () {
+  const host = document.getElementById('lantern-overview');
+  function fail() {
+    host.innerHTML = '<div style="padding:18px;color:#f0b5a8;font:13px -apple-system,sans-serif">'
+      + '3Dmol.js could not be loaded, so the structure cannot be drawn.</div>';
+  }
+  function start() {
+  const viewer = $3Dmol.createViewer(host, {backgroundColor: "#0c1424"});
+  viewer.addModel("ATOM", "pdb");
+  viewer.setStyle({}, {cartoon: {color: 'spectrum', opacity: 0.85}});
+  viewer.addStyle({hetflag: true}, {sphere: {scale: 0.3}});
+  [{"label": "Nd 301", "xyz": [0.0, 0.0, 0.0], "color": "#f5b544"}].forEach(function (mark) {
+    const p = {x: mark.xyz[0], y: mark.xyz[1], z: mark.xyz[2]};
+    viewer.addSphere({center: p, radius: 0.85, color: mark.color});
+    viewer.addLabel(mark.label, {position: p, fontSize: 11, fontColor: '#1b2330',
+      backgroundColor: mark.color, backgroundOpacity: 0.95, borderThickness: 0,
+      inFront: true});
+  });
+  viewer.zoomTo();
+  viewer.render();
+  }
+
+  if (typeof $3Dmol !== 'undefined') {
+    start();
+  } else {
+    const s = document.createElement('script');
+    s.src = "https://cdn/x.js";
+    s.onload = function () { (typeof $3Dmol === 'undefined') ? fail() : start(); };
+    s.onerror = fail;
+    document.head.appendChild(s);
+  }
+})();
+</script>

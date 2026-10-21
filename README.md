@@ -6,6 +6,15 @@
 
 This is a *prototype*, not a validated discovery pipeline. It includes a working web UI, a fully offline demo over six authentic UniProt sequences, live sequence retrieval from UniProt and InterPro, deterministic exploratory sequence scores, first-shell coordination analysis of deposited rare-earth sites, a binding-site visualiser that draws each ion with a labelled bond to every donor it touches, and LLM-written explanations from Argonne Argo, OpenAI or Anthropic. **It does not yet compute a calibrated selectivity descriptor, experimentally grounded metal selectivity, or autonomous multi-tool planning.** See `ROADMAP.md` for the measured state of the code and the path to those.
 
+## Pipeline at a glance
+
+![LANTERN pipeline: Question, Retrieve, Select, Verify, Shortlist, with PDB, AlphaFold DB and ESMFold feeding Verify and a language model that only narrates](docs/figures/lantern_pipeline.png)
+
+*Figure 1. The LANTERN pipeline (`docs/figures/lantern_pipeline.png`).* A typed question names the target ion; sequences are retrieved
+from UniProt and InterPro, selected by stated sequence rules (EF-hand loops and spacing), and each survivor is checked against a 3D
+structure (experimental from the PDB, or a predicted model from AlphaFold DB, with ESMFold planned). The shaded stages are
+deterministic and versioned; the language model only narrates and never produces a score or a citation.
+
 ## Quick start (macOS/Linux)
 
 ```bash

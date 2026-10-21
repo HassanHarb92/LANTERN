@@ -1,0 +1,12 @@
+{
+ "family_in_set": 189,
+ "nonfamily": 165713,
+ "fp_strict": 49,
+ "fp_loose": 2156,
+ "tp_strict": 107,
+ "tp_loose": 110,
+ "spec_strict": 0.9997043080506659,
+ "spec_loose": 0.9869895542293,
+ "sens_strict": 0.5661375661375662,
+ "sens_loose": 0.582010582010582
+}

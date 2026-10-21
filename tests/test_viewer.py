@@ -5,6 +5,7 @@ decides which atoms are drawn and at what distance, and parsing JavaScript to
 check that would test the string formatting instead of the chemistry.
 """
 import json
+import pathlib
 import re
 import shutil
 import subprocess
@@ -15,6 +16,7 @@ from lantern.viewer import (DONOR_COLORS, DONOR_ORDER, OTHER_METAL_COLOR,
                             RARE_EARTH_COLOR, TMOL_SRC, VENDORED_TMOL_PATH,
                             VENDORED_TMOL_URL, metal_color, overview_html,
                             site_viewer_html, tmol_sources, viewer_spec)
+from lantern.viewer import LIGHT_DONOR_COLORS, THEMES, palette
 
 
 def make_site(**overrides) -> dict:
@@ -257,10 +259,10 @@ def run_scene(html: str) -> dict:
     return json.loads(done.stdout)
 
 
-@pytest.fixture(scope="module")
-def scene():
-    """One node run shared by the whole class; each assertion reads one fact."""
-    return run_scene(site_viewer_html("ATOM", "pdb", make_site()))
+@pytest.fixture(scope="module", params=THEMES)
+def scene(request):
+    """One node run per theme, shared by the whole class; each assertion reads one fact."""
+    return run_scene(site_viewer_html("ATOM", "pdb", make_site(), theme=request.param))
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
@@ -301,8 +303,9 @@ class TestTheBrowserDrawsWhatTheSpecSays:
         assert scene["initial"]["buttons"] == ["Residue labels", "Distances", "Waters",
                                                "Cartoon", "Reset view"]
 
-    def test_the_overview_script_also_runs(self):
-        html = overview_html("ATOM", "pdb", [make_site()])
+    @pytest.mark.parametrize("theme", THEMES)
+    def test_the_overview_script_also_runs(self, theme):
+        html = overview_html("ATOM", "pdb", [make_site()], theme=theme)
         bodies = [b for b in re.findall(r"<script[^>]*>(.*?)</script>", html, re.S) if b.strip()]
         done = subprocess.run(["node", "--input-type=module", "-e",
                                HARNESS + bodies[0] + "console.log(CALLS.sphere.length)"],
@@ -431,3 +434,86 @@ class TestTheCdnFallbackActuallyDraws:
             "arrive(); REQUESTED[0].onload();"
             "console.log(JSON.stringify({spheres: CALLS.sphere.length}));")
         assert out["spheres"] == 1
+
+
+GOLDEN = pathlib.Path(__file__).parent / "golden"
+GOLDEN_CALL = {"call": "lanthanide-like", "call_reliable": True, "score_version": "geometry-v2"}
+GOLDEN_KW = dict(script_src="/s.js", fallback_src="https://cdn/x.js")
+DARK_ONLY = ("#0c1424", "#17202e", "#e8f1f8", "#b8c7d4", "#1d4f63", "#141d2b", "#2d3f52",
+             "#4a5d70", "whiteCarbon", "#f0b5a8", "#f5b544", "#8fb8d0")
+
+
+class TestDarkIsUnchanged:
+    """The files in tests/golden were written by the viewer before themes
+    existed. The default call must still reproduce them byte for byte."""
+
+    def test_site_html(self):
+        got = site_viewer_html("ATOM", "pdb", make_site(), call=GOLDEN_CALL, **GOLDEN_KW)
+        assert got == (GOLDEN / "viewer_dark_site.html").read_text()
+
+    def test_overview_html(self):
+        got = overview_html("ATOM", "pdb", [make_site()], **GOLDEN_KW)
+        assert got == (GOLDEN / "viewer_dark_overview.html").read_text()
+
+    def test_spec(self):
+        got = json.dumps(viewer_spec(make_site(), call=GOLDEN_CALL), sort_keys=True, indent=1)
+        assert got == (GOLDEN / "viewer_dark_spec.json").read_text()
+
+    def test_explicit_dark_equals_default(self):
+        assert (site_viewer_html("ATOM", "pdb", make_site(), theme="dark")
+                == site_viewer_html("ATOM", "pdb", make_site()))
+
+
+class TestLightTheme:
+    def test_spec_background_is_white(self):
+        assert viewer_spec(make_site(), theme="light")["background"] == "#ffffff"
+
+    @pytest.mark.parametrize("build", [
+        lambda: site_viewer_html("ATOM", "pdb", make_site(), call=GOLDEN_CALL, theme="light"),
+        lambda: overview_html("ATOM", "pdb", [make_site()], theme="light")])
+    def test_html_is_white_and_leaks_no_dark_colour(self, build):
+        html = build()
+        assert "background:#ffffff" in html
+        for colour in DARK_ONLY:
+            assert colour not in html, colour
+
+    def test_donor_colours_are_the_light_ones_and_still_distinct(self):
+        spec = viewer_spec(make_site(), theme="light")
+        assert {d["color"] for d in spec["donors"]} <= set(LIGHT_DONOR_COLORS.values())
+        assert len({d["color"] for d in spec["donors"]}) == 3
+        assert set(LIGHT_DONOR_COLORS) == set(DONOR_COLORS)
+        assert len(set(LIGHT_DONOR_COLORS.values())) == len(LIGHT_DONOR_COLORS)
+
+    def test_ion_colour_differs_by_element_class_in_light_too(self):
+        assert metal_color("Nd", "light") != metal_color("Ca", "light")
+
+    @staticmethod
+    def luminance(hex_colour):
+        def lin(c):
+            c /= 255
+            return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+        r, g, b = (lin(int(hex_colour[i:i + 2], 16)) for i in (1, 3, 5))
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+    def test_everything_drawn_on_white_has_contrast(self):
+        light = palette("light")
+        white = self.luminance("#ffffff")
+        # White text sits on donor colours (distance labels) and the ion colour.
+        for colour in (*LIGHT_DONOR_COLORS.values(), light["rare_earth"], light["other_metal"]):
+            assert (white + 0.05) / (self.luminance(colour) + 0.05) >= 4.5, colour
+        # Text drawn directly on the page.
+        for key in ("legend_fg", "error_fg"):
+            assert (white + 0.05) / (self.luminance(light[key]) + 0.05) >= 4.5, key
+
+    def test_same_bonds_and_positions_in_both_themes(self):
+        dark, light = viewer_spec(make_site()), viewer_spec(make_site(), theme="light")
+        for key in ("xyz", "midpoint", "distance_A", "label", "donor_class"):
+            assert [d[key] for d in dark["donors"]] == [d[key] for d in light["donors"]]
+        assert len(light["donors"]) == make_site()["coordination_number"]
+
+    def test_unknown_theme_is_an_error(self):
+        for call in (lambda: viewer_spec(make_site(), theme="sepia"),
+                     lambda: site_viewer_html("ATOM", "pdb", make_site(), theme="x"),
+                     lambda: overview_html("ATOM", "pdb", [], theme="x")):
+            with pytest.raises(ValueError, match="unknown viewer theme"):
+                call()
