@@ -1,0 +1,38 @@
+{
+ "natural_asu_sites": 96,
+ "ca_asu_sites": 583,
+ "by_cutoff": {
+  "2.8": {
+   "ln_ge9": 51,
+   "ln_n": 96,
+   "ca_ge9": 1,
+   "ca_n": 583,
+   "ln_median": 9.0,
+   "ca_median": 7.0
+  },
+  "3.0": {
+   "ln_ge9": 61,
+   "ln_n": 96,
+   "ca_ge9": 2,
+   "ca_n": 583,
+   "ln_median": 9.0,
+   "ca_median": 7.0
+  },
+  "3.2": {
+   "ln_ge9": 65,
+   "ln_n": 96,
+   "ca_ge9": 5,
+   "ca_n": 583,
+   "ln_median": 9.0,
+   "ca_median": 7.0
+  },
+  "3.4": {
+   "ln_ge9": 68,
+   "ln_n": 96,
+   "ca_ge9": 8,
+   "ca_n": 583,
+   "ln_median": 9.0,
+   "ca_median": 7.0
+  }
+ }
+}
