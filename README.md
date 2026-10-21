@@ -15,6 +15,12 @@ from UniProt and InterPro, selected by stated sequence rules (EF-hand loops and 
 structure (experimental from the PDB, or a predicted model from AlphaFold DB, with ESMFold planned). The shaded stages are
 deterministic and versioned; the language model only narrates and never produces a score or a citation.
 
+## Results
+
+**[`results/`](results/) holds the answer to every question this platform can be asked**, generated offline and committed, so they can be read and checked without installing anything. The folder's own page is a table of all fifteen trivalent lanthanides -- which deposited structure holds each one, how it was reached, and at what resolution. Beside it, one JSON per ion carries the full record: every measurement, verdict, caveat and basis.
+
+Regenerate with `python scripts/export_results.py`, or verify what is committed still matches the code with `--check`. The records carry no timestamps, so a diff in `results/` is a change in what the platform claims.
+
 ## Quick start (macOS/Linux)
 
 ```bash
@@ -149,10 +155,14 @@ LANTERN/
 │   ├── paired_sites.py           # Same site, both ions: the fold-controlled contrast
 │   ├── assembly_audit.py         # Which entries are parsed with half a site (ASU < assembly)
 │   ├── curate_corpus.py          # Shortlist the 636 for hand-curation; never auto-labels
-│   └── selectivity_contrast.py   # Native Ln biology vs native Ca -- what actually separates
+│   ├── selectivity_contrast.py   # Native Ln biology vs native Ca -- what actually separates
+│   ├── build_ion_structures.py   # One deposited structure per lanthanide, chosen by measuring
+│   └── export_results.py         # Answer every question offline and write results/
+├── results/                      # Every answer, committed and rendered by GitHub
 ├── data/reference_proteins.json  # 6 authentic UniProt sequences, checksummed
 ├── data/synthetic_examples.json  # Synthetic fixtures, used only by tests
 ├── data/structures/              # Prefetched coordinates + manifest
+├── data/ion_structures.json      # The chosen structure per lanthanide, with every rejection
 ├── data/ree_pdb_entries.json     # All 636 rare-earth PDB entries, uncurated
 ├── data/lanthanide_sites.parquet # 3375 metal sites from those entries, with geometry
 ├── data/calcium_sites.parquet    # 681 Ca sites in 172 Ca-only depositions of the same proteins

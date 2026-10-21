@@ -1,0 +1,1962 @@
+{
+  "answered": true,
+  "caveats": [
+    "These rules select for the lanmodulin architecture -- four tightly spaced EF-hand loops in a short protein. They are not an affinity, not a selectivity over calcium, and not specific to any one lanthanide: the same rules fire for all fifteen trivalent lanthanides because sequence cannot separate them. Telling two lanthanides apart needs ionic radius against a coordination number measured from structure.",
+    "The shortlist does not depend on La3+: every design rule is a lanmodulin-architecture rule and fires identically for all 15 trivalent lanthanides. The ion enters only at the structure step, where it chooses which deposited file to measure and is compared against the geometry found there.",
+    "A size match compares one ion's Shannon radius against the mean donor distance actually measured at this site. A good fit says the site is the right size; it is not an affinity, and it does not separate a lanthanide from calcium -- Ca2+ scores above Ce3+ at several real lanthanide sites.",
+    "Each site carries `deposited_rank`: where this size score places the ion that was actually crystallised in it, out of the 15 trivalent lanthanides. On this project's own structures that rank is 6th and 9th, not 1st -- the score does not recover the ion known to bind the site. Read the fit as a rough size compatibility, never as a choice between one lanthanide and another.",
+    "12 of the 16 deposited metal site(s) measured here hold La3+ and the other 4 hold Nd. Only those 12 are observations of La3+ in a structure; the La3+ fit on the rest is a counterfactual.",
+    "The donor distance measured here is a property of this complex, not of the empty protein. An EF-hand loop closes around whichever ion it has: comparing like with like at coordination number 9, the Nd sites of 8FNS average 2.52 A and the Dy sites of 8FNR average 2.43 A, tracking the ionic radii of the two metals. So a low fit for an ion that was not the one crystallised says the loop would have to move, which is what loops do; it is not evidence the protein will not bind that ion."
+  ],
+  "evidence": [
+    {
+      "accession": "A0A4V2JDD3",
+      "format": "pdb",
+      "holds_the_target_element": true,
+      "lanthanide_sites": 12,
+      "name": "Lanmodulin (Hansschlegelia quercus)",
+      "notes": [],
+      "organism": "Hansschlegelia quercus",
+      "pdb_id": "8DQ2",
+      "resolution_A": 1.8,
+      "score_version": "geometry-v2",
+      "site_count": 12,
+      "sites": [
+        {
+          "call": "lanthanide-like",
+          "call_reliable": true,
+          "caveats": [
+            "Threshold is the minimum family median of 4 natural Ln families, fitted and scored on the same points: a descriptive separation, not a validated classifier.",
+            "n = 4 families. The claim is the overlap count -- 0 of 55 Ca accessions reach the threshold -- not the p-value, which at this n is mostly a statement about n.",
+            "A fifth family may do to coordination number what the fourth did to bidentate carboxylates (ROADMAP 3.19). One descriptor surviving four families is the current state of the evidence, not a result.",
+            "Describes an observed coordination geometry. Not an affinity, not a selectivity constant, and not a probability.",
+            "Scored from the asymmetric unit. A metal on a crystallographic symmetry axis is coordinated by two protomers while the deposition holds one, so the coordination number is a lower bound -- 9C8X reads CN 5 here and CN 10 in the biological assembly. Re-score the assembly before acting on anything short of a pass."
+          ],
+          "chain": "A",
+          "coordination_number": 10,
+          "criteria": [
+            {
+              "basis": "weakest of 4 Ln families; 0 of 55 Ca accessions and 0 of 28 crystallophore sites reach it (ROADMAP 3.19, exact one-sided p=0.000002)",
+              "descriptor": "coordination_number",
+              "met": true,
+              "threshold": 9,
+              "value": 10
+            }
+          ],
+          "deposited_charge": null,
+          "deposited_element": "La",
+          "ion_context": {
+            "best_fitting_ion": "Ho3+",
+            "deposited_rank": 3,
+            "ions_in_series": 15,
+            "ions_scored": 3,
+            "ordering": [
+              {
+                "fit": 0.667,
+                "ion": "Ho3+"
+              },
+              {
+                "fit": 0.467,
+                "ion": "Ce3+"
+              },
+              {
+                "fit": 0.333,
+                "ion": "La3+"
+              }
+            ],
+            "self_check": "Each site carries `deposited_rank`: where this size score places the ion that was actually crystallised in it, out of the 15 trivalent lanthanides. On this project's own structures that rank is 6th and 9th, not 1st -- the score does not recover the ion known to bind the site. Read the fit as a rough size compatibility, never as a choice between one lanthanide and another.",
+            "target_rank": 3
+          },
+          "mean_donor_distance_A": 2.57,
+          "protein_donors": 10,
+          "site": "201",
+          "site_id": {
+            "chain": "A",
+            "element": "La",
+            "site": "201"
+          },
+          "size_match": {
+            "basis": "La3+ Shannon effective radius 1.270 A at CN 10 (Shannon, R. D. (1976) Acta Crystallographica A32, 751-767, doi:10.1107/S0567739476001551) plus donor oxygen 1.40 A, the r(O2-) anchor of that scale, predicts a 2.670 A mean donor distance; observed 2.570 A, residual -0.100 A. Scaled by the 0.150 A width of the trivalent lanthanide series at CN 10.",
+            "caveat": "Size propensity only: how well this ion's Shannon radius fits the observed donor distance at the observed coordination number. Not an affinity, not a binding constant, not a selectivity prediction. The whole La3+ -> Lu3+ contraction is ~0.18 A and adjacent lanthanides differ by ~0.01-0.02 A, which is at or below the coordinate error of a 2.0-2.5 A structure, so adjacent-pair differences in this number are not resolvable. The r(O2-) = 1.40 A anchor describes oxides, not protein carboxylate and carbonyl donors: over 279 sites at CN 8-9 in this project's corpus the prediction runs 0.045 A long, so no ion reaches a fit of 1.0 and the ranking between ions is sounder than any single value. Shannon tabulates only 3 of 15 trivalent lanthanides at CN 10, so the series width used as the denominator is a lower bound and this fit is correspondingly harsh.",
+            "coordination_number": 10,
+            "fit": 0.333,
+            "ion": "La3+",
+            "ionic_radius_A": 1.27,
+            "observed_mean_donor_distance_A": 2.57,
+            "predicted_distance_A": 2.67,
+            "residual_A": -0.1,
+            "series_width_A": 0.15,
+            "status": "scored"
+          },
+          "size_match_is_counterfactual": false,
+          "target_coordination_fit": {
+            "basis": "Aqueous and solid-state coordination numbers for the trivalent rare earths (Greenwood & Earnshaw, Chemistry of the Elements): the larger ions are 9-coordinate as [Ln(H2O)9]3+ and the smaller ones 8-coordinate. Ca2+ is given its canonical protein geometry, CN 7 pentagonal bipyramidal.",
+            "caveat": "Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out. Descriptive, not a constraint. Ln3+ bonding is essentially electrostatic and non-directional, so coordination geometry is set by the ligands and a site outside this range is unusual rather than wrong. A coordination number read from an asymmetric unit is also a lower bound (see geometry.py), so a site reading below the minimum may simply be truncated.",
+            "compatible": true,
+            "ion": "La3+",
+            "maximum": 10,
+            "minimum": 8,
+            "observed_cn": 10,
+            "statement": "CN 10 falls inside the range La3+ is normally found in (8-10).",
+            "typical": 9,
+            "verdict": "within_range"
+          },
+          "water_donors": 0
+        },
+        {
+          "call": "lanthanide-like",
+          "call_reliable": true,
+          "caveats": [
+            "Threshold is the minimum family median of 4 natural Ln families, fitted and scored on the same points: a descriptive separation, not a validated classifier.",
+            "n = 4 families. The claim is the overlap count -- 0 of 55 Ca accessions reach the threshold -- not the p-value, which at this n is mostly a statement about n.",
+            "A fifth family may do to coordination number what the fourth did to bidentate carboxylates (ROADMAP 3.19). One descriptor surviving four families is the current state of the evidence, not a result.",
+            "Describes an observed coordination geometry. Not an affinity, not a selectivity constant, and not a probability.",
+            "Scored from the asymmetric unit. A metal on a crystallographic symmetry axis is coordinated by two protomers while the deposition holds one, so the coordination number is a lower bound -- 9C8X reads CN 5 here and CN 10 in the biological assembly. Re-score the assembly before acting on anything short of a pass."
+          ],
+          "chain": "A",
+          "coordination_number": 10,
+          "criteria": [
+            {
+              "basis": "weakest of 4 Ln families; 0 of 55 Ca accessions and 0 of 28 crystallophore sites reach it (ROADMAP 3.19, exact one-sided p=0.000002)",
+              "descriptor": "coordination_number",
+              "met": true,
+              "threshold": 9,
+              "value": 10
+            }
+          ],
+          "deposited_charge": null,
+          "deposited_element": "La",
+          "ion_context": {
+            "best_fitting_ion": "Ce3+",
+            "deposited_rank": 3,
+            "ions_in_series": 15,
+            "ions_scored": 3,
+            "ordering": [
+              {
+                "fit": 0.6,
+                "ion": "Ce3+"
+              },
+              {
+                "fit": 0.533,
+                "ion": "Ho3+"
+              },
+              {
+                "fit": 0.467,
+                "ion": "La3+"
+              }
+            ],
+            "self_check": "Each site carries `deposited_rank`: where this size score places the ion that was actually crystallised in it, out of the 15 trivalent lanthanides. On this project's own structures that rank is 6th and 9th, not 1st -- the score does not recover the ion known to bind the site. Read the fit as a rough size compatibility, never as a choice between one lanthanide and another.",
+            "target_rank": 3
+          },
+          "mean_donor_distance_A": 2.59,
+          "protein_donors": 10,
+          "site": "202",
+          "site_id": {
+            "chain": "A",
+            "element": "La",
+            "site": "202"
+          },
+          "size_match": {
+            "basis": "La3+ Shannon effective radius 1.270 A at CN 10 (Shannon, R. D. (1976) Acta Crystallographica A32, 751-767, doi:10.1107/S0567739476001551) plus donor oxygen 1.40 A, the r(O2-) anchor of that scale, predicts a 2.670 A mean donor distance; observed 2.590 A, residual -0.080 A. Scaled by the 0.150 A width of the trivalent lanthanide series at CN 10.",
+            "caveat": "Size propensity only: how well this ion's Shannon radius fits the observed donor distance at the observed coordination number. Not an affinity, not a binding constant, not a selectivity prediction. The whole La3+ -> Lu3+ contraction is ~0.18 A and adjacent lanthanides differ by ~0.01-0.02 A, which is at or below the coordinate error of a 2.0-2.5 A structure, so adjacent-pair differences in this number are not resolvable. The r(O2-) = 1.40 A anchor describes oxides, not protein carboxylate and carbonyl donors: over 279 sites at CN 8-9 in this project's corpus the prediction runs 0.045 A long, so no ion reaches a fit of 1.0 and the ranking between ions is sounder than any single value. Shannon tabulates only 3 of 15 trivalent lanthanides at CN 10, so the series width used as the denominator is a lower bound and this fit is correspondingly harsh.",
+            "coordination_number": 10,
+            "fit": 0.467,
+            "ion": "La3+",
+            "ionic_radius_A": 1.27,
+            "observed_mean_donor_distance_A": 2.59,
+            "predicted_distance_A": 2.67,
+            "residual_A": -0.08,
+            "series_width_A": 0.15,
+            "status": "scored"
+          },
+          "size_match_is_counterfactual": false,
+          "target_coordination_fit": {
+            "basis": "Aqueous and solid-state coordination numbers for the trivalent rare earths (Greenwood & Earnshaw, Chemistry of the Elements): the larger ions are 9-coordinate as [Ln(H2O)9]3+ and the smaller ones 8-coordinate. Ca2+ is given its canonical protein geometry, CN 7 pentagonal bipyramidal.",
+            "caveat": "Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out. Descriptive, not a constraint. Ln3+ bonding is essentially electrostatic and non-directional, so coordination geometry is set by the ligands and a site outside this range is unusual rather than wrong. A coordination number read from an asymmetric unit is also a lower bound (see geometry.py), so a site reading below the minimum may simply be truncated.",
+            "compatible": true,
+            "ion": "La3+",
+            "maximum": 10,
+            "minimum": 8,
+            "observed_cn": 10,
+            "statement": "CN 10 falls inside the range La3+ is normally found in (8-10).",
+            "typical": 9,
+            "verdict": "within_range"
+          },
+          "water_donors": 0
+        },
+        {
+          "call": "lanthanide-like",
+          "call_reliable": true,
+          "caveats": [
+            "Threshold is the minimum family median of 4 natural Ln families, fitted and scored on the same points: a descriptive separation, not a validated classifier.",
+            "n = 4 families. The claim is the overlap count -- 0 of 55 Ca accessions reach the threshold -- not the p-value, which at this n is mostly a statement about n.",
+            "A fifth family may do to coordination number what the fourth did to bidentate carboxylates (ROADMAP 3.19). One descriptor surviving four families is the current state of the evidence, not a result.",
+            "Describes an observed coordination geometry. Not an affinity, not a selectivity constant, and not a probability.",
+            "Scored from the asymmetric unit. A metal on a crystallographic symmetry axis is coordinated by two protomers while the deposition holds one, so the coordination number is a lower bound -- 9C8X reads CN 5 here and CN 10 in the biological assembly. Re-score the assembly before acting on anything short of a pass."
+          ],
+          "chain": "A",
+          "coordination_number": 10,
+          "criteria": [
+            {
+              "basis": "weakest of 4 Ln families; 0 of 55 Ca accessions and 0 of 28 crystallophore sites reach it (ROADMAP 3.19, exact one-sided p=0.000002)",
+              "descriptor": "coordination_number",
+              "met": true,
+              "threshold": 9,
+              "value": 10
+            }
+          ],
+          "deposited_charge": null,
+          "deposited_element": "La",
+          "ion_context": {
+            "best_fitting_ion": "Ce3+",
+            "deposited_rank": 2,
+            "ions_in_series": 15,
+            "ions_scored": 3,
+            "ordering": [
+              {
+                "fit": 0.733,
+                "ion": "Ce3+"
+              },
+              {
+                "fit": 0.6,
+                "ion": "La3+"
+              },
+              {
+                "fit": 0.4,
+                "ion": "Ho3+"
+              }
+            ],
+            "self_check": "Each site carries `deposited_rank`: where this size score places the ion that was actually crystallised in it, out of the 15 trivalent lanthanides. On this project's own structures that rank is 6th and 9th, not 1st -- the score does not recover the ion known to bind the site. Read the fit as a rough size compatibility, never as a choice between one lanthanide and another.",
+            "target_rank": 2
+          },
+          "mean_donor_distance_A": 2.61,
+          "protein_donors": 10,
+          "site": "203",
+          "site_id": {
+            "chain": "A",
+            "element": "La",
+            "site": "203"
+          },
+          "size_match": {
+            "basis": "La3+ Shannon effective radius 1.270 A at CN 10 (Shannon, R. D. (1976) Acta Crystallographica A32, 751-767, doi:10.1107/S0567739476001551) plus donor oxygen 1.40 A, the r(O2-) anchor of that scale, predicts a 2.670 A mean donor distance; observed 2.610 A, residual -0.060 A. Scaled by the 0.150 A width of the trivalent lanthanide series at CN 10.",
+            "caveat": "Size propensity only: how well this ion's Shannon radius fits the observed donor distance at the observed coordination number. Not an affinity, not a binding constant, not a selectivity prediction. The whole La3+ -> Lu3+ contraction is ~0.18 A and adjacent lanthanides differ by ~0.01-0.02 A, which is at or below the coordinate error of a 2.0-2.5 A structure, so adjacent-pair differences in this number are not resolvable. The r(O2-) = 1.40 A anchor describes oxides, not protein carboxylate and carbonyl donors: over 279 sites at CN 8-9 in this project's corpus the prediction runs 0.045 A long, so no ion reaches a fit of 1.0 and the ranking between ions is sounder than any single value. Shannon tabulates only 3 of 15 trivalent lanthanides at CN 10, so the series width used as the denominator is a lower bound and this fit is correspondingly harsh.",
+            "coordination_number": 10,
+            "fit": 0.6,
+            "ion": "La3+",
+            "ionic_radius_A": 1.27,
+            "observed_mean_donor_distance_A": 2.61,
+            "predicted_distance_A": 2.67,
+            "residual_A": -0.06,
+            "series_width_A": 0.15,
+            "status": "scored"
+          },
+          "size_match_is_counterfactual": false,
+          "target_coordination_fit": {
+            "basis": "Aqueous and solid-state coordination numbers for the trivalent rare earths (Greenwood & Earnshaw, Chemistry of the Elements): the larger ions are 9-coordinate as [Ln(H2O)9]3+ and the smaller ones 8-coordinate. Ca2+ is given its canonical protein geometry, CN 7 pentagonal bipyramidal.",
+            "caveat": "Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out. Descriptive, not a constraint. Ln3+ bonding is essentially electrostatic and non-directional, so coordination geometry is set by the ligands and a site outside this range is unusual rather than wrong. A coordination number read from an asymmetric unit is also a lower bound (see geometry.py), so a site reading below the minimum may simply be truncated.",
+            "compatible": true,
+            "ion": "La3+",
+            "maximum": 10,
+            "minimum": 8,
+            "observed_cn": 10,
+            "statement": "CN 10 falls inside the range La3+ is normally found in (8-10).",
+            "typical": 9,
+            "verdict": "within_range"
+          },
+          "water_donors": 0
+        },
+        {
+          "call": "lanthanide-like",
+          "call_reliable": true,
+          "caveats": [
+            "Threshold is the minimum family median of 4 natural Ln families, fitted and scored on the same points: a descriptive separation, not a validated classifier.",
+            "n = 4 families. The claim is the overlap count -- 0 of 55 Ca accessions reach the threshold -- not the p-value, which at this n is mostly a statement about n.",
+            "A fifth family may do to coordination number what the fourth did to bidentate carboxylates (ROADMAP 3.19). One descriptor surviving four families is the current state of the evidence, not a result.",
+            "Describes an observed coordination geometry. Not an affinity, not a selectivity constant, and not a probability.",
+            "Scored from the asymmetric unit. A metal on a crystallographic symmetry axis is coordinated by two protomers while the deposition holds one, so the coordination number is a lower bound -- 9C8X reads CN 5 here and CN 10 in the biological assembly. Re-score the assembly before acting on anything short of a pass."
+          ],
+          "chain": "B",
+          "coordination_number": 10,
+          "criteria": [
+            {
+              "basis": "weakest of 4 Ln families; 0 of 55 Ca accessions and 0 of 28 crystallophore sites reach it (ROADMAP 3.19, exact one-sided p=0.000002)",
+              "descriptor": "coordination_number",
+              "met": true,
+              "threshold": 9,
+              "value": 10
+            }
+          ],
+          "deposited_charge": null,
+          "deposited_element": "La",
+          "ion_context": {
+            "best_fitting_ion": "Ce3+",
+            "deposited_rank": 2,
+            "ions_in_series": 15,
+            "ions_scored": 3,
+            "ordering": [
+              {
+                "fit": 0.733,
+                "ion": "Ce3+"
+              },
+              {
+                "fit": 0.6,
+                "ion": "La3+"
+              },
+              {
+                "fit": 0.4,
+                "ion": "Ho3+"
+              }
+            ],
+            "self_check": "Each site carries `deposited_rank`: where this size score places the ion that was actually crystallised in it, out of the 15 trivalent lanthanides. On this project's own structures that rank is 6th and 9th, not 1st -- the score does not recover the ion known to bind the site. Read the fit as a rough size compatibility, never as a choice between one lanthanide and another.",
+            "target_rank": 2
+          },
+          "mean_donor_distance_A": 2.61,
+          "protein_donors": 10,
+          "site": "202",
+          "site_id": {
+            "chain": "B",
+            "element": "La",
+            "site": "202"
+          },
+          "size_match": {
+            "basis": "La3+ Shannon effective radius 1.270 A at CN 10 (Shannon, R. D. (1976) Acta Crystallographica A32, 751-767, doi:10.1107/S0567739476001551) plus donor oxygen 1.40 A, the r(O2-) anchor of that scale, predicts a 2.670 A mean donor distance; observed 2.610 A, residual -0.060 A. Scaled by the 0.150 A width of the trivalent lanthanide series at CN 10.",
+            "caveat": "Size propensity only: how well this ion's Shannon radius fits the observed donor distance at the observed coordination number. Not an affinity, not a binding constant, not a selectivity prediction. The whole La3+ -> Lu3+ contraction is ~0.18 A and adjacent lanthanides differ by ~0.01-0.02 A, which is at or below the coordinate error of a 2.0-2.5 A structure, so adjacent-pair differences in this number are not resolvable. The r(O2-) = 1.40 A anchor describes oxides, not protein carboxylate and carbonyl donors: over 279 sites at CN 8-9 in this project's corpus the prediction runs 0.045 A long, so no ion reaches a fit of 1.0 and the ranking between ions is sounder than any single value. Shannon tabulates only 3 of 15 trivalent lanthanides at CN 10, so the series width used as the denominator is a lower bound and this fit is correspondingly harsh.",
+            "coordination_number": 10,
+            "fit": 0.6,
+            "ion": "La3+",
+            "ionic_radius_A": 1.27,
+            "observed_mean_donor_distance_A": 2.61,
+            "predicted_distance_A": 2.67,
+            "residual_A": -0.06,
+            "series_width_A": 0.15,
+            "status": "scored"
+          },
+          "size_match_is_counterfactual": false,
+          "target_coordination_fit": {
+            "basis": "Aqueous and solid-state coordination numbers for the trivalent rare earths (Greenwood & Earnshaw, Chemistry of the Elements): the larger ions are 9-coordinate as [Ln(H2O)9]3+ and the smaller ones 8-coordinate. Ca2+ is given its canonical protein geometry, CN 7 pentagonal bipyramidal.",
+            "caveat": "Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out. Descriptive, not a constraint. Ln3+ bonding is essentially electrostatic and non-directional, so coordination geometry is set by the ligands and a site outside this range is unusual rather than wrong. A coordination number read from an asymmetric unit is also a lower bound (see geometry.py), so a site reading below the minimum may simply be truncated.",
+            "compatible": true,
+            "ion": "La3+",
+            "maximum": 10,
+            "minimum": 8,
+            "observed_cn": 10,
+            "statement": "CN 10 falls inside the range La3+ is normally found in (8-10).",
+            "typical": 9,
+            "verdict": "within_range"
+          },
+          "water_donors": 0
+        },
+        {
+          "call": "lanthanide-like",
+          "call_reliable": true,
+          "caveats": [
+            "Threshold is the minimum family median of 4 natural Ln families, fitted and scored on the same points: a descriptive separation, not a validated classifier.",
+            "n = 4 families. The claim is the overlap count -- 0 of 55 Ca accessions reach the threshold -- not the p-value, which at this n is mostly a statement about n.",
+            "A fifth family may do to coordination number what the fourth did to bidentate carboxylates (ROADMAP 3.19). One descriptor surviving four families is the current state of the evidence, not a result.",
+            "Describes an observed coordination geometry. Not an affinity, not a selectivity constant, and not a probability.",
+            "Scored from the asymmetric unit. A metal on a crystallographic symmetry axis is coordinated by two protomers while the deposition holds one, so the coordination number is a lower bound -- 9C8X reads CN 5 here and CN 10 in the biological assembly. Re-score the assembly before acting on anything short of a pass."
+          ],
+          "chain": "B",
+          "coordination_number": 10,
+          "criteria": [
+            {
+              "basis": "weakest of 4 Ln families; 0 of 55 Ca accessions and 0 of 28 crystallophore sites reach it (ROADMAP 3.19, exact one-sided p=0.000002)",
+              "descriptor": "coordination_number",
+              "met": true,
+              "threshold": 9,
+              "value": 10
+            }
+          ],
+          "deposited_charge": null,
+          "deposited_element": "La",
+          "ion_context": {
+            "best_fitting_ion": "Ho3+",
+            "deposited_rank": 3,
+            "ions_in_series": 15,
+            "ions_scored": 3,
+            "ordering": [
+              {
+                "fit": 0.6,
+                "ion": "Ho3+"
+              },
+              {
+                "fit": 0.533,
+                "ion": "Ce3+"
+              },
+              {
+                "fit": 0.4,
+                "ion": "La3+"
+              }
+            ],
+            "self_check": "Each site carries `deposited_rank`: where this size score places the ion that was actually crystallised in it, out of the 15 trivalent lanthanides. On this project's own structures that rank is 6th and 9th, not 1st -- the score does not recover the ion known to bind the site. Read the fit as a rough size compatibility, never as a choice between one lanthanide and another.",
+            "target_rank": 3
+          },
+          "mean_donor_distance_A": 2.58,
+          "protein_donors": 10,
+          "site": "203",
+          "site_id": {
+            "chain": "B",
+            "element": "La",
+            "site": "203"
+          },
+          "size_match": {
+            "basis": "La3+ Shannon effective radius 1.270 A at CN 10 (Shannon, R. D. (1976) Acta Crystallographica A32, 751-767, doi:10.1107/S0567739476001551) plus donor oxygen 1.40 A, the r(O2-) anchor of that scale, predicts a 2.670 A mean donor distance; observed 2.580 A, residual -0.090 A. Scaled by the 0.150 A width of the trivalent lanthanide series at CN 10.",
+            "caveat": "Size propensity only: how well this ion's Shannon radius fits the observed donor distance at the observed coordination number. Not an affinity, not a binding constant, not a selectivity prediction. The whole La3+ -> Lu3+ contraction is ~0.18 A and adjacent lanthanides differ by ~0.01-0.02 A, which is at or below the coordinate error of a 2.0-2.5 A structure, so adjacent-pair differences in this number are not resolvable. The r(O2-) = 1.40 A anchor describes oxides, not protein carboxylate and carbonyl donors: over 279 sites at CN 8-9 in this project's corpus the prediction runs 0.045 A long, so no ion reaches a fit of 1.0 and the ranking between ions is sounder than any single value. Shannon tabulates only 3 of 15 trivalent lanthanides at CN 10, so the series width used as the denominator is a lower bound and this fit is correspondingly harsh.",
+            "coordination_number": 10,
+            "fit": 0.4,
+            "ion": "La3+",
+            "ionic_radius_A": 1.27,
+            "observed_mean_donor_distance_A": 2.58,
+            "predicted_distance_A": 2.67,
+            "residual_A": -0.09,
+            "series_width_A": 0.15,
+            "status": "scored"
+          },
+          "size_match_is_counterfactual": false,
+          "target_coordination_fit": {
+            "basis": "Aqueous and solid-state coordination numbers for the trivalent rare earths (Greenwood & Earnshaw, Chemistry of the Elements): the larger ions are 9-coordinate as [Ln(H2O)9]3+ and the smaller ones 8-coordinate. Ca2+ is given its canonical protein geometry, CN 7 pentagonal bipyramidal.",
+            "caveat": "Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out. Descriptive, not a constraint. Ln3+ bonding is essentially electrostatic and non-directional, so coordination geometry is set by the ligands and a site outside this range is unusual rather than wrong. A coordination number read from an asymmetric unit is also a lower bound (see geometry.py), so a site reading below the minimum may simply be truncated.",
+            "compatible": true,
+            "ion": "La3+",
+            "maximum": 10,
+            "minimum": 8,
+            "observed_cn": 10,
+            "statement": "CN 10 falls inside the range La3+ is normally found in (8-10).",
+            "typical": 9,
+            "verdict": "within_range"
+          },
+          "water_donors": 0
+        },
+        {
+          "call": "lanthanide-like",
+          "call_reliable": true,
+          "caveats": [
+            "Threshold is the minimum family median of 4 natural Ln families, fitted and scored on the same points: a descriptive separation, not a validated classifier.",
+            "n = 4 families. The claim is the overlap count -- 0 of 55 Ca accessions reach the threshold -- not the p-value, which at this n is mostly a statement about n.",
+            "A fifth family may do to coordination number what the fourth did to bidentate carboxylates (ROADMAP 3.19). One descriptor surviving four families is the current state of the evidence, not a result.",
+            "Describes an observed coordination geometry. Not an affinity, not a selectivity constant, and not a probability.",
+            "Scored from the asymmetric unit. A metal on a crystallographic symmetry axis is coordinated by two protomers while the deposition holds one, so the coordination number is a lower bound -- 9C8X reads CN 5 here and CN 10 in the biological assembly. Re-score the assembly before acting on anything short of a pass."
+          ],
+          "chain": "B",
+          "coordination_number": 10,
+          "criteria": [
+            {
+              "basis": "weakest of 4 Ln families; 0 of 55 Ca accessions and 0 of 28 crystallophore sites reach it (ROADMAP 3.19, exact one-sided p=0.000002)",
+              "descriptor": "coordination_number",
+              "met": true,
+              "threshold": 9,
+              "value": 10
+            }
+          ],
+          "deposited_charge": null,
+          "deposited_element": "La",
+          "ion_context": {
+            "best_fitting_ion": "Ce3+",
+            "deposited_rank": 3,
+            "ions_in_series": 15,
+            "ions_scored": 3,
+            "ordering": [
+              {
+                "fit": 0.6,
+                "ion": "Ce3+"
+              },
+              {
+                "fit": 0.533,
+                "ion": "Ho3+"
+              },
+              {
+                "fit": 0.467,
+                "ion": "La3+"
+              }
+            ],
+            "self_check": "Each site carries `deposited_rank`: where this size score places the ion that was actually crystallised in it, out of the 15 trivalent lanthanides. On this project's own structures that rank is 6th and 9th, not 1st -- the score does not recover the ion known to bind the site. Read the fit as a rough size compatibility, never as a choice between one lanthanide and another.",
+            "target_rank": 3
+          },
+          "mean_donor_distance_A": 2.59,
+          "protein_donors": 10,
+          "site": "204",
+          "site_id": {
+            "chain": "B",
+            "element": "La",
+            "site": "204"
+          },
+          "size_match": {
+            "basis": "La3+ Shannon effective radius 1.270 A at CN 10 (Shannon, R. D. (1976) Acta Crystallographica A32, 751-767, doi:10.1107/S0567739476001551) plus donor oxygen 1.40 A, the r(O2-) anchor of that scale, predicts a 2.670 A mean donor distance; observed 2.590 A, residual -0.080 A. Scaled by the 0.150 A width of the trivalent lanthanide series at CN 10.",
+            "caveat": "Size propensity only: how well this ion's Shannon radius fits the observed donor distance at the observed coordination number. Not an affinity, not a binding constant, not a selectivity prediction. The whole La3+ -> Lu3+ contraction is ~0.18 A and adjacent lanthanides differ by ~0.01-0.02 A, which is at or below the coordinate error of a 2.0-2.5 A structure, so adjacent-pair differences in this number are not resolvable. The r(O2-) = 1.40 A anchor describes oxides, not protein carboxylate and carbonyl donors: over 279 sites at CN 8-9 in this project's corpus the prediction runs 0.045 A long, so no ion reaches a fit of 1.0 and the ranking between ions is sounder than any single value. Shannon tabulates only 3 of 15 trivalent lanthanides at CN 10, so the series width used as the denominator is a lower bound and this fit is correspondingly harsh.",
+            "coordination_number": 10,
+            "fit": 0.467,
+            "ion": "La3+",
+            "ionic_radius_A": 1.27,
+            "observed_mean_donor_distance_A": 2.59,
+            "predicted_distance_A": 2.67,
+            "residual_A": -0.08,
+            "series_width_A": 0.15,
+            "status": "scored"
+          },
+          "size_match_is_counterfactual": false,
+          "target_coordination_fit": {
+            "basis": "Aqueous and solid-state coordination numbers for the trivalent rare earths (Greenwood & Earnshaw, Chemistry of the Elements): the larger ions are 9-coordinate as [Ln(H2O)9]3+ and the smaller ones 8-coordinate. Ca2+ is given its canonical protein geometry, CN 7 pentagonal bipyramidal.",
+            "caveat": "Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out. Descriptive, not a constraint. Ln3+ bonding is essentially electrostatic and non-directional, so coordination geometry is set by the ligands and a site outside this range is unusual rather than wrong. A coordination number read from an asymmetric unit is also a lower bound (see geometry.py), so a site reading below the minimum may simply be truncated.",
+            "compatible": true,
+            "ion": "La3+",
+            "maximum": 10,
+            "minimum": 8,
+            "observed_cn": 10,
+            "statement": "CN 10 falls inside the range La3+ is normally found in (8-10).",
+            "typical": 9,
+            "verdict": "within_range"
+          },
+          "water_donors": 0
+        },
+        {
+          "call": "lanthanide-like",
+          "call_reliable": true,
+          "caveats": [
+            "Threshold is the minimum family median of 4 natural Ln families, fitted and scored on the same points: a descriptive separation, not a validated classifier.",
+            "n = 4 families. The claim is the overlap count -- 0 of 55 Ca accessions reach the threshold -- not the p-value, which at this n is mostly a statement about n.",
+            "A fifth family may do to coordination number what the fourth did to bidentate carboxylates (ROADMAP 3.19). One descriptor surviving four families is the current state of the evidence, not a result.",
+            "Describes an observed coordination geometry. Not an affinity, not a selectivity constant, and not a probability.",
+            "Scored from the asymmetric unit. A metal on a crystallographic symmetry axis is coordinated by two protomers while the deposition holds one, so the coordination number is a lower bound -- 9C8X reads CN 5 here and CN 10 in the biological assembly. Re-score the assembly before acting on anything short of a pass."
+          ],
+          "chain": "C",
+          "coordination_number": 10,
+          "criteria": [
+            {
+              "basis": "weakest of 4 Ln families; 0 of 55 Ca accessions and 0 of 28 crystallophore sites reach it (ROADMAP 3.19, exact one-sided p=0.000002)",
+              "descriptor": "coordination_number",
+              "met": true,
+              "threshold": 9,
+              "value": 10
+            }
+          ],
+          "deposited_charge": null,
+          "deposited_element": "La",
+          "ion_context": {
+            "best_fitting_ion": "Ce3+",
+            "deposited_rank": 2,
+            "ions_in_series": 15,
+            "ions_scored": 3,
+            "ordering": [
+              {
+                "fit": 0.667,
+                "ion": "Ce3+"
+              },
+              {
+                "fit": 0.533,
+                "ion": "La3+"
+              },
+              {
+                "fit": 0.467,
+                "ion": "Ho3+"
+              }
+            ],
+            "self_check": "Each site carries `deposited_rank`: where this size score places the ion that was actually crystallised in it, out of the 15 trivalent lanthanides. On this project's own structures that rank is 6th and 9th, not 1st -- the score does not recover the ion known to bind the site. Read the fit as a rough size compatibility, never as a choice between one lanthanide and another.",
+            "target_rank": 2
+          },
+          "mean_donor_distance_A": 2.6,
+          "protein_donors": 10,
+          "site": "201",
+          "site_id": {
+            "chain": "C",
+            "element": "La",
+            "site": "201"
+          },
+          "size_match": {
+            "basis": "La3+ Shannon effective radius 1.270 A at CN 10 (Shannon, R. D. (1976) Acta Crystallographica A32, 751-767, doi:10.1107/S0567739476001551) plus donor oxygen 1.40 A, the r(O2-) anchor of that scale, predicts a 2.670 A mean donor distance; observed 2.600 A, residual -0.070 A. Scaled by the 0.150 A width of the trivalent lanthanide series at CN 10.",
+            "caveat": "Size propensity only: how well this ion's Shannon radius fits the observed donor distance at the observed coordination number. Not an affinity, not a binding constant, not a selectivity prediction. The whole La3+ -> Lu3+ contraction is ~0.18 A and adjacent lanthanides differ by ~0.01-0.02 A, which is at or below the coordinate error of a 2.0-2.5 A structure, so adjacent-pair differences in this number are not resolvable. The r(O2-) = 1.40 A anchor describes oxides, not protein carboxylate and carbonyl donors: over 279 sites at CN 8-9 in this project's corpus the prediction runs 0.045 A long, so no ion reaches a fit of 1.0 and the ranking between ions is sounder than any single value. Shannon tabulates only 3 of 15 trivalent lanthanides at CN 10, so the series width used as the denominator is a lower bound and this fit is correspondingly harsh.",
+            "coordination_number": 10,
+            "fit": 0.533,
+            "ion": "La3+",
+            "ionic_radius_A": 1.27,
+            "observed_mean_donor_distance_A": 2.6,
+            "predicted_distance_A": 2.67,
+            "residual_A": -0.07,
+            "series_width_A": 0.15,
+            "status": "scored"
+          },
+          "size_match_is_counterfactual": false,
+          "target_coordination_fit": {
+            "basis": "Aqueous and solid-state coordination numbers for the trivalent rare earths (Greenwood & Earnshaw, Chemistry of the Elements): the larger ions are 9-coordinate as [Ln(H2O)9]3+ and the smaller ones 8-coordinate. Ca2+ is given its canonical protein geometry, CN 7 pentagonal bipyramidal.",
+            "caveat": "Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out. Descriptive, not a constraint. Ln3+ bonding is essentially electrostatic and non-directional, so coordination geometry is set by the ligands and a site outside this range is unusual rather than wrong. A coordination number read from an asymmetric unit is also a lower bound (see geometry.py), so a site reading below the minimum may simply be truncated.",
+            "compatible": true,
+            "ion": "La3+",
+            "maximum": 10,
+            "minimum": 8,
+            "observed_cn": 10,
+            "statement": "CN 10 falls inside the range La3+ is normally found in (8-10).",
+            "typical": 9,
+            "verdict": "within_range"
+          },
+          "water_donors": 0
+        },
+        {
+          "call": "lanthanide-like",
+          "call_reliable": true,
+          "caveats": [
+            "Threshold is the minimum family median of 4 natural Ln families, fitted and scored on the same points: a descriptive separation, not a validated classifier.",
+            "n = 4 families. The claim is the overlap count -- 0 of 55 Ca accessions reach the threshold -- not the p-value, which at this n is mostly a statement about n.",
+            "A fifth family may do to coordination number what the fourth did to bidentate carboxylates (ROADMAP 3.19). One descriptor surviving four families is the current state of the evidence, not a result.",
+            "Describes an observed coordination geometry. Not an affinity, not a selectivity constant, and not a probability.",
+            "Scored from the asymmetric unit. A metal on a crystallographic symmetry axis is coordinated by two protomers while the deposition holds one, so the coordination number is a lower bound -- 9C8X reads CN 5 here and CN 10 in the biological assembly. Re-score the assembly before acting on anything short of a pass."
+          ],
+          "chain": "C",
+          "coordination_number": 10,
+          "criteria": [
+            {
+              "basis": "weakest of 4 Ln families; 0 of 55 Ca accessions and 0 of 28 crystallophore sites reach it (ROADMAP 3.19, exact one-sided p=0.000002)",
+              "descriptor": "coordination_number",
+              "met": true,
+              "threshold": 9,
+              "value": 10
+            }
+          ],
+          "deposited_charge": null,
+          "deposited_element": "La",
+          "ion_context": {
+            "best_fitting_ion": "Ce3+",
+            "deposited_rank": 3,
+            "ions_in_series": 15,
+            "ions_scored": 3,
+            "ordering": [
+              {
+                "fit": 0.6,
+                "ion": "Ce3+"
+              },
+              {
+                "fit": 0.533,
+                "ion": "Ho3+"
+              },
+              {
+                "fit": 0.467,
+                "ion": "La3+"
+              }
+            ],
+            "self_check": "Each site carries `deposited_rank`: where this size score places the ion that was actually crystallised in it, out of the 15 trivalent lanthanides. On this project's own structures that rank is 6th and 9th, not 1st -- the score does not recover the ion known to bind the site. Read the fit as a rough size compatibility, never as a choice between one lanthanide and another.",
+            "target_rank": 3
+          },
+          "mean_donor_distance_A": 2.59,
+          "protein_donors": 10,
+          "site": "202",
+          "site_id": {
+            "chain": "C",
+            "element": "La",
+            "site": "202"
+          },
+          "size_match": {
+            "basis": "La3+ Shannon effective radius 1.270 A at CN 10 (Shannon, R. D. (1976) Acta Crystallographica A32, 751-767, doi:10.1107/S0567739476001551) plus donor oxygen 1.40 A, the r(O2-) anchor of that scale, predicts a 2.670 A mean donor distance; observed 2.590 A, residual -0.080 A. Scaled by the 0.150 A width of the trivalent lanthanide series at CN 10.",
+            "caveat": "Size propensity only: how well this ion's Shannon radius fits the observed donor distance at the observed coordination number. Not an affinity, not a binding constant, not a selectivity prediction. The whole La3+ -> Lu3+ contraction is ~0.18 A and adjacent lanthanides differ by ~0.01-0.02 A, which is at or below the coordinate error of a 2.0-2.5 A structure, so adjacent-pair differences in this number are not resolvable. The r(O2-) = 1.40 A anchor describes oxides, not protein carboxylate and carbonyl donors: over 279 sites at CN 8-9 in this project's corpus the prediction runs 0.045 A long, so no ion reaches a fit of 1.0 and the ranking between ions is sounder than any single value. Shannon tabulates only 3 of 15 trivalent lanthanides at CN 10, so the series width used as the denominator is a lower bound and this fit is correspondingly harsh.",
+            "coordination_number": 10,
+            "fit": 0.467,
+            "ion": "La3+",
+            "ionic_radius_A": 1.27,
+            "observed_mean_donor_distance_A": 2.59,
+            "predicted_distance_A": 2.67,
+            "residual_A": -0.08,
+            "series_width_A": 0.15,
+            "status": "scored"
+          },
+          "size_match_is_counterfactual": false,
+          "target_coordination_fit": {
+            "basis": "Aqueous and solid-state coordination numbers for the trivalent rare earths (Greenwood & Earnshaw, Chemistry of the Elements): the larger ions are 9-coordinate as [Ln(H2O)9]3+ and the smaller ones 8-coordinate. Ca2+ is given its canonical protein geometry, CN 7 pentagonal bipyramidal.",
+            "caveat": "Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out. Descriptive, not a constraint. Ln3+ bonding is essentially electrostatic and non-directional, so coordination geometry is set by the ligands and a site outside this range is unusual rather than wrong. A coordination number read from an asymmetric unit is also a lower bound (see geometry.py), so a site reading below the minimum may simply be truncated.",
+            "compatible": true,
+            "ion": "La3+",
+            "maximum": 10,
+            "minimum": 8,
+            "observed_cn": 10,
+            "statement": "CN 10 falls inside the range La3+ is normally found in (8-10).",
+            "typical": 9,
+            "verdict": "within_range"
+          },
+          "water_donors": 0
+        },
+        {
+          "call": "lanthanide-like",
+          "call_reliable": true,
+          "caveats": [
+            "Threshold is the minimum family median of 4 natural Ln families, fitted and scored on the same points: a descriptive separation, not a validated classifier.",
+            "n = 4 families. The claim is the overlap count -- 0 of 55 Ca accessions reach the threshold -- not the p-value, which at this n is mostly a statement about n.",
+            "A fifth family may do to coordination number what the fourth did to bidentate carboxylates (ROADMAP 3.19). One descriptor surviving four families is the current state of the evidence, not a result.",
+            "Describes an observed coordination geometry. Not an affinity, not a selectivity constant, and not a probability.",
+            "Scored from the asymmetric unit. A metal on a crystallographic symmetry axis is coordinated by two protomers while the deposition holds one, so the coordination number is a lower bound -- 9C8X reads CN 5 here and CN 10 in the biological assembly. Re-score the assembly before acting on anything short of a pass."
+          ],
+          "chain": "C",
+          "coordination_number": 10,
+          "criteria": [
+            {
+              "basis": "weakest of 4 Ln families; 0 of 55 Ca accessions and 0 of 28 crystallophore sites reach it (ROADMAP 3.19, exact one-sided p=0.000002)",
+              "descriptor": "coordination_number",
+              "met": true,
+              "threshold": 9,
+              "value": 10
+            }
+          ],
+          "deposited_charge": null,
+          "deposited_element": "La",
+          "ion_context": {
+            "best_fitting_ion": "Ce3+",
+            "deposited_rank": 3,
+            "ions_in_series": 15,
+            "ions_scored": 3,
+            "ordering": [
+              {
+                "fit": 0.6,
+                "ion": "Ce3+"
+              },
+              {
+                "fit": 0.533,
+                "ion": "Ho3+"
+              },
+              {
+                "fit": 0.467,
+                "ion": "La3+"
+              }
+            ],
+            "self_check": "Each site carries `deposited_rank`: where this size score places the ion that was actually crystallised in it, out of the 15 trivalent lanthanides. On this project's own structures that rank is 6th and 9th, not 1st -- the score does not recover the ion known to bind the site. Read the fit as a rough size compatibility, never as a choice between one lanthanide and another.",
+            "target_rank": 3
+          },
+          "mean_donor_distance_A": 2.59,
+          "protein_donors": 10,
+          "site": "203",
+          "site_id": {
+            "chain": "C",
+            "element": "La",
+            "site": "203"
+          },
+          "size_match": {
+            "basis": "La3+ Shannon effective radius 1.270 A at CN 10 (Shannon, R. D. (1976) Acta Crystallographica A32, 751-767, doi:10.1107/S0567739476001551) plus donor oxygen 1.40 A, the r(O2-) anchor of that scale, predicts a 2.670 A mean donor distance; observed 2.590 A, residual -0.080 A. Scaled by the 0.150 A width of the trivalent lanthanide series at CN 10.",
+            "caveat": "Size propensity only: how well this ion's Shannon radius fits the observed donor distance at the observed coordination number. Not an affinity, not a binding constant, not a selectivity prediction. The whole La3+ -> Lu3+ contraction is ~0.18 A and adjacent lanthanides differ by ~0.01-0.02 A, which is at or below the coordinate error of a 2.0-2.5 A structure, so adjacent-pair differences in this number are not resolvable. The r(O2-) = 1.40 A anchor describes oxides, not protein carboxylate and carbonyl donors: over 279 sites at CN 8-9 in this project's corpus the prediction runs 0.045 A long, so no ion reaches a fit of 1.0 and the ranking between ions is sounder than any single value. Shannon tabulates only 3 of 15 trivalent lanthanides at CN 10, so the series width used as the denominator is a lower bound and this fit is correspondingly harsh.",
+            "coordination_number": 10,
+            "fit": 0.467,
+            "ion": "La3+",
+            "ionic_radius_A": 1.27,
+            "observed_mean_donor_distance_A": 2.59,
+            "predicted_distance_A": 2.67,
+            "residual_A": -0.08,
+            "series_width_A": 0.15,
+            "status": "scored"
+          },
+          "size_match_is_counterfactual": false,
+          "target_coordination_fit": {
+            "basis": "Aqueous and solid-state coordination numbers for the trivalent rare earths (Greenwood & Earnshaw, Chemistry of the Elements): the larger ions are 9-coordinate as [Ln(H2O)9]3+ and the smaller ones 8-coordinate. Ca2+ is given its canonical protein geometry, CN 7 pentagonal bipyramidal.",
+            "caveat": "Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out. Descriptive, not a constraint. Ln3+ bonding is essentially electrostatic and non-directional, so coordination geometry is set by the ligands and a site outside this range is unusual rather than wrong. A coordination number read from an asymmetric unit is also a lower bound (see geometry.py), so a site reading below the minimum may simply be truncated.",
+            "compatible": true,
+            "ion": "La3+",
+            "maximum": 10,
+            "minimum": 8,
+            "observed_cn": 10,
+            "statement": "CN 10 falls inside the range La3+ is normally found in (8-10).",
+            "typical": 9,
+            "verdict": "within_range"
+          },
+          "water_donors": 0
+        },
+        {
+          "call": "lanthanide-like",
+          "call_reliable": true,
+          "caveats": [
+            "Threshold is the minimum family median of 4 natural Ln families, fitted and scored on the same points: a descriptive separation, not a validated classifier.",
+            "n = 4 families. The claim is the overlap count -- 0 of 55 Ca accessions reach the threshold -- not the p-value, which at this n is mostly a statement about n.",
+            "A fifth family may do to coordination number what the fourth did to bidentate carboxylates (ROADMAP 3.19). One descriptor surviving four families is the current state of the evidence, not a result.",
+            "Describes an observed coordination geometry. Not an affinity, not a selectivity constant, and not a probability.",
+            "Scored from the asymmetric unit. A metal on a crystallographic symmetry axis is coordinated by two protomers while the deposition holds one, so the coordination number is a lower bound -- 9C8X reads CN 5 here and CN 10 in the biological assembly. Re-score the assembly before acting on anything short of a pass."
+          ],
+          "chain": "D",
+          "coordination_number": 10,
+          "criteria": [
+            {
+              "basis": "weakest of 4 Ln families; 0 of 55 Ca accessions and 0 of 28 crystallophore sites reach it (ROADMAP 3.19, exact one-sided p=0.000002)",
+              "descriptor": "coordination_number",
+              "met": true,
+              "threshold": 9,
+              "value": 10
+            }
+          ],
+          "deposited_charge": null,
+          "deposited_element": "La",
+          "ion_context": {
+            "best_fitting_ion": "Ce3+",
+            "deposited_rank": 2,
+            "ions_in_series": 15,
+            "ions_scored": 3,
+            "ordering": [
+              {
+                "fit": 1.0,
+                "ion": "Ce3+"
+              },
+              {
+                "fit": 0.867,
+                "ion": "La3+"
+              },
+              {
+                "fit": 0.133,
+                "ion": "Ho3+"
+              }
+            ],
+            "self_check": "Each site carries `deposited_rank`: where this size score places the ion that was actually crystallised in it, out of the 15 trivalent lanthanides. On this project's own structures that rank is 6th and 9th, not 1st -- the score does not recover the ion known to bind the site. Read the fit as a rough size compatibility, never as a choice between one lanthanide and another.",
+            "target_rank": 2
+          },
+          "mean_donor_distance_A": 2.65,
+          "protein_donors": 10,
+          "site": "202",
+          "site_id": {
+            "chain": "D",
+            "element": "La",
+            "site": "202"
+          },
+          "size_match": {
+            "basis": "La3+ Shannon effective radius 1.270 A at CN 10 (Shannon, R. D. (1976) Acta Crystallographica A32, 751-767, doi:10.1107/S0567739476001551) plus donor oxygen 1.40 A, the r(O2-) anchor of that scale, predicts a 2.670 A mean donor distance; observed 2.650 A, residual -0.020 A. Scaled by the 0.150 A width of the trivalent lanthanide series at CN 10.",
+            "caveat": "Size propensity only: how well this ion's Shannon radius fits the observed donor distance at the observed coordination number. Not an affinity, not a binding constant, not a selectivity prediction. The whole La3+ -> Lu3+ contraction is ~0.18 A and adjacent lanthanides differ by ~0.01-0.02 A, which is at or below the coordinate error of a 2.0-2.5 A structure, so adjacent-pair differences in this number are not resolvable. The r(O2-) = 1.40 A anchor describes oxides, not protein carboxylate and carbonyl donors: over 279 sites at CN 8-9 in this project's corpus the prediction runs 0.045 A long, so no ion reaches a fit of 1.0 and the ranking between ions is sounder than any single value. Shannon tabulates only 3 of 15 trivalent lanthanides at CN 10, so the series width used as the denominator is a lower bound and this fit is correspondingly harsh.",
+            "coordination_number": 10,
+            "fit": 0.867,
+            "ion": "La3+",
+            "ionic_radius_A": 1.27,
+            "observed_mean_donor_distance_A": 2.65,
+            "predicted_distance_A": 2.67,
+            "residual_A": -0.02,
+            "series_width_A": 0.15,
+            "status": "scored"
+          },
+          "size_match_is_counterfactual": false,
+          "target_coordination_fit": {
+            "basis": "Aqueous and solid-state coordination numbers for the trivalent rare earths (Greenwood & Earnshaw, Chemistry of the Elements): the larger ions are 9-coordinate as [Ln(H2O)9]3+ and the smaller ones 8-coordinate. Ca2+ is given its canonical protein geometry, CN 7 pentagonal bipyramidal.",
+            "caveat": "Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out. Descriptive, not a constraint. Ln3+ bonding is essentially electrostatic and non-directional, so coordination geometry is set by the ligands and a site outside this range is unusual rather than wrong. A coordination number read from an asymmetric unit is also a lower bound (see geometry.py), so a site reading below the minimum may simply be truncated.",
+            "compatible": true,
+            "ion": "La3+",
+            "maximum": 10,
+            "minimum": 8,
+            "observed_cn": 10,
+            "statement": "CN 10 falls inside the range La3+ is normally found in (8-10).",
+            "typical": 9,
+            "verdict": "within_range"
+          },
+          "water_donors": 0
+        },
+        {
+          "call": "lanthanide-like",
+          "call_reliable": true,
+          "caveats": [
+            "Threshold is the minimum family median of 4 natural Ln families, fitted and scored on the same points: a descriptive separation, not a validated classifier.",
+            "n = 4 families. The claim is the overlap count -- 0 of 55 Ca accessions reach the threshold -- not the p-value, which at this n is mostly a statement about n.",
+            "A fifth family may do to coordination number what the fourth did to bidentate carboxylates (ROADMAP 3.19). One descriptor surviving four families is the current state of the evidence, not a result.",
+            "Describes an observed coordination geometry. Not an affinity, not a selectivity constant, and not a probability.",
+            "Scored from the asymmetric unit. A metal on a crystallographic symmetry axis is coordinated by two protomers while the deposition holds one, so the coordination number is a lower bound -- 9C8X reads CN 5 here and CN 10 in the biological assembly. Re-score the assembly before acting on anything short of a pass."
+          ],
+          "chain": "D",
+          "coordination_number": 10,
+          "criteria": [
+            {
+              "basis": "weakest of 4 Ln families; 0 of 55 Ca accessions and 0 of 28 crystallophore sites reach it (ROADMAP 3.19, exact one-sided p=0.000002)",
+              "descriptor": "coordination_number",
+              "met": true,
+              "threshold": 9,
+              "value": 10
+            }
+          ],
+          "deposited_charge": null,
+          "deposited_element": "La",
+          "ion_context": {
+            "best_fitting_ion": "Ce3+",
+            "deposited_rank": 2,
+            "ions_in_series": 15,
+            "ions_scored": 3,
+            "ordering": [
+              {
+                "fit": 0.667,
+                "ion": "Ce3+"
+              },
+              {
+                "fit": 0.533,
+                "ion": "La3+"
+              },
+              {
+                "fit": 0.467,
+                "ion": "Ho3+"
+              }
+            ],
+            "self_check": "Each site carries `deposited_rank`: where this size score places the ion that was actually crystallised in it, out of the 15 trivalent lanthanides. On this project's own structures that rank is 6th and 9th, not 1st -- the score does not recover the ion known to bind the site. Read the fit as a rough size compatibility, never as a choice between one lanthanide and another.",
+            "target_rank": 2
+          },
+          "mean_donor_distance_A": 2.6,
+          "protein_donors": 10,
+          "site": "203",
+          "site_id": {
+            "chain": "D",
+            "element": "La",
+            "site": "203"
+          },
+          "size_match": {
+            "basis": "La3+ Shannon effective radius 1.270 A at CN 10 (Shannon, R. D. (1976) Acta Crystallographica A32, 751-767, doi:10.1107/S0567739476001551) plus donor oxygen 1.40 A, the r(O2-) anchor of that scale, predicts a 2.670 A mean donor distance; observed 2.600 A, residual -0.070 A. Scaled by the 0.150 A width of the trivalent lanthanide series at CN 10.",
+            "caveat": "Size propensity only: how well this ion's Shannon radius fits the observed donor distance at the observed coordination number. Not an affinity, not a binding constant, not a selectivity prediction. The whole La3+ -> Lu3+ contraction is ~0.18 A and adjacent lanthanides differ by ~0.01-0.02 A, which is at or below the coordinate error of a 2.0-2.5 A structure, so adjacent-pair differences in this number are not resolvable. The r(O2-) = 1.40 A anchor describes oxides, not protein carboxylate and carbonyl donors: over 279 sites at CN 8-9 in this project's corpus the prediction runs 0.045 A long, so no ion reaches a fit of 1.0 and the ranking between ions is sounder than any single value. Shannon tabulates only 3 of 15 trivalent lanthanides at CN 10, so the series width used as the denominator is a lower bound and this fit is correspondingly harsh.",
+            "coordination_number": 10,
+            "fit": 0.533,
+            "ion": "La3+",
+            "ionic_radius_A": 1.27,
+            "observed_mean_donor_distance_A": 2.6,
+            "predicted_distance_A": 2.67,
+            "residual_A": -0.07,
+            "series_width_A": 0.15,
+            "status": "scored"
+          },
+          "size_match_is_counterfactual": false,
+          "target_coordination_fit": {
+            "basis": "Aqueous and solid-state coordination numbers for the trivalent rare earths (Greenwood & Earnshaw, Chemistry of the Elements): the larger ions are 9-coordinate as [Ln(H2O)9]3+ and the smaller ones 8-coordinate. Ca2+ is given its canonical protein geometry, CN 7 pentagonal bipyramidal.",
+            "caveat": "Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out. Descriptive, not a constraint. Ln3+ bonding is essentially electrostatic and non-directional, so coordination geometry is set by the ligands and a site outside this range is unusual rather than wrong. A coordination number read from an asymmetric unit is also a lower bound (see geometry.py), so a site reading below the minimum may simply be truncated.",
+            "compatible": true,
+            "ion": "La3+",
+            "maximum": 10,
+            "minimum": 8,
+            "observed_cn": 10,
+            "statement": "CN 10 falls inside the range La3+ is normally found in (8-10).",
+            "typical": 9,
+            "verdict": "within_range"
+          },
+          "water_donors": 0
+        },
+        {
+          "call": "lanthanide-like",
+          "call_reliable": true,
+          "caveats": [
+            "Threshold is the minimum family median of 4 natural Ln families, fitted and scored on the same points: a descriptive separation, not a validated classifier.",
+            "n = 4 families. The claim is the overlap count -- 0 of 55 Ca accessions reach the threshold -- not the p-value, which at this n is mostly a statement about n.",
+            "A fifth family may do to coordination number what the fourth did to bidentate carboxylates (ROADMAP 3.19). One descriptor surviving four families is the current state of the evidence, not a result.",
+            "Describes an observed coordination geometry. Not an affinity, not a selectivity constant, and not a probability.",
+            "Scored from the asymmetric unit. A metal on a crystallographic symmetry axis is coordinated by two protomers while the deposition holds one, so the coordination number is a lower bound -- 9C8X reads CN 5 here and CN 10 in the biological assembly. Re-score the assembly before acting on anything short of a pass."
+          ],
+          "chain": "D",
+          "coordination_number": 10,
+          "criteria": [
+            {
+              "basis": "weakest of 4 Ln families; 0 of 55 Ca accessions and 0 of 28 crystallophore sites reach it (ROADMAP 3.19, exact one-sided p=0.000002)",
+              "descriptor": "coordination_number",
+              "met": true,
+              "threshold": 9,
+              "value": 10
+            }
+          ],
+          "deposited_charge": null,
+          "deposited_element": "La",
+          "ion_context": {
+            "best_fitting_ion": "Ce3+",
+            "deposited_rank": 2,
+            "ions_in_series": 15,
+            "ions_scored": 3,
+            "ordering": [
+              {
+                "fit": 0.667,
+                "ion": "Ce3+"
+              },
+              {
+                "fit": 0.533,
+                "ion": "La3+"
+              },
+              {
+                "fit": 0.467,
+                "ion": "Ho3+"
+              }
+            ],
+            "self_check": "Each site carries `deposited_rank`: where this size score places the ion that was actually crystallised in it, out of the 15 trivalent lanthanides. On this project's own structures that rank is 6th and 9th, not 1st -- the score does not recover the ion known to bind the site. Read the fit as a rough size compatibility, never as a choice between one lanthanide and another.",
+            "target_rank": 2
+          },
+          "mean_donor_distance_A": 2.6,
+          "protein_donors": 10,
+          "site": "204",
+          "site_id": {
+            "chain": "D",
+            "element": "La",
+            "site": "204"
+          },
+          "size_match": {
+            "basis": "La3+ Shannon effective radius 1.270 A at CN 10 (Shannon, R. D. (1976) Acta Crystallographica A32, 751-767, doi:10.1107/S0567739476001551) plus donor oxygen 1.40 A, the r(O2-) anchor of that scale, predicts a 2.670 A mean donor distance; observed 2.600 A, residual -0.070 A. Scaled by the 0.150 A width of the trivalent lanthanide series at CN 10.",
+            "caveat": "Size propensity only: how well this ion's Shannon radius fits the observed donor distance at the observed coordination number. Not an affinity, not a binding constant, not a selectivity prediction. The whole La3+ -> Lu3+ contraction is ~0.18 A and adjacent lanthanides differ by ~0.01-0.02 A, which is at or below the coordinate error of a 2.0-2.5 A structure, so adjacent-pair differences in this number are not resolvable. The r(O2-) = 1.40 A anchor describes oxides, not protein carboxylate and carbonyl donors: over 279 sites at CN 8-9 in this project's corpus the prediction runs 0.045 A long, so no ion reaches a fit of 1.0 and the ranking between ions is sounder than any single value. Shannon tabulates only 3 of 15 trivalent lanthanides at CN 10, so the series width used as the denominator is a lower bound and this fit is correspondingly harsh.",
+            "coordination_number": 10,
+            "fit": 0.533,
+            "ion": "La3+",
+            "ionic_radius_A": 1.27,
+            "observed_mean_donor_distance_A": 2.6,
+            "predicted_distance_A": 2.67,
+            "residual_A": -0.07,
+            "series_width_A": 0.15,
+            "status": "scored"
+          },
+          "size_match_is_counterfactual": false,
+          "target_coordination_fit": {
+            "basis": "Aqueous and solid-state coordination numbers for the trivalent rare earths (Greenwood & Earnshaw, Chemistry of the Elements): the larger ions are 9-coordinate as [Ln(H2O)9]3+ and the smaller ones 8-coordinate. Ca2+ is given its canonical protein geometry, CN 7 pentagonal bipyramidal.",
+            "caveat": "Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out. Descriptive, not a constraint. Ln3+ bonding is essentially electrostatic and non-directional, so coordination geometry is set by the ligands and a site outside this range is unusual rather than wrong. A coordination number read from an asymmetric unit is also a lower bound (see geometry.py), so a site reading below the minimum may simply be truncated.",
+            "compatible": true,
+            "ion": "La3+",
+            "maximum": 10,
+            "minimum": 8,
+            "observed_cn": 10,
+            "statement": "CN 10 falls inside the range La3+ is normally found in (8-10).",
+            "typical": 9,
+            "verdict": "within_range"
+          },
+          "water_donors": 0
+        }
+      ],
+      "sites_holding_the_target": 12,
+      "structure_choice": {
+        "agrees_with_the_rule": true,
+        "deposited": [
+          {
+            "chains": "A/B/C/D=24-133",
+            "holds": [
+              "La"
+            ],
+            "id": "8DQ2",
+            "indexed": true,
+            "method": "X-ray",
+            "resolution_A": 1.8
+          },
+          {
+            "chains": "A/B/C/D=24-133",
+            "holds": [
+              "Dy"
+            ],
+            "id": "8FNR",
+            "indexed": true,
+            "method": "X-ray",
+            "resolution_A": 1.4
+          }
+        ],
+        "holds_the_target_element": true,
+        "measured": "8DQ2",
+        "not_measured": [
+          {
+            "chains": "A/B/C/D=24-133",
+            "id": "8FNR",
+            "method": "X-ray",
+            "resolution_A": 1.4
+          }
+        ],
+        "reason": "8DQ2 measured: of the 2 structure(s) listed for this entry it is the only one recorded as holding La, the element asked about.",
+        "target_element": "La"
+      },
+      "structure_kind": "deposited"
+    },
+    {
+      "accession": "C5B164",
+      "format": "pdb",
+      "holds_the_target_element": false,
+      "lanthanide_sites": 4,
+      "name": "Lanmodulin",
+      "notes": [],
+      "organism": "Methylorubrum extorquens (strain ATCC 14718 / DSM 1338 / JCM 2805 / NCIMB 9133 / AM1)",
+      "pdb_id": "8FNS",
+      "resolution_A": 1.01,
+      "score_version": "geometry-v2",
+      "site_count": 4,
+      "sites": [
+        {
+          "call": "lanthanide-like",
+          "call_reliable": true,
+          "caveats": [
+            "Threshold is the minimum family median of 4 natural Ln families, fitted and scored on the same points: a descriptive separation, not a validated classifier.",
+            "n = 4 families. The claim is the overlap count -- 0 of 55 Ca accessions reach the threshold -- not the p-value, which at this n is mostly a statement about n.",
+            "A fifth family may do to coordination number what the fourth did to bidentate carboxylates (ROADMAP 3.19). One descriptor surviving four families is the current state of the evidence, not a result.",
+            "Describes an observed coordination geometry. Not an affinity, not a selectivity constant, and not a probability.",
+            "Scored from the asymmetric unit. A metal on a crystallographic symmetry axis is coordinated by two protomers while the deposition holds one, so the coordination number is a lower bound -- 9C8X reads CN 5 here and CN 10 in the biological assembly. Re-score the assembly before acting on anything short of a pass."
+          ],
+          "chain": "A",
+          "coordination_number": 9,
+          "criteria": [
+            {
+              "basis": "weakest of 4 Ln families; 0 of 55 Ca accessions and 0 of 28 crystallophore sites reach it (ROADMAP 3.19, exact one-sided p=0.000002)",
+              "descriptor": "coordination_number",
+              "met": true,
+              "threshold": 9,
+              "value": 9
+            }
+          ],
+          "deposited_charge": null,
+          "deposited_element": "Nd",
+          "ion_context": {
+            "best_fitting_ion": "Gd3+",
+            "deposited_rank": 9,
+            "ions_in_series": 15,
+            "ions_scored": 15,
+            "ordering": [
+              {
+                "fit": 0.984,
+                "ion": "Gd3+"
+              },
+              {
+                "fit": 0.946,
+                "ion": "Eu3+"
+              },
+              {
+                "fit": 0.918,
+                "ion": "Tb3+"
+              },
+              {
+                "fit": 0.88,
+                "ion": "Sm3+"
+              },
+              {
+                "fit": 0.853,
+                "ion": "Dy3+"
+              },
+              {
+                "fit": 0.815,
+                "ion": "Pm3+"
+              },
+              {
+                "fit": 0.793,
+                "ion": "Ho3+"
+              },
+              {
+                "fit": 0.739,
+                "ion": "Er3+"
+              },
+              {
+                "fit": 0.712,
+                "ion": "Nd3+"
+              },
+              {
+                "fit": 0.685,
+                "ion": "Tm3+"
+              },
+              {
+                "fit": 0.63,
+                "ion": "Yb3+"
+              },
+              {
+                "fit": 0.625,
+                "ion": "Pr3+"
+              },
+              {
+                "fit": 0.576,
+                "ion": "Lu3+"
+              },
+              {
+                "fit": 0.533,
+                "ion": "Ce3+"
+              },
+              {
+                "fit": 0.424,
+                "ion": "La3+"
+              }
+            ],
+            "self_check": "Each site carries `deposited_rank`: where this size score places the ion that was actually crystallised in it, out of the 15 trivalent lanthanides. On this project's own structures that rank is 6th and 9th, not 1st -- the score does not recover the ion known to bind the site. Read the fit as a rough size compatibility, never as a choice between one lanthanide and another.",
+            "target_rank": 15
+          },
+          "mean_donor_distance_A": 2.51,
+          "protein_donors": 7,
+          "site": "201",
+          "site_id": {
+            "chain": "A",
+            "element": "Nd",
+            "site": "201"
+          },
+          "size_match": {
+            "basis": "La3+ Shannon effective radius 1.216 A at CN 9 (Shannon, R. D. (1976) Acta Crystallographica A32, 751-767, doi:10.1107/S0567739476001551) plus donor oxygen 1.40 A, the r(O2-) anchor of that scale, predicts a 2.616 A mean donor distance; observed 2.510 A, residual -0.106 A. Scaled by the 0.184 A width of the trivalent lanthanide series at CN 9.",
+            "caveat": "Size propensity only: how well this ion's Shannon radius fits the observed donor distance at the observed coordination number. Not an affinity, not a binding constant, not a selectivity prediction. The whole La3+ -> Lu3+ contraction is ~0.18 A and adjacent lanthanides differ by ~0.01-0.02 A, which is at or below the coordinate error of a 2.0-2.5 A structure, so adjacent-pair differences in this number are not resolvable. The r(O2-) = 1.40 A anchor describes oxides, not protein carboxylate and carbonyl donors: over 279 sites at CN 8-9 in this project's corpus the prediction runs 0.045 A long, so no ion reaches a fit of 1.0 and the ranking between ions is sounder than any single value.",
+            "coordination_number": 9,
+            "fit": 0.424,
+            "ion": "La3+",
+            "ionic_radius_A": 1.216,
+            "observed_mean_donor_distance_A": 2.51,
+            "predicted_distance_A": 2.616,
+            "residual_A": -0.106,
+            "series_width_A": 0.184,
+            "status": "scored"
+          },
+          "size_match_is_counterfactual": true,
+          "target_coordination_fit": {
+            "basis": "Aqueous and solid-state coordination numbers for the trivalent rare earths (Greenwood & Earnshaw, Chemistry of the Elements): the larger ions are 9-coordinate as [Ln(H2O)9]3+ and the smaller ones 8-coordinate. Ca2+ is given its canonical protein geometry, CN 7 pentagonal bipyramidal.",
+            "caveat": "Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out. Descriptive, not a constraint. Ln3+ bonding is essentially electrostatic and non-directional, so coordination geometry is set by the ligands and a site outside this range is unusual rather than wrong. A coordination number read from an asymmetric unit is also a lower bound (see geometry.py), so a site reading below the minimum may simply be truncated.",
+            "compatible": true,
+            "ion": "La3+",
+            "maximum": 10,
+            "minimum": 8,
+            "observed_cn": 9,
+            "statement": "CN 9 is exactly the coordination number La3+ most often adopts.",
+            "typical": 9,
+            "verdict": "typical"
+          },
+          "water_donors": 2
+        },
+        {
+          "call": "lanthanide-like",
+          "call_reliable": true,
+          "caveats": [
+            "Threshold is the minimum family median of 4 natural Ln families, fitted and scored on the same points: a descriptive separation, not a validated classifier.",
+            "n = 4 families. The claim is the overlap count -- 0 of 55 Ca accessions reach the threshold -- not the p-value, which at this n is mostly a statement about n.",
+            "A fifth family may do to coordination number what the fourth did to bidentate carboxylates (ROADMAP 3.19). One descriptor surviving four families is the current state of the evidence, not a result.",
+            "Describes an observed coordination geometry. Not an affinity, not a selectivity constant, and not a probability.",
+            "Scored from the asymmetric unit. A metal on a crystallographic symmetry axis is coordinated by two protomers while the deposition holds one, so the coordination number is a lower bound -- 9C8X reads CN 5 here and CN 10 in the biological assembly. Re-score the assembly before acting on anything short of a pass."
+          ],
+          "chain": "A",
+          "coordination_number": 9,
+          "criteria": [
+            {
+              "basis": "weakest of 4 Ln families; 0 of 55 Ca accessions and 0 of 28 crystallophore sites reach it (ROADMAP 3.19, exact one-sided p=0.000002)",
+              "descriptor": "coordination_number",
+              "met": true,
+              "threshold": 9,
+              "value": 9
+            }
+          ],
+          "deposited_charge": null,
+          "deposited_element": "Nd",
+          "ion_context": {
+            "best_fitting_ion": "Pm3+",
+            "deposited_rank": 4,
+            "ions_in_series": 15,
+            "ions_scored": 15,
+            "ordering": [
+              {
+                "fit": 0.978,
+                "ion": "Pm3+"
+              },
+              {
+                "fit": 0.957,
+                "ion": "Sm3+"
+              },
+              {
+                "fit": 0.891,
+                "ion": "Eu3+"
+              },
+              {
+                "fit": 0.875,
+                "ion": "Nd3+"
+              },
+              {
+                "fit": 0.821,
+                "ion": "Gd3+"
+              },
+              {
+                "fit": 0.788,
+                "ion": "Pr3+"
+              },
+              {
+                "fit": 0.755,
+                "ion": "Tb3+"
+              },
+              {
+                "fit": 0.696,
+                "ion": "Ce3+"
+              },
+              {
+                "fit": 0.69,
+                "ion": "Dy3+"
+              },
+              {
+                "fit": 0.63,
+                "ion": "Ho3+"
+              },
+              {
+                "fit": 0.587,
+                "ion": "La3+"
+              },
+              {
+                "fit": 0.576,
+                "ion": "Er3+"
+              },
+              {
+                "fit": 0.522,
+                "ion": "Tm3+"
+              },
+              {
+                "fit": 0.467,
+                "ion": "Yb3+"
+              },
+              {
+                "fit": 0.413,
+                "ion": "Lu3+"
+              }
+            ],
+            "self_check": "Each site carries `deposited_rank`: where this size score places the ion that was actually crystallised in it, out of the 15 trivalent lanthanides. On this project's own structures that rank is 6th and 9th, not 1st -- the score does not recover the ion known to bind the site. Read the fit as a rough size compatibility, never as a choice between one lanthanide and another.",
+            "target_rank": 11
+          },
+          "mean_donor_distance_A": 2.54,
+          "protein_donors": 7,
+          "site": "202",
+          "site_id": {
+            "chain": "A",
+            "element": "Nd",
+            "site": "202"
+          },
+          "size_match": {
+            "basis": "La3+ Shannon effective radius 1.216 A at CN 9 (Shannon, R. D. (1976) Acta Crystallographica A32, 751-767, doi:10.1107/S0567739476001551) plus donor oxygen 1.40 A, the r(O2-) anchor of that scale, predicts a 2.616 A mean donor distance; observed 2.540 A, residual -0.076 A. Scaled by the 0.184 A width of the trivalent lanthanide series at CN 9.",
+            "caveat": "Size propensity only: how well this ion's Shannon radius fits the observed donor distance at the observed coordination number. Not an affinity, not a binding constant, not a selectivity prediction. The whole La3+ -> Lu3+ contraction is ~0.18 A and adjacent lanthanides differ by ~0.01-0.02 A, which is at or below the coordinate error of a 2.0-2.5 A structure, so adjacent-pair differences in this number are not resolvable. The r(O2-) = 1.40 A anchor describes oxides, not protein carboxylate and carbonyl donors: over 279 sites at CN 8-9 in this project's corpus the prediction runs 0.045 A long, so no ion reaches a fit of 1.0 and the ranking between ions is sounder than any single value.",
+            "coordination_number": 9,
+            "fit": 0.587,
+            "ion": "La3+",
+            "ionic_radius_A": 1.216,
+            "observed_mean_donor_distance_A": 2.54,
+            "predicted_distance_A": 2.616,
+            "residual_A": -0.076,
+            "series_width_A": 0.184,
+            "status": "scored"
+          },
+          "size_match_is_counterfactual": true,
+          "target_coordination_fit": {
+            "basis": "Aqueous and solid-state coordination numbers for the trivalent rare earths (Greenwood & Earnshaw, Chemistry of the Elements): the larger ions are 9-coordinate as [Ln(H2O)9]3+ and the smaller ones 8-coordinate. Ca2+ is given its canonical protein geometry, CN 7 pentagonal bipyramidal.",
+            "caveat": "Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out. Descriptive, not a constraint. Ln3+ bonding is essentially electrostatic and non-directional, so coordination geometry is set by the ligands and a site outside this range is unusual rather than wrong. A coordination number read from an asymmetric unit is also a lower bound (see geometry.py), so a site reading below the minimum may simply be truncated.",
+            "compatible": true,
+            "ion": "La3+",
+            "maximum": 10,
+            "minimum": 8,
+            "observed_cn": 9,
+            "statement": "CN 9 is exactly the coordination number La3+ most often adopts.",
+            "typical": 9,
+            "verdict": "typical"
+          },
+          "water_donors": 2
+        },
+        {
+          "call": "lanthanide-like",
+          "call_reliable": true,
+          "caveats": [
+            "Threshold is the minimum family median of 4 natural Ln families, fitted and scored on the same points: a descriptive separation, not a validated classifier.",
+            "n = 4 families. The claim is the overlap count -- 0 of 55 Ca accessions reach the threshold -- not the p-value, which at this n is mostly a statement about n.",
+            "A fifth family may do to coordination number what the fourth did to bidentate carboxylates (ROADMAP 3.19). One descriptor surviving four families is the current state of the evidence, not a result.",
+            "Describes an observed coordination geometry. Not an affinity, not a selectivity constant, and not a probability.",
+            "Scored from the asymmetric unit. A metal on a crystallographic symmetry axis is coordinated by two protomers while the deposition holds one, so the coordination number is a lower bound -- 9C8X reads CN 5 here and CN 10 in the biological assembly. Re-score the assembly before acting on anything short of a pass."
+          ],
+          "chain": "A",
+          "coordination_number": 9,
+          "criteria": [
+            {
+              "basis": "weakest of 4 Ln families; 0 of 55 Ca accessions and 0 of 28 crystallophore sites reach it (ROADMAP 3.19, exact one-sided p=0.000002)",
+              "descriptor": "coordination_number",
+              "met": true,
+              "threshold": 9,
+              "value": 9
+            }
+          ],
+          "deposited_charge": null,
+          "deposited_element": "Nd",
+          "ion_context": {
+            "best_fitting_ion": "Gd3+",
+            "deposited_rank": 9,
+            "ions_in_series": 15,
+            "ions_scored": 15,
+            "ordering": [
+              {
+                "fit": 0.984,
+                "ion": "Gd3+"
+              },
+              {
+                "fit": 0.946,
+                "ion": "Eu3+"
+              },
+              {
+                "fit": 0.918,
+                "ion": "Tb3+"
+              },
+              {
+                "fit": 0.88,
+                "ion": "Sm3+"
+              },
+              {
+                "fit": 0.853,
+                "ion": "Dy3+"
+              },
+              {
+                "fit": 0.815,
+                "ion": "Pm3+"
+              },
+              {
+                "fit": 0.793,
+                "ion": "Ho3+"
+              },
+              {
+                "fit": 0.739,
+                "ion": "Er3+"
+              },
+              {
+                "fit": 0.712,
+                "ion": "Nd3+"
+              },
+              {
+                "fit": 0.685,
+                "ion": "Tm3+"
+              },
+              {
+                "fit": 0.63,
+                "ion": "Yb3+"
+              },
+              {
+                "fit": 0.625,
+                "ion": "Pr3+"
+              },
+              {
+                "fit": 0.576,
+                "ion": "Lu3+"
+              },
+              {
+                "fit": 0.533,
+                "ion": "Ce3+"
+              },
+              {
+                "fit": 0.424,
+                "ion": "La3+"
+              }
+            ],
+            "self_check": "Each site carries `deposited_rank`: where this size score places the ion that was actually crystallised in it, out of the 15 trivalent lanthanides. On this project's own structures that rank is 6th and 9th, not 1st -- the score does not recover the ion known to bind the site. Read the fit as a rough size compatibility, never as a choice between one lanthanide and another.",
+            "target_rank": 15
+          },
+          "mean_donor_distance_A": 2.51,
+          "protein_donors": 7,
+          "site": "203",
+          "site_id": {
+            "chain": "A",
+            "element": "Nd",
+            "site": "203"
+          },
+          "size_match": {
+            "basis": "La3+ Shannon effective radius 1.216 A at CN 9 (Shannon, R. D. (1976) Acta Crystallographica A32, 751-767, doi:10.1107/S0567739476001551) plus donor oxygen 1.40 A, the r(O2-) anchor of that scale, predicts a 2.616 A mean donor distance; observed 2.510 A, residual -0.106 A. Scaled by the 0.184 A width of the trivalent lanthanide series at CN 9.",
+            "caveat": "Size propensity only: how well this ion's Shannon radius fits the observed donor distance at the observed coordination number. Not an affinity, not a binding constant, not a selectivity prediction. The whole La3+ -> Lu3+ contraction is ~0.18 A and adjacent lanthanides differ by ~0.01-0.02 A, which is at or below the coordinate error of a 2.0-2.5 A structure, so adjacent-pair differences in this number are not resolvable. The r(O2-) = 1.40 A anchor describes oxides, not protein carboxylate and carbonyl donors: over 279 sites at CN 8-9 in this project's corpus the prediction runs 0.045 A long, so no ion reaches a fit of 1.0 and the ranking between ions is sounder than any single value.",
+            "coordination_number": 9,
+            "fit": 0.424,
+            "ion": "La3+",
+            "ionic_radius_A": 1.216,
+            "observed_mean_donor_distance_A": 2.51,
+            "predicted_distance_A": 2.616,
+            "residual_A": -0.106,
+            "series_width_A": 0.184,
+            "status": "scored"
+          },
+          "size_match_is_counterfactual": true,
+          "target_coordination_fit": {
+            "basis": "Aqueous and solid-state coordination numbers for the trivalent rare earths (Greenwood & Earnshaw, Chemistry of the Elements): the larger ions are 9-coordinate as [Ln(H2O)9]3+ and the smaller ones 8-coordinate. Ca2+ is given its canonical protein geometry, CN 7 pentagonal bipyramidal.",
+            "caveat": "Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out. Descriptive, not a constraint. Ln3+ bonding is essentially electrostatic and non-directional, so coordination geometry is set by the ligands and a site outside this range is unusual rather than wrong. A coordination number read from an asymmetric unit is also a lower bound (see geometry.py), so a site reading below the minimum may simply be truncated.",
+            "compatible": true,
+            "ion": "La3+",
+            "maximum": 10,
+            "minimum": 8,
+            "observed_cn": 9,
+            "statement": "CN 9 is exactly the coordination number La3+ most often adopts.",
+            "typical": 9,
+            "verdict": "typical"
+          },
+          "water_donors": 2
+        },
+        {
+          "call": "lanthanide-like",
+          "call_reliable": true,
+          "caveats": [
+            "Threshold is the minimum family median of 4 natural Ln families, fitted and scored on the same points: a descriptive separation, not a validated classifier.",
+            "n = 4 families. The claim is the overlap count -- 0 of 55 Ca accessions reach the threshold -- not the p-value, which at this n is mostly a statement about n.",
+            "A fifth family may do to coordination number what the fourth did to bidentate carboxylates (ROADMAP 3.19). One descriptor surviving four families is the current state of the evidence, not a result.",
+            "Describes an observed coordination geometry. Not an affinity, not a selectivity constant, and not a probability.",
+            "Scored from the asymmetric unit. A metal on a crystallographic symmetry axis is coordinated by two protomers while the deposition holds one, so the coordination number is a lower bound -- 9C8X reads CN 5 here and CN 10 in the biological assembly. Re-score the assembly before acting on anything short of a pass."
+          ],
+          "chain": "A",
+          "coordination_number": 10,
+          "criteria": [
+            {
+              "basis": "weakest of 4 Ln families; 0 of 55 Ca accessions and 0 of 28 crystallophore sites reach it (ROADMAP 3.19, exact one-sided p=0.000002)",
+              "descriptor": "coordination_number",
+              "met": true,
+              "threshold": 9,
+              "value": 10
+            }
+          ],
+          "deposited_charge": null,
+          "deposited_element": "Nd",
+          "ion_context": {
+            "best_fitting_ion": "Ho3+",
+            "deposited_rank": null,
+            "deposited_rank_unavailable": "Shannon 1976 tabulates no radius for ND at coordination number 10, so the ion known to bind this site cannot be placed in the ordering and the self-check is unavailable here.",
+            "ions_in_series": 15,
+            "ions_scored": 3,
+            "ordering": [
+              {
+                "fit": 0.867,
+                "ion": "Ho3+"
+              },
+              {
+                "fit": 0.267,
+                "ion": "Ce3+"
+              },
+              {
+                "fit": 0.133,
+                "ion": "La3+"
+              }
+            ],
+            "self_check": "Each site carries `deposited_rank`: where this size score places the ion that was actually crystallised in it, out of the 15 trivalent lanthanides. On this project's own structures that rank is 6th and 9th, not 1st -- the score does not recover the ion known to bind the site. Read the fit as a rough size compatibility, never as a choice between one lanthanide and another.",
+            "target_rank": 3
+          },
+          "mean_donor_distance_A": 2.54,
+          "protein_donors": 8,
+          "site": "204",
+          "site_id": {
+            "chain": "A",
+            "element": "Nd",
+            "site": "204"
+          },
+          "size_match": {
+            "basis": "La3+ Shannon effective radius 1.270 A at CN 10 (Shannon, R. D. (1976) Acta Crystallographica A32, 751-767, doi:10.1107/S0567739476001551) plus donor oxygen 1.40 A, the r(O2-) anchor of that scale, predicts a 2.670 A mean donor distance; observed 2.540 A, residual -0.130 A. Scaled by the 0.150 A width of the trivalent lanthanide series at CN 10.",
+            "caveat": "Size propensity only: how well this ion's Shannon radius fits the observed donor distance at the observed coordination number. Not an affinity, not a binding constant, not a selectivity prediction. The whole La3+ -> Lu3+ contraction is ~0.18 A and adjacent lanthanides differ by ~0.01-0.02 A, which is at or below the coordinate error of a 2.0-2.5 A structure, so adjacent-pair differences in this number are not resolvable. The r(O2-) = 1.40 A anchor describes oxides, not protein carboxylate and carbonyl donors: over 279 sites at CN 8-9 in this project's corpus the prediction runs 0.045 A long, so no ion reaches a fit of 1.0 and the ranking between ions is sounder than any single value. Shannon tabulates only 3 of 15 trivalent lanthanides at CN 10, so the series width used as the denominator is a lower bound and this fit is correspondingly harsh.",
+            "coordination_number": 10,
+            "fit": 0.133,
+            "ion": "La3+",
+            "ionic_radius_A": 1.27,
+            "observed_mean_donor_distance_A": 2.54,
+            "predicted_distance_A": 2.67,
+            "residual_A": -0.13,
+            "series_width_A": 0.15,
+            "status": "scored"
+          },
+          "size_match_is_counterfactual": true,
+          "target_coordination_fit": {
+            "basis": "Aqueous and solid-state coordination numbers for the trivalent rare earths (Greenwood & Earnshaw, Chemistry of the Elements): the larger ions are 9-coordinate as [Ln(H2O)9]3+ and the smaller ones 8-coordinate. Ca2+ is given its canonical protein geometry, CN 7 pentagonal bipyramidal.",
+            "caveat": "Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out. Descriptive, not a constraint. Ln3+ bonding is essentially electrostatic and non-directional, so coordination geometry is set by the ligands and a site outside this range is unusual rather than wrong. A coordination number read from an asymmetric unit is also a lower bound (see geometry.py), so a site reading below the minimum may simply be truncated.",
+            "compatible": true,
+            "ion": "La3+",
+            "maximum": 10,
+            "minimum": 8,
+            "observed_cn": 10,
+            "statement": "CN 10 falls inside the range La3+ is normally found in (8-10).",
+            "typical": 9,
+            "verdict": "within_range"
+          },
+          "water_donors": 2
+        }
+      ],
+      "sites_holding_the_target": 0,
+      "structure_choice": {
+        "agrees_with_the_rule": true,
+        "deposited": [
+          {
+            "chains": "X=23-133",
+            "holds": [
+              "Y"
+            ],
+            "id": "6MI5",
+            "indexed": true,
+            "method": "NMR",
+            "resolution_A": null
+          },
+          {
+            "chains": "A=29-133",
+            "holds": [
+              "Nd"
+            ],
+            "id": "8FNS",
+            "indexed": true,
+            "method": "X-ray",
+            "resolution_A": 1.01
+          }
+        ],
+        "holds_the_target_element": false,
+        "measured": "8FNS",
+        "not_measured": [
+          {
+            "chains": "X=23-133",
+            "id": "6MI5",
+            "method": "NMR",
+            "resolution_A": null
+          }
+        ],
+        "reason": "8FNS measured, the sharpest of the 2 structure(s) UniProt lists for this entry (1.01 \u00c5, X-ray). Chosen on resolution, because the geometry score weighs how far to trust a call against the resolution of the entry it measured. A cross-reference does not say which metal is in which file, so this is not a judgement about which structure is most relevant to your ion. No structure listed for this entry is recorded as holding La, so resolution decided instead and the measurement below is of a different element. That is a statement about what has been deposited and indexed, not about whether this protein binds La.",
+        "target_element": "La"
+      },
+      "structure_kind": "deposited"
+    }
+  ],
+  "ion_report": {
+    "caveat": "Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out.",
+    "coordination": {
+      "basis": "Aqueous and solid-state coordination numbers for the trivalent rare earths (Greenwood & Earnshaw, Chemistry of the Elements): the larger ions are 9-coordinate as [Ln(H2O)9]3+ and the smaller ones 8-coordinate. Ca2+ is given its canonical protein geometry, CN 7 pentagonal bipyramidal.",
+      "caveat": "Descriptive, not a constraint. Ln3+ bonding is essentially electrostatic and non-directional, so coordination geometry is set by the ligands and a site outside this range is unusual rather than wrong. A coordination number read from an asymmetric unit is also a lower bound (see geometry.py), so a site reading below the minimum may simply be truncated.",
+      "ion": "La3+",
+      "maximum": 10,
+      "minimum": 8,
+      "typical": 9
+    },
+    "coordination_verdict": "16 of the 16 measured site(s) with a coordination number have one that falls in the range La3+ is normally found in (8-10, typically 9). Whether a coordination number falls in an ion's usual range is a statement about geometry and nothing else. It is not an affinity, not a selectivity prediction, and not evidence that the ion was observed in this site. Neighbouring lanthanides share almost identical ranges, so a site compatible with one is compatible with several; this can rule a site in, never rule a competitor out.",
+    "deposited_elsewhere": [],
+    "deposited_elsewhere_count": 0,
+    "element": "La",
+    "name": "Lanthanum",
+    "other_elements_measured": [
+      "Nd"
+    ],
+    "sites_compatible_with_the_target": 16,
+    "sites_holding_the_target": 12,
+    "sites_measured": 16,
+    "sites_with_a_coordination_verdict": 16,
+    "statement": "12 of the 16 deposited metal site(s) measured here hold La3+ and the other 4 hold Nd. Only those 12 are observations of La3+ in a structure; the La3+ fit on the rest is a counterfactual.",
+    "structures_holding_the_target": [
+      "8DQ2"
+    ],
+    "structures_measured": [
+      "8DQ2",
+      "8FNS"
+    ],
+    "target": "La3+",
+    "verdict_kind": "observed"
+  },
+  "notes": [
+    "No competitor ion was named; assumed Ca2+. Ca2+ is the comparison that matters for lanthanide binding -- it occupies the same oxygen-rich carboxylate sites, and the sequence score cannot tell the two apart (see agent.SCORE_LIMITATION).",
+    "No protein corpus was named; defaulted to 'lanmodulin'. Available: lanmodulin, calmodulin, lanm-family.",
+    "No candidate count was given; defaulted to 20.",
+    "Screened the bundled reference set (6 authentic UniProt sequences). Switch on live lookups to search more."
+  ],
+  "plan": {
+    "competitor": "Ca2+",
+    "corpus": "lanmodulin",
+    "limit": 20,
+    "needs_clarification": false,
+    "notes": [
+      "No competitor ion was named; assumed Ca2+. Ca2+ is the comparison that matters for lanthanide binding -- it occupies the same oxygen-rich carboxylate sites, and the sequence score cannot tell the two apart (see agent.SCORE_LIMITATION).",
+      "No protein corpus was named; defaulted to 'lanmodulin'. Available: lanmodulin, calmodulin, lanm-family.",
+      "No candidate count was given; defaulted to 20."
+    ],
+    "parsed_by": "fallback",
+    "question": "what proteins should I try for capturing La3+",
+    "target": "La3+"
+  },
+  "question": "what proteins should I try for capturing La3+",
+  "shortlist": {
+    "candidates": [
+      {
+        "accession": "A0A4V2JDD3",
+        "disclaimer": "These rules select for the lanmodulin architecture -- four tightly spaced EF-hand loops in a short protein. They are not an affinity, not a selectivity over calcium, and not specific to any one lanthanide: the same rules fire for all fifteen trivalent lanthanides because sequence cannot separate them. Telling two lanthanides apart needs ionic radius against a coordination number measured from structure.",
+        "name": "Lanmodulin (Hansschlegelia quercus)",
+        "observations": {
+          "acidic_fraction": 0.1579,
+          "adjacent_gaps": [
+            12,
+            13,
+            12
+          ],
+          "classifier_loops": 3,
+          "ef_loop_starts": [
+            34,
+            58,
+            83,
+            107
+          ],
+          "ef_loops": 4,
+          "gap_definition": "residues between the end of one 12-residue EF-loop match and the start of the next",
+          "length_aa": 133,
+          "position_9": {
+            "E": 3,
+            "T": 1
+          },
+          "position_9_note": "Reported, never scored. Asp here is the family-wide signal (82.1% of lanmodulins against 26.4% of calcium EF-hands) but Hans-LanM carries none, and troponin C carries three."
+        },
+        "of": 3,
+        "passed": 3,
+        "rules": [
+          {
+            "basis": "Mattocks 2023 length bound. Lanmodulins are small; the bound mostly removes large multi-domain proteins that happen to carry EF-hands.",
+            "detail": "133 residues; the bound is 200.",
+            "id": "length",
+            "measured": 133,
+            "question": "Is it shorter than 200 residues?",
+            "verdict": "pass"
+          },
+          {
+            "basis": "Mattocks 2023, counted with chemistry.EF_LOOP_INSTRUMENT, the pattern that is neutral between the two families. The lanthanide-biased classifier finds only 3 of Hans-LanM's 4 and would reject it.",
+            "detail": "4 EF-hand loop(s) at [34, 58, 83, 107] (1-based); the bound is 4.",
+            "id": "ef_hand_count",
+            "measured": 4,
+            "question": "Does it carry at least 4 EF-hand loops?",
+            "verdict": "pass"
+          },
+          {
+            "basis": "Mattocks 2023, and the rule that does the discriminating: both lanmodulins in the reference set measure 12, calmodulin and troponin C measure 24. At least one pair, not every pair.",
+            "detail": "adjacent gaps [12, 13, 12], smallest 12; the bound is under 14.",
+            "id": "compact_pair",
+            "measured": 12,
+            "question": "Are two adjacent EF-hands fewer than 14 residues apart?",
+            "verdict": "pass"
+          }
+        ],
+        "selected": true
+      },
+      {
+        "accession": "C5B164",
+        "disclaimer": "These rules select for the lanmodulin architecture -- four tightly spaced EF-hand loops in a short protein. They are not an affinity, not a selectivity over calcium, and not specific to any one lanthanide: the same rules fire for all fifteen trivalent lanthanides because sequence cannot separate them. Telling two lanthanides apart needs ionic radius against a coordination number measured from structure.",
+        "name": "Lanmodulin",
+        "observations": {
+          "acidic_fraction": 0.1805,
+          "adjacent_gaps": [
+            12,
+            13,
+            12
+          ],
+          "classifier_loops": 4,
+          "ef_loop_starts": [
+            35,
+            59,
+            84,
+            108
+          ],
+          "ef_loops": 4,
+          "gap_definition": "residues between the end of one 12-residue EF-loop match and the start of the next",
+          "length_aa": 133,
+          "position_9": {
+            "D": 4
+          },
+          "position_9_note": "Reported, never scored. Asp here is the family-wide signal (82.1% of lanmodulins against 26.4% of calcium EF-hands) but Hans-LanM carries none, and troponin C carries three."
+        },
+        "of": 3,
+        "passed": 3,
+        "rules": [
+          {
+            "basis": "Mattocks 2023 length bound. Lanmodulins are small; the bound mostly removes large multi-domain proteins that happen to carry EF-hands.",
+            "detail": "133 residues; the bound is 200.",
+            "id": "length",
+            "measured": 133,
+            "question": "Is it shorter than 200 residues?",
+            "verdict": "pass"
+          },
+          {
+            "basis": "Mattocks 2023, counted with chemistry.EF_LOOP_INSTRUMENT, the pattern that is neutral between the two families. The lanthanide-biased classifier finds only 3 of Hans-LanM's 4 and would reject it.",
+            "detail": "4 EF-hand loop(s) at [35, 59, 84, 108] (1-based); the bound is 4.",
+            "id": "ef_hand_count",
+            "measured": 4,
+            "question": "Does it carry at least 4 EF-hand loops?",
+            "verdict": "pass"
+          },
+          {
+            "basis": "Mattocks 2023, and the rule that does the discriminating: both lanmodulins in the reference set measure 12, calmodulin and troponin C measure 24. At least one pair, not every pair.",
+            "detail": "adjacent gaps [12, 13, 12], smallest 12; the bound is under 14.",
+            "id": "compact_pair",
+            "measured": 12,
+            "question": "Are two adjacent EF-hands fewer than 14 residues apart?",
+            "verdict": "pass"
+          }
+        ],
+        "selected": true
+      },
+      {
+        "accession": "P02585",
+        "disclaimer": "These rules select for the lanmodulin architecture -- four tightly spaced EF-hand loops in a short protein. They are not an affinity, not a selectivity over calcium, and not specific to any one lanthanide: the same rules fire for all fifteen trivalent lanthanides because sequence cannot separate them. Telling two lanthanides apart needs ionic radius against a coordination number measured from structure.",
+        "name": "Troponin C, skeletal muscle",
+        "observations": {
+          "acidic_fraction": 0.2812,
+          "adjacent_gaps": [
+            24,
+            28,
+            24
+          ],
+          "classifier_loops": 2,
+          "ef_loop_starts": [
+            28,
+            64,
+            104,
+            140
+          ],
+          "ef_loops": 4,
+          "gap_definition": "residues between the end of one 12-residue EF-loop match and the start of the next",
+          "length_aa": 160,
+          "position_9": {
+            "D": 3,
+            "S": 1
+          },
+          "position_9_note": "Reported, never scored. Asp here is the family-wide signal (82.1% of lanmodulins against 26.4% of calcium EF-hands) but Hans-LanM carries none, and troponin C carries three."
+        },
+        "of": 3,
+        "passed": 2,
+        "rules": [
+          {
+            "basis": "Mattocks 2023 length bound. Lanmodulins are small; the bound mostly removes large multi-domain proteins that happen to carry EF-hands.",
+            "detail": "160 residues; the bound is 200.",
+            "id": "length",
+            "measured": 160,
+            "question": "Is it shorter than 200 residues?",
+            "verdict": "pass"
+          },
+          {
+            "basis": "Mattocks 2023, counted with chemistry.EF_LOOP_INSTRUMENT, the pattern that is neutral between the two families. The lanthanide-biased classifier finds only 3 of Hans-LanM's 4 and would reject it.",
+            "detail": "4 EF-hand loop(s) at [28, 64, 104, 140] (1-based); the bound is 4.",
+            "id": "ef_hand_count",
+            "measured": 4,
+            "question": "Does it carry at least 4 EF-hand loops?",
+            "verdict": "pass"
+          },
+          {
+            "basis": "Mattocks 2023, and the rule that does the discriminating: both lanmodulins in the reference set measure 12, calmodulin and troponin C measure 24. At least one pair, not every pair.",
+            "detail": "adjacent gaps [24, 28, 24], smallest 24; the bound is under 14.",
+            "id": "compact_pair",
+            "measured": 24,
+            "question": "Are two adjacent EF-hands fewer than 14 residues apart?",
+            "verdict": "fail"
+          }
+        ],
+        "selected": false
+      },
+      {
+        "accession": "P0DP23",
+        "disclaimer": "These rules select for the lanmodulin architecture -- four tightly spaced EF-hand loops in a short protein. They are not an affinity, not a selectivity over calcium, and not specific to any one lanthanide: the same rules fire for all fifteen trivalent lanthanides because sequence cannot separate them. Telling two lanthanides apart needs ionic radius against a coordination number measured from structure.",
+        "name": "Calmodulin-1",
+        "observations": {
+          "acidic_fraction": 0.255,
+          "adjacent_gaps": [
+            24,
+            25,
+            24
+          ],
+          "classifier_loops": 1,
+          "ef_loop_starts": [
+            21,
+            57,
+            94,
+            130
+          ],
+          "ef_loops": 4,
+          "gap_definition": "residues between the end of one 12-residue EF-loop match and the start of the next",
+          "length_aa": 149,
+          "position_9": {
+            "D": 1,
+            "N": 1,
+            "S": 1,
+            "T": 1
+          },
+          "position_9_note": "Reported, never scored. Asp here is the family-wide signal (82.1% of lanmodulins against 26.4% of calcium EF-hands) but Hans-LanM carries none, and troponin C carries three."
+        },
+        "of": 3,
+        "passed": 2,
+        "rules": [
+          {
+            "basis": "Mattocks 2023 length bound. Lanmodulins are small; the bound mostly removes large multi-domain proteins that happen to carry EF-hands.",
+            "detail": "149 residues; the bound is 200.",
+            "id": "length",
+            "measured": 149,
+            "question": "Is it shorter than 200 residues?",
+            "verdict": "pass"
+          },
+          {
+            "basis": "Mattocks 2023, counted with chemistry.EF_LOOP_INSTRUMENT, the pattern that is neutral between the two families. The lanthanide-biased classifier finds only 3 of Hans-LanM's 4 and would reject it.",
+            "detail": "4 EF-hand loop(s) at [21, 57, 94, 130] (1-based); the bound is 4.",
+            "id": "ef_hand_count",
+            "measured": 4,
+            "question": "Does it carry at least 4 EF-hand loops?",
+            "verdict": "pass"
+          },
+          {
+            "basis": "Mattocks 2023, and the rule that does the discriminating: both lanmodulins in the reference set measure 12, calmodulin and troponin C measure 24. At least one pair, not every pair.",
+            "detail": "adjacent gaps [24, 25, 24], smallest 24; the bound is under 14.",
+            "id": "compact_pair",
+            "measured": 24,
+            "question": "Are two adjacent EF-hands fewer than 14 residues apart?",
+            "verdict": "fail"
+          }
+        ],
+        "selected": false
+      },
+      {
+        "accession": "P69905",
+        "disclaimer": "These rules select for the lanmodulin architecture -- four tightly spaced EF-hand loops in a short protein. They are not an affinity, not a selectivity over calcium, and not specific to any one lanthanide: the same rules fire for all fifteen trivalent lanthanides because sequence cannot separate them. Telling two lanthanides apart needs ionic radius against a coordination number measured from structure.",
+        "name": "Hemoglobin subunit alpha",
+        "observations": {
+          "acidic_fraction": 0.0845,
+          "adjacent_gaps": [],
+          "classifier_loops": 0,
+          "ef_loop_starts": [],
+          "ef_loops": 0,
+          "gap_definition": "residues between the end of one 12-residue EF-loop match and the start of the next",
+          "length_aa": 142,
+          "position_9": {},
+          "position_9_note": "Reported, never scored. Asp here is the family-wide signal (82.1% of lanmodulins against 26.4% of calcium EF-hands) but Hans-LanM carries none, and troponin C carries three."
+        },
+        "of": 3,
+        "passed": 1,
+        "rules": [
+          {
+            "basis": "Mattocks 2023 length bound. Lanmodulins are small; the bound mostly removes large multi-domain proteins that happen to carry EF-hands.",
+            "detail": "142 residues; the bound is 200.",
+            "id": "length",
+            "measured": 142,
+            "question": "Is it shorter than 200 residues?",
+            "verdict": "pass"
+          },
+          {
+            "basis": "Mattocks 2023, counted with chemistry.EF_LOOP_INSTRUMENT, the pattern that is neutral between the two families. The lanthanide-biased classifier finds only 3 of Hans-LanM's 4 and would reject it.",
+            "detail": "0 EF-hand loop(s) at no (1-based); the bound is 4.",
+            "id": "ef_hand_count",
+            "measured": 0,
+            "question": "Does it carry at least 4 EF-hand loops?",
+            "verdict": "fail"
+          },
+          {
+            "basis": "Mattocks 2023, and the rule that does the discriminating: both lanmodulins in the reference set measure 12, calmodulin and troponin C measure 24. At least one pair, not every pair.",
+            "detail": "fewer than two EF-hand loops, so no pair to measure.",
+            "id": "compact_pair",
+            "measured": null,
+            "question": "Are two adjacent EF-hands fewer than 14 residues apart?",
+            "verdict": "fail"
+          }
+        ],
+        "selected": false
+      },
+      {
+        "accession": "P00766",
+        "disclaimer": "These rules select for the lanmodulin architecture -- four tightly spaced EF-hand loops in a short protein. They are not an affinity, not a selectivity over calcium, and not specific to any one lanthanide: the same rules fire for all fifteen trivalent lanthanides because sequence cannot separate them. Telling two lanthanides apart needs ionic radius against a coordination number measured from structure.",
+        "name": "Chymotrypsinogen A",
+        "observations": {
+          "acidic_fraction": 0.0571,
+          "adjacent_gaps": [],
+          "classifier_loops": 0,
+          "ef_loop_starts": [],
+          "ef_loops": 0,
+          "gap_definition": "residues between the end of one 12-residue EF-loop match and the start of the next",
+          "length_aa": 245,
+          "position_9": {},
+          "position_9_note": "Reported, never scored. Asp here is the family-wide signal (82.1% of lanmodulins against 26.4% of calcium EF-hands) but Hans-LanM carries none, and troponin C carries three."
+        },
+        "of": 3,
+        "passed": 0,
+        "rules": [
+          {
+            "basis": "Mattocks 2023 length bound. Lanmodulins are small; the bound mostly removes large multi-domain proteins that happen to carry EF-hands.",
+            "detail": "245 residues; the bound is 200.",
+            "id": "length",
+            "measured": 245,
+            "question": "Is it shorter than 200 residues?",
+            "verdict": "fail"
+          },
+          {
+            "basis": "Mattocks 2023, counted with chemistry.EF_LOOP_INSTRUMENT, the pattern that is neutral between the two families. The lanthanide-biased classifier finds only 3 of Hans-LanM's 4 and would reject it.",
+            "detail": "0 EF-hand loop(s) at no (1-based); the bound is 4.",
+            "id": "ef_hand_count",
+            "measured": 0,
+            "question": "Does it carry at least 4 EF-hand loops?",
+            "verdict": "fail"
+          },
+          {
+            "basis": "Mattocks 2023, and the rule that does the discriminating: both lanmodulins in the reference set measure 12, calmodulin and troponin C measure 24. At least one pair, not every pair.",
+            "detail": "fewer than two EF-hand loops, so no pair to measure.",
+            "id": "compact_pair",
+            "measured": null,
+            "question": "Are two adjacent EF-hands fewer than 14 residues apart?",
+            "verdict": "fail"
+          }
+        ],
+        "selected": false
+      }
+    ],
+    "considered": 6,
+    "disclaimer": "These rules select for the lanmodulin architecture -- four tightly spaced EF-hand loops in a short protein. They are not an affinity, not a selectivity over calcium, and not specific to any one lanthanide: the same rules fire for all fifteen trivalent lanthanides because sequence cannot separate them. Telling two lanthanides apart needs ionic radius against a coordination number measured from structure.",
+    "ordering": "Candidates are ordered by how many design rules they pass. Within a tier the order is a stable tie-break on EF-hand count and spacing, not a ranking by any measured or predicted quantity.",
+    "rules": [
+      {
+        "basis": "Mattocks 2023 length bound. Lanmodulins are small; the bound mostly removes large multi-domain proteins that happen to carry EF-hands.",
+        "id": "length",
+        "question": "Is it shorter than 200 residues?"
+      },
+      {
+        "basis": "Mattocks 2023, counted with chemistry.EF_LOOP_INSTRUMENT, the pattern that is neutral between the two families. The lanthanide-biased classifier finds only 3 of Hans-LanM's 4 and would reject it.",
+        "id": "ef_hand_count",
+        "question": "Does it carry at least 4 EF-hand loops?"
+      },
+      {
+        "basis": "Mattocks 2023, and the rule that does the discriminating: both lanmodulins in the reference set measure 12, calmodulin and troponin C measure 24. At least one pair, not every pair.",
+        "id": "compact_pair",
+        "question": "Are two adjacent EF-hands fewer than 14 residues apart?"
+      }
+    ],
+    "selected_count": 2,
+    "target": "La3+",
+    "target_was_used": false
+  }
+}

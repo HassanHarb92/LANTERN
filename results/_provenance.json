@@ -1,0 +1,11 @@
+{
+  "description": "Answers generated offline by scripts/export_results.py. Each <ion>.json is the full record the app's download button produces: every measurement, verdict, caveat and basis, with coordinates and per-atom donor lists left out. Regenerating on unchanged code and data is byte-identical, so a diff here is a change in what the platform claims.",
+  "generated_by": "scripts/export_results.py",
+  "generated_at_utc": "2026-10-21T21:13:56Z",
+  "commit": "27d0158",
+  "branch": "rag_dev",
+  "score_version": "geometry-v2",
+  "question_template": "what proteins should I try for capturing {ion}",
+  "live": false,
+  "ions": 15
+}
