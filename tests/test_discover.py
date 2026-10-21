@@ -19,7 +19,10 @@ from lantern.discover import (LANTHANIDE_ELEMENTS, PREDICTION_HAS_NO_METAL,
                               SIZE_MATCH_IS_NOT_BINDING, SIZE_RANK_SELF_CHECK,
                               SPHERE_CLOSED_AROUND_THE_DEPOSITED_ION,
                               NARRATION_MAX_TOKENS, NARRATION_TIMEOUT_S,
-                              _element_of, _rank_of, answer, exportable,
+                              _element_of, _ion_report,
+                              _ion_structure_evidence,
+                              _is_the_ion_asked_for,
+                              _rank_of, answer, exportable,
                               headline, narrate, narration_payload)
 from lantern.models import Protein
 from lantern.plan import SOURCE_FALLBACK
@@ -142,8 +145,13 @@ class TestTheSizeComparisonIsLabelledAsACounterfactual:
             assert site["size_match_is_counterfactual"] is True
 
     def test_and_in_the_caveats(self, run):
-        assert any("not evidence that this protein was observed binding Ce3+" in c
-                   for c in run["caveats"])
+        """Counted, not hedged. The caveat that carries this is the ion
+        report's own statement, so it says how many of the measured sites
+        hold Ce3+ -- none of the eighteen -- rather than "at least one site
+        holds a different element", which read as an exception."""
+        assert run["ion_report"]["statement"] in run["caveats"]
+        assert any("none of it is evidence that this protein was observed "
+                   "binding Ce3+" in c for c in run["caveats"])
         assert SPHERE_CLOSED_AROUND_THE_DEPOSITED_ION in run["caveats"]
 
     def test_the_flag_is_false_when_the_elements_do_match(self):
@@ -292,17 +300,35 @@ class TestMeasuringOneStructureOfSeveralSaysSo:
         assert "8FNS" not in [o["id"]
                               for o in measured["structure_choice"]["not_measured"]]
 
-    def test_it_says_when_the_file_measured_is_not_the_one_the_rule_picks(self):
-        """pdb_id can come from somewhere other than the rule -- a curated
-        record, or a hand-set field. Silently printing the rule's reasoning
-        over a different file would explain a choice that was not made."""
+    def test_a_hand_set_pdb_id_does_not_override_the_rule(self):
+        """This used to assert the opposite -- that a hand-set pdb_id won and
+        the record admitted the rule disagreed. That was the bug: the rule was
+        computed, its disagreement reported, and the other file measured
+        anyway. Whichever file the rule picks is now the file measured, so the
+        reasoning printed next to a structure is the reasoning that chose it.
+        """
         record = answer(CANONICAL, proteins=[live_shaped("8FNR")])
-        assert record["evidence"][0]["structure_choice"]["agrees_with_the_rule"] is False
+        choice = record["evidence"][0]["structure_choice"]
+        assert record["evidence"][0]["pdb_id"] == "8FNS"
+        assert choice["agrees_with_the_rule"] is True
 
-    def test_a_curated_record_claims_no_choice_was_made(self, run):
-        """The bundled set names one structure per protein and lists no
-        alternatives. An empty "others" expander would imply it had looked."""
-        assert all(ev.get("structure_choice") is None for ev in run["evidence"])
+    def test_a_curated_record_lists_the_alternatives_it_passed_over(self, run):
+        """The bundled lanmodulins carry every structure UniProt lists for
+        them, which is what lets a question about La3+ reach 8DQ2. Having
+        alternatives means the choice is real and has to be shown; the old
+        assertion here was that curated records made no choice at all."""
+        choices = [ev["structure_choice"] for ev in run["evidence"]]
+        assert all(c is not None for c in choices)
+        assert {c["measured"] for c in choices} == {"8FNR", "8FNS"}
+        assert all(c["not_measured"] for c in choices)
+
+    def test_a_curated_record_says_which_element_each_alternative_holds(self, run):
+        """The fact a UniProt cross-reference cannot supply, and the only
+        reason the choice can be ion-aware at all."""
+        holds = {o["id"]: o["holds"] for c in (ev["structure_choice"] for ev in run["evidence"])
+                 for o in c["deposited"]}
+        assert holds["8FNR"] == ["Dy"] and holds["8DQ2"] == ["La"]
+        assert holds["8FNS"] == ["Nd"] and holds["6MI5"] == ["Y"]
 
     def test_the_download_keeps_the_choice(self):
         record = exportable(answer(CANONICAL, proteins=[live_shaped()]))
@@ -329,6 +355,154 @@ class TestVerificationCanBeSkippedButNotFaked:
         record = answer(CANONICAL, max_structures=1)
         assert record["shortlist"]["selected_count"] == 2
         assert len(record["evidence"]) == 1
+
+
+class TestTheOxidationStateIsPartOfTheIon:
+    """"The atom should be the same" includes which ion of it. Six PDB
+    component codes state an oxidation state and one of them, YB2, states a
+    different one from the only ytterbium this platform can be asked about.
+
+    No cached structure contains YB2, so the element check alone has never
+    yet been wrong offline -- which is the whole reason to pin it here rather
+    than wait for a live search to find one."""
+
+    def site(self, metal, element):
+        return {"metal": metal, "element": element}
+
+    def test_a_bare_code_is_judged_on_its_element(self):
+        assert _is_the_ion_asked_for(self.site("YB", "Yb"), "Yb3+")
+        assert _is_the_ion_asked_for(self.site("EU", "Eu"), "Eu3+")
+
+    def test_a_code_stating_the_same_state_still_matches(self):
+        assert _is_the_ion_asked_for(self.site("EU3", "Eu"), "Eu3+")
+        assert _is_the_ion_asked_for(self.site("HO3", "Ho"), "Ho3+")
+
+    def test_ytterbium_two_is_not_the_ytterbium_three_that_was_asked_for(self):
+        assert not _is_the_ion_asked_for(self.site("YB2", "Yb"), "Yb3+")
+
+    def test_a_different_element_never_matches(self):
+        assert not _is_the_ion_asked_for(self.site("DY", "Dy"), "Eu3+")
+
+    def test_the_real_pages_sites_are_unaffected(self):
+        """The fix must not quietly reclassify what already worked. Every
+        site on the Nd3+ page holds a bare ND, which states no oxidation
+        state, so it is judged on its element and still counts."""
+        record = answer("what proteins should I try for capturing Nd3+")
+        nd = [s for ev in record["evidence"] if ev.get("pdb_id") == "8FNS"
+              for s in ev["sites"]]
+        assert nd
+        assert all(s["size_match_is_counterfactual"] is False for s in nd)
+        assert all(s["deposited_charge"] is None for s in nd)
+
+
+class TestTheIonAskedAboutIsSomewhereOnThePage:
+    """The design rules are ion-independent, so for thirteen of the fifteen
+    askable lanthanides every coordinate on this page used to belong to some
+    other element: ask about Eu3+, get Dy and Nd. The shortlist cannot be
+    fixed -- it answers "what should I try", and sequence cannot tell Eu from
+    Dy -- so the ion gets a structure of its own, chosen by measuring
+    candidates rather than by sorting on resolution."""
+
+    def test_the_structure_shown_for_an_ion_actually_holds_that_element(self):
+        for ion, element in (("Eu3+", "Eu"), ("Ce3+", "Ce"), ("Tb3+", "Tb")):
+            own = answer(f"what proteins should I try for capturing {ion}")
+            own = own["ion_structure"]
+            held = [s for s in own["sites"]
+                    if s["deposited_element"].capitalize() == element]
+            assert held, f"{ion} drew {own['pdb_id']} with no {element} site"
+            assert own["sites_holding_the_target"] == len(held)
+            assert own["holds_the_target_element"] is True
+
+    def test_every_admitted_site_is_one_the_geometry_code_stands_behind(self):
+        """The admission rule, restated where a reader will find it. 4BAR is
+        the sharpest Eu entry in the index and is not what Eu3+ draws: its
+        europium sits in a soaked tris-dipicolinate cage with zero protein
+        donors, which geometry-v2 declines to call. Sorting on resolution
+        takes the thaumatin; measuring takes the dehydrogenase."""
+        own = answer("what proteins should I try for capturing Eu3+")["ion_structure"]
+        assert own["pdb_id"] != "4BAR"
+        admitted = [s for s in own["sites"]
+                    if s["deposited_element"].capitalize() == "Eu"]
+        assert any(s["call"] == "lanthanide-like" and s["call_reliable"]
+                   for s in admitted)
+        assert any(s["protein_donors"] > 0 for s in admitted)
+        assert any(r["id"] == "4BAR" for r in own["rejected"])
+
+    def test_it_is_never_mistaken_for_a_shortlist_candidate(self, run):
+        """The one way this feature could do real damage: a structure nothing
+        screened for the lanmodulin architecture, read as a recommendation."""
+        own = run["ion_structure"]
+        assert own["is_a_design_rule_candidate"] is False
+        assert own["pdb_id"] not in [ev.get("pdb_id") for ev in run["evidence"]]
+        assert own not in run["evidence"]
+        assert own["caveat"] in run["caveats"]
+        assert all(c["accession"] != own.get("accession")
+                   for c in run["shortlist"]["candidates"])
+
+    def test_a_question_already_holding_its_ion_does_not_draw_one(self):
+        """La3+ is measured in the corpus itself. Adding a second La structure
+        would be answering a question the page already answered."""
+        record = answer("what proteins should I try for capturing La3+")
+        assert record["ion_report"]["verdict_kind"] == "observed"
+        assert "ion_structure" not in record
+
+    def test_an_element_with_nothing_deposited_says_so_and_draws_nothing(self):
+        """Pm3+ has no deposited structure anywhere. Silence would read as a
+        bug; a fabricated structure would be worse than either."""
+        record = answer("what proteins should I try for capturing Pm3+")
+        assert "ion_structure" not in record
+        assert ("No deposited structure anywhere in this platform's index "
+                "holds Pm" in record["ion_report"]["statement"])
+
+    def test_an_element_measured_and_rejected_says_that_instead(self):
+        """Ho3+ is the other kind of nothing: sixteen entries hold holmium and
+        all sixteen were measured. "None exists" and "all of them were a
+        chelate soak" are different facts and must not share a sentence."""
+        record = answer("what proteins should I try for capturing Ho3+")
+        assert "ion_structure" not in record
+        statement = record["ion_report"]["statement"]
+        assert "All 16 were downloaded and measured" in statement
+        assert "does not call a protein site" in statement
+
+    def test_the_report_does_not_deny_the_structure_printed_below_it(self):
+        """The sentence this replaced read "none of them is in this corpus, so
+        none was measured here" on a page that then measured one of them."""
+        record = answer("what proteins should I try for capturing Eu3+")
+        statement = record["ion_report"]["statement"]
+        assert "none was measured here" not in statement
+        assert record["ion_structure"]["pdb_id"] in statement
+
+    def test_a_page_with_no_candidate_sites_still_admits_what_it_measured(self):
+        """The fourth sentence that goes false when the ion gets its own
+        block. If no candidate has a measurable site the report takes an
+        early branch that used to say "this run says nothing about Eu3+" --
+        on a page carrying four measured Eu sites."""
+        own = _ion_structure_evidence("Eu3+")
+        report = _ion_report("Eu3+", [], own)
+        assert report["verdict_kind"] == "no_sites"
+        assert "says nothing about Eu3+" not in report["statement"]
+        assert own["pdb_id"] in report["statement"]
+        # ... and does not promise a structure when there is none to show.
+        bare = _ion_report("Eu3+", [], None)
+        assert "6FKW" not in bare["statement"]
+        assert "shown below" not in bare["statement"]
+
+    def test_the_coordinates_are_read_from_the_cache_and_not_the_network(self):
+        """answer(live=False) must stay offline. A block that quietly fetches
+        is a block that fails in the room it is being demonstrated in."""
+        import lantern.structure as structure
+
+        def explode(*a, **k):
+            raise AssertionError("ion structure reached the network")
+
+        saved = structure.requests.get
+        structure.requests.get = explode
+        try:
+            record = answer("what proteins should I try for capturing Eu3+",
+                            live=False)
+        finally:
+            structure.requests.get = saved
+        assert record["ion_structure"]["pdb_id"] == "6FKW"
 
 
 class TestTheRecordIsSelfDescribing:
@@ -384,12 +558,18 @@ class TestTheDownloadKeepsEveryJustification:
         assert "evidence.sites.raw" not in after
 
     def test_and_drops_nothing_else_whatsoever(self, run):
-        """The assertion that survives new fields being added to a site."""
+        """The assertion that survives new fields being added to a site.
+
+        Two blocks carry coordinates now -- the candidates and the ion's own
+        structure -- and both are trimmed the same way, so the exemption is
+        written once per block rather than widened to any key named `raw`."""
         removed = key_paths(run) - key_paths(exportable(run))
+        allowed = {f"{block}.{leaf}"
+                   for block in ("evidence", "ion_structure")
+                   for leaf in ("coordinates", "sites.raw")}
         collateral = {path for path in removed
-                      if path != "evidence.coordinates"
-                      and path != "evidence.sites.raw"
-                      and not path.startswith("evidence.sites.raw.")}
+                      if path not in allowed
+                      and not any(path.startswith(f"{a}.") for a in allowed)}
         assert not collateral, f"exportable() also dropped {sorted(collateral)}"
 
     def test_and_invents_nothing(self, run):

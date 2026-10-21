@@ -20,7 +20,8 @@
       "P69905": "true negative",
       "P00766": "true negative"
     },
-    "warning": "These are real sequences. Do not describe heuristic scores over them as measured binding or selectivity."
+    "warning": "These are real sequences. Do not describe heuristic scores over them as measured binding or selectivity.",
+    "pdb_options": "Verbatim UniProt PDB cross-references (method, resolution, chains) for the two lanmodulins, retrieved 2026-10-21. Which element each file holds is deliberately NOT restated here: catalog.deposited_rare_earths() derives it from ree_pdb_entries.json, so the two cannot drift apart. Carrying the alternatives is what lets a question about La3+ reach 8DQ2 instead of measuring the sharper Dy3+ file 8FNR and calling it an answer."
   },
   "proteins": [
     {
@@ -34,7 +35,21 @@
       "source": "UniProt reference set (authentic sequence)",
       "evidence": "experimentally characterized; Nd3+ sites resolved in PDB 8FNS",
       "source_url": "https://www.uniprot.org/uniprotkb/C5B164/entry",
-      "notes": "Lanmodulin from Methylorubrum extorquens AM1. The one reviewed member of the family and the positive control for the pipeline."
+      "notes": "Lanmodulin from Methylorubrum extorquens AM1. The one reviewed member of the family and the positive control for the pipeline.",
+      "pdb_options": [
+        {
+          "id": "6MI5",
+          "method": "NMR",
+          "resolution_A": null,
+          "chains": "X=23-133"
+        },
+        {
+          "id": "8FNS",
+          "method": "X-ray",
+          "resolution_A": 1.01,
+          "chains": "A=29-133"
+        }
+      ]
     },
     {
       "accession": "A0A4V2JDD3",
@@ -47,7 +62,21 @@
       "source": "UniProt reference set (authentic sequence)",
       "evidence": "structure with bound Dy3+ deposited as PDB 8FNR",
       "source_url": "https://www.uniprot.org/uniprotkb/A0A4V2JDD3/entry",
-      "notes": "Lanmodulin from Hansschlegelia quercus. A distinct site architecture from 8FNS: CN 9 with three bidentate carboxylates and no coordinating water."
+      "notes": "Lanmodulin from Hansschlegelia quercus. A distinct site architecture from 8FNS: CN 9 with three bidentate carboxylates and no coordinating water.",
+      "pdb_options": [
+        {
+          "id": "8DQ2",
+          "method": "X-ray",
+          "resolution_A": 1.8,
+          "chains": "A/B/C/D=24-133"
+        },
+        {
+          "id": "8FNR",
+          "method": "X-ray",
+          "resolution_A": 1.4,
+          "chains": "A/B/C/D=24-133"
+        }
+      ]
     },
     {
       "accession": "P0DP23",

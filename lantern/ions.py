@@ -82,8 +82,9 @@ SHANNON_SOURCE = ("Shannon, R. D. (1976) Acta Crystallographica A32, 751-767, "
 SEQUENCE_SCORE_IS_ION_INDEPENDENT = (
     "A sequence-only score cannot tell one trivalent lanthanide from another. "
     "chemistry.score_sequence() counts acidic residues and EF-hand-like motifs, "
-    "and those counts are identical whether the target is La3+, Ce3+, Nd3+ or "
-    "Dy3+ -- the residues are the same residues. Selecting a target ion does not "
+    "and those counts are identical for every one of the fifteen trivalent "
+    "lanthanides -- the residues are the same residues. Selecting a target "
+    "ion does not "
     "change this ranking by one digit and must not be presented as if it did. "
     "Ion identity can only enter through a structure: an observed coordination "
     "number and mean donor distance can be compared against the ion's Shannon "
@@ -267,6 +268,19 @@ _ELEMENT_NAMES: dict[str, str] = {
     "thulium": "Tm", "ytterbium": "Yb", "lutetium": "Lu",
     "yttrium": "Y", "scandium": "Sc", "calcium": "Ca",
 }
+
+_NAME_BY_SYMBOL: dict[str, str] = {sym: name.capitalize() for name, sym in _ELEMENT_NAMES.items()}
+
+
+def element_name(symbol: str) -> str:
+    """"Ce" -> "Cerium". The symbol itself for anything not in the table.
+
+    Exists so a caller building display text does not have to reach into
+    _ELEMENT_NAMES and invert it, or keep a second copy of the names that can
+    drift out of step with the one the parser accepts.
+    """
+    return _NAME_BY_SYMBOL.get(symbol.strip().capitalize(), symbol)
+
 
 # Oxidation state assumed when a bare element or name is given with no charge.
 # Every rare earth is 3+; calcium is 2+. Stated as data rather than inferred,
@@ -551,6 +565,82 @@ def typical_coordination(ion: str) -> dict | None:
                    "rather than wrong. A coordination number read from an "
                    "asymmetric unit is also a lower bound (see geometry.py), so a "
                    "site reading below the minimum may simply be truncated."),
+    }
+
+
+# The one statement this platform can make about the ion a user actually named,
+# as opposed to the ion that happens to be in the crystal.
+#
+# Every other per-ion number here is comparative: size_match ranks the series at
+# one site, and SIZE_RANK_SELF_CHECK records that the ranking does not even
+# recover the ion known to bind there, so it cannot be read as "this ion binds".
+# A coordination number is different in kind. It is read off the deposited
+# coordinates, and _COORDINATION_RANGES gives each ion a range that was not
+# derived from this corpus, so asking whether one falls inside the other is a
+# question about the named ion that does not route through the ranking at all.
+#
+# It is still only geometry. A site can sit dead-centre in an ion's range and
+# bind it weakly or not at all, which is why the verdict words below describe
+# the coordination number and never the binding.
+COORDINATION_FIT_IS_NOT_BINDING = (
+    "Whether a coordination number falls in an ion's usual range is a statement "
+    "about geometry and nothing else. It is not an affinity, not a selectivity "
+    "prediction, and not evidence that the ion was observed in this site. "
+    "Neighbouring lanthanides share almost identical ranges, so a site "
+    "compatible with one is compatible with several; this can rule a site in, "
+    "never rule a competitor out."
+)
+
+_FIT_WORDS = {
+    "typical": "is exactly the coordination number {ion} most often adopts",
+    "within_range": "falls inside the range {ion} is normally found in ({low}-{high})",
+    "above_range": "is higher than {ion} is normally found in ({low}-{high})",
+    "below_range": "is lower than {ion} is normally found in ({low}-{high})",
+}
+
+
+def coordination_fit(ion: str, observed_cn: int) -> dict | None:
+    """Where one observed coordination number sits in one ion's own range.
+
+    Returns the range, a `verdict` of typical / within_range / above_range /
+    below_range, and a `statement` saying it in words. None when the ion is
+    unrecognised or untabulated, or the coordination number is not a whole
+    number -- never a verdict of "no", which would read as a negative finding
+    where there is simply no table entry.
+
+    `below_range` is the weakest of the four and is reported with that stated:
+    a coordination number measured on an asymmetric unit is a lower bound, so a
+    site can read low because the symmetry mate holding the rest of the shell
+    was not in the file. `above_range` has no such excuse.
+    """
+    span = typical_coordination(ion)
+    cn = whole_cn(observed_cn)
+    if span is None or cn is None:
+        return None
+    low, typical, high = span["minimum"], span["typical"], span["maximum"]
+    if cn == typical:
+        verdict = "typical"
+    elif low <= cn <= high:
+        verdict = "within_range"
+    elif cn > high:
+        verdict = "above_range"
+    else:
+        verdict = "below_range"
+    statement = (f"CN {cn} " + _FIT_WORDS[verdict].format(
+        ion=span["ion"], low=low, high=high) + ".")
+    if verdict == "below_range":
+        statement += (" A coordination number read from an asymmetric unit is a "
+                      "lower bound, so this may be a truncated shell rather than "
+                      "a mismatch.")
+    return {
+        "ion": span["ion"],
+        "observed_cn": cn,
+        "minimum": low, "typical": typical, "maximum": high,
+        "verdict": verdict,
+        "compatible": verdict in ("typical", "within_range"),
+        "statement": statement,
+        "basis": span["basis"],
+        "caveat": COORDINATION_FIT_IS_NOT_BINDING + " " + span["caveat"],
     }
 
 

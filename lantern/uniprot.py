@@ -1,5 +1,6 @@
 """Live protein lookup. Calls only the public UniProt and InterPro APIs."""
 import requests
+from .catalog import deposited_rare_earths, known_entry
 from .models import Protein
 
 BASE = "https://rest.uniprot.org/uniprotkb/search"
@@ -90,7 +91,22 @@ RESOLUTION_IS_THE_RULE = (
 )
 
 
-def choose_structure(options: list[dict]) -> tuple[str | None, str]:
+# What "no structure of this protein holds your ion" is allowed to mean. The
+# enumeration behind deposited_rare_earths() is a snapshot, so silence in it is
+# two different facts wearing one face, and only one of them is a statement
+# about chemistry. Saying which was seen is the difference between "this protein
+# has never been crystallised with your ion" and "this platform's index predates
+# the entry that was".
+NO_LISTED_STRUCTURE_HOLDS_THE_ION = (
+    "No structure listed for this entry is recorded as holding {element}, so "
+    "resolution decided instead and the measurement below is of a different "
+    "element. That is a statement about what has been deposited and indexed, "
+    "not about whether this protein binds {element}."
+)
+
+
+def choose_structure(options: list[dict], target: str | None = None
+                     ) -> tuple[str | None, str]:
     """Which of an entry's deposited structures to measure, and why.
 
     Returns the PDB id and a sentence stating the rule that picked it, so the
@@ -98,23 +114,54 @@ def choose_structure(options: list[dict]) -> tuple[str | None, str]:
     silence. Entries stating no resolution -- NMR, cryo-EM without one -- are
     not ranked against those that do; they are the fallback, taken in PDB id
     order so the same search returns the same structure twice running.
+
+    With `target`, structures recorded as holding that element are considered
+    first and resolution only breaks ties among them. This inverts the old
+    priority on purpose: a 1.8 A file containing the ion asked about answers
+    the question, and a 1.01 A file containing a different one does not, no
+    matter how much sharper it is. `target=None` reproduces the resolution-only
+    behaviour exactly, which is what every caller with no ion in hand wants.
     """
     if not options:
         return None, ""
     n = len(options)
+    note = ""
+    if target:
+        element = "".join(c for c in str(target) if c.isalpha()).capitalize()
+        holding = [o for o in options if element in deposited_rare_earths(o["id"])]
+        if holding:
+            # Recurse without a target so the resolution tie-break is written
+            # once; only the sentence explaining the choice differs.
+            pdb_id, _ = choose_structure(holding, None)
+            if len(holding) == 1:
+                return pdb_id, (
+                    f"{pdb_id} measured: of the {n} structure(s) listed for this "
+                    f"entry it is the only one recorded as holding {element}, the "
+                    "element asked about.")
+            return pdb_id, (
+                f"{pdb_id} measured: {len(holding)} of the {n} structure(s) listed "
+                f"for this entry are recorded as holding {element}, the element "
+                "asked about, and this is the sharpest of those. Structures "
+                "holding the ion are preferred over sharper ones that do not.")
+        note = " " + NO_LISTED_STRUCTURE_HOLDS_THE_ION.format(element=element)
+        unindexed = sorted(o["id"] for o in options if not known_entry(o["id"]))
+        if unindexed:
+            note += (f" {len(unindexed)} of them ({', '.join(unindexed)}) are absent "
+                     "from that index rather than recorded as holding nothing, so for "
+                     "those the answer is unknown rather than no.")
     measured = [o for o in options if o["resolution_A"] is not None]
     if measured:
         best = min(measured, key=lambda o: (o["resolution_A"], o["id"]))
         return best["id"], (
             f"{best['id']} measured, the sharpest of the {n} structure(s) "
             f"UniProt lists for this entry ({best['resolution_A']} Å, "
-            f"{best['method']}). {RESOLUTION_IS_THE_RULE}")
+            f"{best['method']}). {RESOLUTION_IS_THE_RULE}{note}")
     first = min(options, key=lambda o: o["id"])
     methods = ", ".join(sorted({o["method"] for o in options}))
     return first["id"], (
         f"{first['id']} measured. None of the {n} structure(s) UniProt lists "
         f"for this entry states a resolution ({methods}), so the lowest PDB id "
-        "was taken and the choice between them is arbitrary.")
+        f"was taken and the choice between them is arbitrary.{note}")
 
 
 def _to_protein(item: dict, source: str, notes: str) -> Protein:

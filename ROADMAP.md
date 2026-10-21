@@ -2100,6 +2100,49 @@ explicitly marked unmeasured.
 **Done when:** the agent completes a campaign end-to-end with an audit log mapping every claim to a
 tool call and a source, and degrades to the deterministic pipeline when no provider is reachable.
 
+### M7 — Literature critic (retrieval + LLM judge + frozen policy) — 🟡 retrieval verified live, judge not yet run
+
+Branch `arxiv_rag`. Code: `lantern/scholarbud/` (Crossref/ChemRxiv search, dedup library, BM25; adapted from the ScholarMap project),
+`lantern/critic/` (claims, judge with post-check, retrieval, policy, lineage, pipeline), optional hook `discover.answer(critic=...)`.
+Docs: `lantern/critic/README.md`. Tests: `tests/test_scholarbud.py`, `tests/test_critic_{policy,judge,pipeline}.py` (offline, scripted judge).
+
+Design: the critic comments on numbers the deterministic pipeline already produced. A confident `contradicts` moves a protein behind
+the others and marks it `review`; `supports` only adds a badge; neither changes a number or promotes a candidate. Evidence from
+lineage sources (papers the rules came from) counts at alpha = 0.3 of an external source; lineage-only support never badges. The
+policy is a pure function of a parameter vector (frozen now; `PARAM_BOUNDS` and `objective` are the hooks for later GP tuning).
+
+| Stage | Artefact | Status (2026-10-21) |
+|---|---|---|
+| 1 Input and plan | `proteins for capturing Ce3+` -> target Ce3+, parsed by the deterministic fallback | live, done |
+| 2 Claims from the measured record | 12 claims: 9 site coordination numbers (8FNR Dy, 8FNS Nd, CN 7-10) + 3 design-rule claims | live, done |
+| 3 Retrieval | 78 records from live Crossref/ChemRxiv; top 4 per claim by BM25; PDB depositions and abstract-less records dropped | live, done |
+| 4 Judge verdicts | supports / contradicts / no_evidence per claim, with cited evidence numbers | **NOT RUN: no model access yet** |
+| 5 Policy decision | keep / badge / review per protein (frozen parameters, lineage weight 0.3) | **NOT RUN** (all keep by construction) |
+| 6 Final shortlist | order unchanged: A0A4V2JDD3, C5B164, P02585, P0DP23, P69905, P00766; measured numbers identical | verified unchanged |
+
+Full per-claim table (claim, source field, evidence DOIs, verdict): `docs/critic/CRITIC_LIVE_TRIAL.md` (+ `.json`). Regenerate with
+`python scripts/critic_live_trial.py --provider <argo|openai|anthropic> --out docs/critic/CRITIC_LIVE_TRIAL.md`.
+
+**Problems the live run found that the offline tests could not confirm** (all fixed, each with a regression test):
+1. Crossref returned HTTP 400 for a `select` field (`subtype`) that the route does not support; recorded fixtures cannot reveal a bad request.
+2. With no judge configured, retrieved evidence was discarded, so a retrieval-only trial showed an empty table.
+3. The best-ranked "evidence" for claims about 8FNR was the PDB deposition of 8FNR itself (DOI 10.2210/pdb8fnr/pdb): the measured data
+   cited in support of itself. PDB deposition DOIs and abstracts under 80 characters are now excluded.
+4. Still open: per-site claims share one query and retrieve nearly the same papers, so judge calls are mostly redundant. Consolidate to
+   one claim per distinct (element, coordination number) pair before paying for a full run.
+5. Still open: the lineage list (`data/critic_lineage.json`) is empty, so no source is discounted yet; the CN >= 9 and loop-spacing
+   rules' source DOIs must be added or the 30% lineage weight does nothing.
+
+**Caveats** (these also belong in any write-up): abstract-level evidence only (ChemRxiv full text is behind Cloudflare; about 479
+full texts are reachable through Europe PMC, mostly COVID-era); preprints are not peer reviewed; lexical (BM25) retrieval; the judge may
+share a model family with the narrator; literature is biased toward reported successes and a missing paper is not evidence; judge
+accuracy is unmeasured (no labelled claim set); the policy is frozen, not trained. The critic never writes or edits a number and never
+promotes a candidate.
+
+**Exit criteria for M7:** (1) one full live run on the canonical question with a real judge, table committed; (2) a hand-labelled set of
+at least 30 claims with the judge scored against it; (3) lineage list populated; (4) with and without the critic on the two lanmodulin
+controls and the known negatives, correct calls unchanged; (5) only then, push.
+
 ### Stretch — Corpus C
 
 Broad EF-hand screen, homology-aware holdout to avoid leakage between close homologs, and only then
@@ -2164,6 +2207,8 @@ parts are now contradicted by evidence:
 | Argo account not provisioned | No LLM layer | **Closed.** Everything through M5 is LLM-free by design, and M6's narration now runs on Argo, OpenAI or Anthropic (`lantern/llm.py`), so an unprovisioned Argonne account no longer removes the layer. |
 | The 188 homologs are near-identical to C5B164 | "Discovery" is trivial | Measure sequence identity spread at M4 entry; if clustered, report it honestly and widen to Corpus C. |
 | Lanthanide sites in the PDB are mostly artefacts | M2 yields little signal | This is why M2's curation step is the asset, not the download. |
+| The literature critic confirms the rules by construction (same papers) or cites the data under test | Looks like validation, is not | Lineage discount (0.3), PDB depositions excluded, verdicts treated as commentary; measure against a labelled set before relying on it (M7). |
+| No judge model reachable from the cluster | M7 untested live | Needs a provider key from a collaborator or the Argonne network; see `Agent_handoff.md`. |
 
 ---
 

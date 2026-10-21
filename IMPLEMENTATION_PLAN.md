@@ -187,6 +187,8 @@ Use `https://alphafold.ebi.ac.uk/api/prediction/{uniprot_accession}` to retrieve
 
 Use primary publications linked through RCSB/UniProt and optionally Crossref/PubMed (respect APIs, policies, and caching). Extract Kd and competition evidence only with exact source, assay conditions and appropriate units. Persist direct citation URLs. Keep separate "known REE binding" and "REEx versus Ca selectivity" columns. If no verified comparison exists, set `selectivity_evidence = not_available`.
 
+**Implemented (branch `arxiv_rag`, live test pending):** a commentary-only literature critic. Retrieval from Crossref/ChemRxiv abstracts (`lantern/scholarbud/`), claims derived from the measured record, an LLM judge whose verdicts pass a citation/number post-check, and a frozen policy (`lantern/critic/policy.py`) that can badge or flag for review but never changes a number or promotes a candidate. It does not extract Kd values; that remains open.
+
 ---
 
 ## 6. Structural and chemical screening algorithm
@@ -317,6 +319,48 @@ Support clear cache and re-fetch. If API fails, show stale cached data as cached
 - [ ] Prevent unsupported affinity/selectivity claims at answer-generation time.
 
 **Acceptance:** agent can call at least 3 real tools, handle malformed model action, recover from transient network failure, and produce an audit log containing which tool/source supports each claim.
+
+### Sprint 3b: Literature critic live test (HIGH PRIORITY until done)
+
+- [x] `lantern/scholarbud/`: Crossref/ChemRxiv search, dedup library, BM25 (offline tests).
+- [x] `lantern/critic/`: claims, judge + post-check, policy with lineage weight 0.3 and frozen trainable parameters, pipeline, hook in `discover.answer`.
+- [x] Live retrieval on the canonical question (table in `docs/critic/CRITIC_LIVE_TRIAL.md`); three defects found and fixed.
+- [ ] Full live run with a real judge model (needs a provider key or Argonne network): `scripts/critic_live_trial.py`.
+- [ ] Consolidate per-site claims to distinct (element, CN) pairs.
+- [ ] Populate `data/critic_lineage.json` with the rules' source DOIs.
+- [ ] Hand-labelled claim set (>= 30) and judge scoring; with/without-critic ablation on controls and known negatives.
+- [ ] Narrator integration of verdicts (with citation check), then push the branch.
+
+| Stage | Artefact | Status (2026-10-21) |
+|---|---|---|
+| 1 Input and plan | `proteins for capturing Ce3+` -> target Ce3+, parsed by the deterministic fallback | live, done |
+| 2 Claims from the measured record | 12 claims: 9 site coordination numbers (8FNR Dy, 8FNS Nd, CN 7-10) + 3 design-rule claims | live, done |
+| 3 Retrieval | 78 records from live Crossref/ChemRxiv; top 4 per claim by BM25; PDB depositions and abstract-less records dropped | live, done |
+| 4 Judge verdicts | supports / contradicts / no_evidence per claim, with cited evidence numbers | **NOT RUN: no model access yet** |
+| 5 Policy decision | keep / badge / review per protein (frozen parameters, lineage weight 0.3) | **NOT RUN** (all keep by construction) |
+| 6 Final shortlist | order unchanged: A0A4V2JDD3, C5B164, P02585, P0DP23, P69905, P00766; measured numbers identical | verified unchanged |
+
+Full per-claim table (claim, source field, evidence DOIs, verdict): `docs/critic/CRITIC_LIVE_TRIAL.md` (+ `.json`). Regenerate with
+`python scripts/critic_live_trial.py --provider <argo|openai|anthropic> --out docs/critic/CRITIC_LIVE_TRIAL.md`.
+
+**Problems the live run found that the offline tests could not confirm** (all fixed, each with a regression test):
+1. Crossref returned HTTP 400 for a `select` field (`subtype`) that the route does not support; recorded fixtures cannot reveal a bad request.
+2. With no judge configured, retrieved evidence was discarded, so a retrieval-only trial showed an empty table.
+3. The best-ranked "evidence" for claims about 8FNR was the PDB deposition of 8FNR itself (DOI 10.2210/pdb8fnr/pdb): the measured data
+   cited in support of itself. PDB deposition DOIs and abstracts under 80 characters are now excluded.
+4. Still open: per-site claims share one query and retrieve nearly the same papers, so judge calls are mostly redundant. Consolidate to
+   one claim per distinct (element, coordination number) pair before paying for a full run.
+5. Still open: the lineage list (`data/critic_lineage.json`) is empty, so no source is discounted yet; the CN >= 9 and loop-spacing
+   rules' source DOIs must be added or the 30% lineage weight does nothing.
+
+**Caveats** (these also belong in any write-up): abstract-level evidence only (ChemRxiv full text is behind Cloudflare; about 479
+full texts are reachable through Europe PMC, mostly COVID-era); preprints are not peer reviewed; lexical (BM25) retrieval; the judge may
+share a model family with the narrator; literature is biased toward reported successes and a missing paper is not evidence; judge
+accuracy is unmeasured (no labelled claim set); the policy is frozen, not trained. The critic never writes or edits a number and never
+promotes a candidate.
+
+**Acceptance:** the table has verdicts and decisions for every claim; every cited evidence number exists; no measured number differs from the
+input record; no candidate is promoted; failures degrade to `keep`; correct controls are unchanged with the critic on.
 
 ### Sprint 4: User-friendly presentation
 

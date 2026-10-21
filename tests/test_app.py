@@ -56,8 +56,27 @@ class TestTheQuestionBoxProducesAPage:
         assert len(page.tabs) == len(page.session_state["record"]["evidence"])
 
     def test_it_draws_the_rules_table_and_a_site_table_per_structure(self, page):
-        evidence = page.session_state["record"]["evidence"]
-        assert len(page.dataframe) == 1 + len(evidence)
+        """One rules table, then per structure a site table and a table of the
+        structures passed over. The curated lanmodulins carry alternatives now
+        -- 8FNR/8DQ2 and 8FNS/6MI5 -- so the second table per structure is
+        drawn for the offline set too, where it used to appear only live.
+
+        Plus one more when nothing measured holds the ion asked about: the
+        entries elsewhere in the index that do. Ce3+ is such a question, so
+        the canonical page draws it.
+
+        Plus the ion's own structure, when one was admitted: its site table,
+        and the entries measured before it and passed over. Ce3+ draws both --
+        4MAE is the structure, and the Ce entries sharper than it are not."""
+        record = page.session_state["record"]
+        evidence = record["evidence"]
+        alternatives = sum(1 for ev in evidence
+                           if (ev.get("structure_choice") or {}).get("not_measured"))
+        elsewhere = 1 if record["ion_report"]["deposited_elsewhere"] else 0
+        own = record.get("ion_structure")
+        mine = 0 if not own else 1 + (1 if own["rejected"] else 0)
+        assert len(page.dataframe) == (1 + len(evidence) + alternatives
+                                       + elsewhere + mine)
 
     def test_it_reports_no_errors(self, page):
         assert [e.value for e in page.error] == []
@@ -74,9 +93,14 @@ class TestEachStructuresWidgetsBelongToThatStructure:
 
     def test_each_site_picker_formats_with_its_own_structures_labels(self, page):
         pickers = [box for box in page.selectbox if box.label == "View"]
-        evidence = page.session_state["record"]["evidence"]
-        assert len(pickers) == len(evidence)
-        for box, ev in zip(pickers, evidence):
+        record = page.session_state["record"]
+        # The ion's own structure draws its picker above the candidate tabs,
+        # so it is first and is held to the same rule: its formatter must
+        # name the element in its own file, not the one in the next picker.
+        own = record.get("ion_structure")
+        drawn = ([own] if own else []) + record["evidence"]
+        assert len(pickers) == len(drawn)
+        for box, ev in zip(pickers, drawn):
             elements = {s["deposited_element"].upper() for s in ev["sites"]}
             formatted = box.format_func(box.value)
             assert any(formatted.upper().startswith(e) for e in elements), (

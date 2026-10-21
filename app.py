@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 
 from lantern.catalog import load_reference
 from lantern.discover import (NARRATION_IS_NOT_A_SOURCE, NARRATION_TIMEOUT_S,
-                              answer, exportable, headline, narrate)
+                              and_list, answer, exportable, headline, narrate)
 from lantern.explorer import render_explorer
 from lantern.geometry import SCORE_VERSION
 from lantern.llm import LLMError, PROVIDERS, make_client, provider_status
@@ -46,6 +46,13 @@ st.markdown("""<style>
 .hero h1{margin:0;font-size:2.2rem}.hero p{opacity:.86;margin-bottom:0}
 .small{color:#a9bcc9;font-size:.86rem}
 .stepnum{color:#1f8a8a;font-weight:700;letter-spacing:.06em;font-size:.78rem}
+.ion{display:flex;gap:1.1rem;align-items:center;padding:1rem 1.2rem;border-radius:16px;margin:.1rem 0 1rem;border-left:10px solid}
+.ion .sym{font-size:2.6rem;font-weight:700;line-height:1;white-space:nowrap}
+.ion .sym sup{font-size:1.1rem;vertical-align:super}
+.ion .txt{font-size:.92rem;line-height:1.5}
+.ion-yes{background:#0f3324;border-color:#35a06a;color:#e8f7ee}
+.ion-no{background:#3a2c0f;border-color:#d7a12b;color:#fcf3e0}
+.ion-none{background:#17262d;border-color:#4e8294;color:#e8f3f7}
 </style>""", unsafe_allow_html=True)
 st.markdown(
     '<div class="hero"><h1>🧬 LANTERN</h1><p>Lanthanide-Aware Network for '
@@ -92,6 +99,48 @@ def step(number: str, title: str, caption: str = "") -> None:
     st.subheader(title)
     if caption:
         st.caption(caption)
+
+
+def ion_banner(report: dict, own: dict | None = None) -> None:
+    """The ion the question named, drawn at the size it was asked in.
+
+    Everything below this point is organised by protein, and for thirteen of
+    the fifteen askable lanthanides the page opened on a structure holding
+    something else: ask about Eu3+ and the first thing on screen was a tab
+    reading "Lanmodulin", a PDB metric reading 8FNR, a 3D viewer labelled Dy
+    and a table column headed "Eu3+ size fit". Every one of those is true and
+    none of them answers the question. So the element goes first, in a colour
+    that encodes the only thing the rest of the page cannot say at a glance:
+    whether anything here was measured holding it.
+    """
+    symbol, target = report["element"], report["target"]
+    charge = target[len(symbol):] or "3+"
+    tone = {"observed": "ion-yes", "counterfactual": "ion-no"}.get(
+        report["verdict_kind"], "ion-none")
+    # A lead, not a summary: the statement under it carries the elements and
+    # the consequence, and saying those twice in consecutive sentences is how
+    # a reader learns to skip the second one.
+    #
+    # "candidate sites", not "metal sites", because there are now two kinds of
+    # site below and only one of them is counted here. On a page that draws
+    # the ion its own structure, "none of the 18 metal sites below" would be
+    # contradicted four inches further down by four sites of exactly this
+    # element -- and the lead has to point at them rather than deny them.
+    found = f", but measured in {own['pdb_id']}, shown first" if own else ""
+    verdict = {
+        "observed": f"measured in {report['sites_holding_the_target']} of the "
+                    f"{report['sites_measured']} metal sites below",
+        "counterfactual": f"in none of the {report['sites_measured']} "
+                          f"candidate sites below{found}",
+    }.get(report["verdict_kind"],
+          f"nothing structural was measured on the candidates{found}"
+          if found else "nothing structural was measured")
+    st.markdown(
+        f'<div class="ion {tone}">'
+        f'<div class="sym">{symbol}<sup>{charge}</sup></div>'
+        f'<div class="txt"><b>You asked about {report["name"]} ({target})</b> '
+        f'&mdash; {verdict}.<br>{report["statement"]}</div></div>',
+        unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------------- settings --
@@ -240,10 +289,18 @@ shortlist = record["shortlist"]
 sites_measured = sum(ev["site_count"] for ev in record["evidence"])
 
 st.success(headline(record))
+report = record.get("ion_report") or {}
+if report:
+    ion_banner(report, record.get("ion_structure"))
+
 a, b, c, d = st.columns(4)
-a.metric("Target ion", plan["target"])
+a.metric("Target ion", plan["target"], help=report.get("name"))
 b.metric("Pass every rule", f"{shortlist['selected_count']} / {shortlist['considered']}")
-c.metric("Metal sites measured", sites_measured)
+c.metric(f"Sites holding {plan['target']}",
+         f"{report.get('sites_holding_the_target', 0)} / {sites_measured}",
+         help="Deposited metal sites on this page whose element is the one "
+              "asked about, out of every site measured. The denominator is "
+              "what used to be shown alone, and it hid the numerator.")
 d.metric("Question read by", "language model"
          if plan["parsed_by"] == SOURCE_LLM else "deterministic reader")
 if plan["notes"]:
@@ -251,7 +308,33 @@ if plan["notes"]:
         for note in plan["notes"]:
             st.write("•", note)
 
-st.warning("  \n".join(f"• {c}" for c in record["caveats"]))
+# Where the ion actually is, when it is nowhere on this page. The shortlist
+# is architecture-based and cannot reach these, so offering them as candidates
+# would be a lie; withholding them makes "none was measured" unfalsifiable.
+# They are listed as what they are: an element lookup against the same index
+# that decided which file to measure.
+elsewhere = report.get("deposited_elsewhere") or []
+if elsewhere:
+    with st.expander(f"{report['deposited_elsewhere_count']} deposited "
+                     f"structure(s) in this platform's index do hold "
+                     f"{report['element']} — the {len(elsewhere)} sharpest"):
+        st.dataframe(pd.DataFrame([{
+            "PDB": e["id"], "Resolution (Å)": e["resolution_A"] or "—",
+            "Method": e["method"], "Title": e["title"],
+        } for e in elsewhere]), width="stretch", hide_index=True)
+        st.caption(
+            "Found by looking the element up in the rare-earth entry index, "
+            "not by the design rules above. These are not candidates: none "
+            "was screened for the lanmodulin architecture, and an entry can "
+            "contain a lanthanide because it was soaked in to phase the "
+            "crystal, so presence is not a binding claim. They are here so "
+            "that 'none was measured' can be checked against what exists.")
+
+# The ion report's statement is a caveat and is exported as one, but it is
+# already the body of the banner above; repeating it verbatim a few hundred
+# pixels later trains the reader to skip the block that carries the rest.
+st.warning("  \n".join(f"• {c}" for c in record["caveats"]
+                       if c != report.get("statement")))
 
 # ------------------------------------------------------------ design rules --
 st.divider()
@@ -288,18 +371,115 @@ step("2", "Verified against structure",
      "Coordination numbers measured from deposited coordinates, not modelled. "
      "This is the only step where the ion you asked about enters.")
 
+# Called once per run and before the first viewer, which is now the ion's own
+# structure rather than the first candidate tab.
+own = record.get("ion_structure")
+viewer_theme = "dark"
+if own or any(ev["structure_kind"] == "deposited" for ev in record["evidence"]):
+    viewer_theme = theme_control()
+
+# ------------------------------------------------- the ion's own structure --
+# First in this step, because a user who asked about Eu3+ came to see europium
+# and no candidate below has any. It stays outside the candidate tabs and
+# carries its own not-a-candidate caveat: the shortlist answers "what should I
+# try", this answers "show me my ion", and the two must not read as one list.
+if own:
+    st.markdown(f"#### {plan['target']} itself, measured")
+    held_here = own["sites_holding_the_target"]
+    st.success(f"**{own['pdb_id']} holds {plan['target']}.** {held_here} of its "
+               f"{own['site_count']} measured metal site(s) contain "
+               f"{report['element']}, at {own['resolution_A']} Å — "
+               f"{own['title']}.")
+    st.caption(f"{own['selection']} {own['entries_tried']} of the "
+               f"{own['entries_in_index']} {report['element']} entries in the "
+               f"index were measured to get here.")
+    st.warning(own["caveat"])
+
+    own_text, own_fmt = own["coordinates"]
+    own_sites = own["sites"]
+    own_raw = [s["raw"] for s in own_sites]
+    # Same label order as the candidate tabs: element first, because a reader
+    # scanning for their own ion is scanning the first token.
+    own_views = ["Whole structure"] + [
+        f"{s['deposited_element']} {s['site']} · chain {s['chain']} "
+        f"— CN {s['coordination_number']}" for s in own_sites]
+    # Opens on a site of the element asked about. Falling back to the whole
+    # fold rather than to another element's site: this block exists to show
+    # one atom, so if it cannot open on that atom it should not pretend to.
+    own_opening = next((i for i, s in enumerate(own_sites, start=1)
+                        if (s["deposited_element"] or "").capitalize()
+                        == report["element"]), 0)
+    own_chosen = st.selectbox(
+        "View", range(len(own_views)), index=own_opening,
+        format_func=lambda i, v=own_views: v[i], key=f"view_ion_{own['pdb_id']}",
+        help=f"Pick a metal site to see its first coordination shell. The "
+             f"{report['element']} sites are the ones this block is for.")
+    if own_chosen == 0:
+        embed(overview_html(own_text, own_fmt, own_raw, script_src=TMOL_PRIMARY,
+                            fallback_src=TMOL_FALLBACK, theme=viewer_theme), 480)
+    else:
+        own_site = own_sites[own_chosen - 1]
+        embed(site_viewer_html(
+            own_text, own_fmt, own_raw[own_chosen - 1],
+            call={"call": own_site["call"],
+                  "call_reliable": own_site["call_reliable"],
+                  "score_version": own["score_version"]},
+            script_src=TMOL_PRIMARY, fallback_src=TMOL_FALLBACK,
+            theme=viewer_theme), 620)
+        st.caption(
+            f"**{own_site['deposited_element']} {own_site['site']}, chain "
+            f"{own_site['chain']}** — {viewer_spec(own_raw[own_chosen - 1])['summary']}. "
+            "Distances are measured from the deposited coordinates, not "
+            "modelled. No size fit is shown: the deposited element is the "
+            "one asked about, so there is no counterfactual to score.")
+    st.dataframe(pd.DataFrame([{
+        "Element": s["deposited_element"], "Chain": s["chain"],
+        "Site": s["site"], "CN": s["coordination_number"],
+        "Mean donor distance (Å)": s["mean_donor_distance_A"],
+        "Protein donors": s["protein_donors"],
+        "Water donors": s["water_donors"],
+        f"{SCORE_VERSION} call": s["call"],
+        "Call reliable": s["call_reliable"],
+    } for s in own_sites]), width="stretch", hide_index=True)
+    if own["rejected"]:
+        with st.expander(f"{len(own['rejected'])} {report['element']} "
+                         f"entry/entries measured before it and passed over"):
+            st.dataframe(pd.DataFrame([{
+                "PDB": r["id"], "Resolution (Å)": r.get("resolution_A") or "—",
+                "Why it was passed over": r["why"],
+                "What was measured": r.get("detail") or "—",
+            } for r in own["rejected"]]), width="stretch", hide_index=True)
+            st.caption("Each was downloaded and measured by the same code that "
+                       "measured the structure above, in sharpest-first order. "
+                       "A chelate soaked in to phase a crystal gives a site "
+                       "with no protein donors, which is what most of these "
+                       "rows are, and it is why resolution alone was not "
+                       "enough to choose.")
+    st.divider()
+    st.markdown("#### The candidates from step 1, measured")
+
 if not record["evidence"]:
     st.info("No candidate had a structure to measure.")
 
+
 def tab_label(evidence: dict) -> str:
-    """Accession always survives truncation; it is the unambiguous half."""
+    """Accession always survives truncation; it is the unambiguous half.
+
+    The element the file holds is in the label because the tab strip is where
+    a reader chooses what to open, and until it was there the only way to find
+    out that a question about Eu3+ had been answered with a Dy structure was
+    to open the tab and read down to the site table.
+    """
     name = evidence["name"]
-    return f"{name if len(name) <= 30 else name[:29] + '…'} · {evidence['accession']}"
+    head = (f"{name if len(name) <= 24 else name[:23] + '…'} · "
+            f"{evidence['accession']}")
+    elements = sorted({s["deposited_element"] for s in evidence["sites"]
+                       if s["deposited_element"]})
+    if not elements:
+        return head
+    mark = "✅ " if evidence.get("holds_the_target_element") else ""
+    return f"{head} · {mark}{'/'.join(elements)}"
 
-
-viewer_theme = "dark"
-if any(ev["structure_kind"] == "deposited" for ev in record["evidence"]):
-    viewer_theme = theme_control()
 
 tabs = st.tabs([tab_label(ev) for ev in record["evidence"]] or ["—"])
 for tab, ev in zip(tabs, record["evidence"]):
@@ -332,10 +512,33 @@ for tab, ev in zip(tabs, record["evidence"]):
         # Deposited coordinates: the full measurement.
         text, fmt = ev["coordinates"]
         sites = ev["sites"]
-        x, y, z = st.columns(3)
-        x.metric("PDB", ev["pdb_id"])
-        y.metric("Resolution (Å)", ev["resolution_A"] or "—")
-        z.metric("Metal sites", ev["site_count"])
+        held = ev.get("sites_holding_the_target") or 0
+        in_file = sorted({s["deposited_element"] for s in sites
+                          if s["deposited_element"]})
+        w, x, y, z = st.columns(4)
+        w.metric("PDB", ev["pdb_id"])
+        x.metric("Resolution (Å)", ev["resolution_A"] or "—")
+        y.metric("Metal sites", ev["site_count"])
+        z.metric(f"Holding {plan['target']}", f"{held} / {ev['site_count']}")
+
+        # Said at structure level, not only per site: the per-site caption
+        # lives inside the single-site branch of the view picker, so on the
+        # whole-structure view -- and in the site table, which is drawn for
+        # every view -- there was nothing on screen saying the file holds a
+        # different element from the one in the column headings.
+        others = [e for e in in_file if e != report.get("element")]
+        if ev.get("holds_the_target_element"):
+            rest = (f"The other {ev['site_count'] - held} hold "
+                    f"{and_list(others)}." if others else "")
+            st.success(f"**{ev['pdb_id']} holds {plan['target']}.** {held} of "
+                       f"its {ev['site_count']} measured site(s) contain "
+                       f"{report.get('element', plan['target'])}. {rest}")
+        else:
+            st.warning(
+                f"**{ev['pdb_id']} does not hold {plan['target']}** — its "
+                f"metal sites contain {and_list(in_file) or 'no rare earth'}. "
+                f"Every {plan['target']} number below is a counterfactual fit "
+                f"against a sphere that closed around another ion.")
 
         # A live search can find several deposited structures for one
         # accession and this page measures exactly one of them. Saying which
@@ -358,9 +561,15 @@ for tab, ev in zip(tabs, record["evidence"]):
                            "instead could give different sites.")
 
         raw_sites = [s["raw"] for s in sites]
+        # The element stays first in every label: a reader scanning this list
+        # for their own ion is scanning the first token, and a marker in front
+        # of it would be the one thing they have to read past to find out the
+        # site holds something else.
         views = ["Whole structure"] + [
             f"{s['deposited_element']} {s['site']} · chain {s['chain']} "
-            f"— CN {s['coordination_number']}" for s in sites]
+            f"— CN {s['coordination_number']} · "
+            + ("✅ " + plan["target"] if not s["size_match_is_counterfactual"]
+               else "not " + plan["target"]) for s in sites]
         # Open on a site rather than the fold: the question this page exists
         # to answer is where the element binds, and a whole-chain cartoon does
         # not answer it. Prefer a rare-earth site; fall back to the first site
@@ -418,6 +627,16 @@ for tab, ev in zip(tabs, record["evidence"]):
                            f"{fit['basis']}")
             else:
                 st.caption(f"Size fit unavailable. {fit['basis']}")
+            # The one verdict on this page that is genuinely about the ion
+            # asked for. A coordination number is read off the coordinates and
+            # the per-ion ranges were never fitted to this corpus, so unlike
+            # the size fit -- which ranks the deposited ion 6th and 9th on
+            # these very structures -- it says something checkable about the
+            # named ion whether or not that ion was ever crystallised here.
+            geometry = site.get("target_coordination_fit")
+            if geometry:
+                st.caption(f"**{plan['target']} geometry:** "
+                           f"{geometry['statement']}")
             if context["deposited_rank"] is not None:
                 st.caption(
                     f"**Calibration:** this score ranks "
@@ -432,22 +651,34 @@ for tab, ev in zip(tabs, record["evidence"]):
                            f"{context['deposited_rank_unavailable']}")
 
         st.dataframe(pd.DataFrame([{
-            "Element": s["deposited_element"], "Chain": s["chain"],
+            "Element": s["deposited_element"],
+            f"Is {plan['target']}?":
+                "no" if s["size_match_is_counterfactual"] else "✅ yes",
+            "Chain": s["chain"],
             "Site": s["site"], "CN": s["coordination_number"],
             "Mean donor distance (Å)": s["mean_donor_distance_A"],
             "Protein donors": s["protein_donors"],
             "Water donors": s["water_donors"],
             f"{SCORE_VERSION} call": s["call"],
             "Call reliable": s["call_reliable"],
+            f"CN usual for {plan['target']}": (
+                ("yes" if s["target_coordination_fit"]["compatible"] else "no")
+                if s["target_coordination_fit"] else "—"),
             f"{plan['target']} size fit": s["size_match"]["fit"],
             "Rank of bound ion": s["ion_context"]["deposited_rank"],
         } for s in sites]), width="stretch", hide_index=True)
         st.caption(
             "Coordination number counts O/N/S first-shell donors within 3.2 Å, "
-            "waters included. 'Rank of bound ion' is where the size score "
-            "places the element that is actually in each site — the score's "
-            "own calibration, shown next to the number it qualifies. Blank "
-            "means that element is not tabulated at that coordination number.")
+            f"waters included. 'Is {plan['target']}?' is the element in the "
+            "site compared with the one you asked about, so a column of 'no' "
+            f"means every {plan['target']} number in this table is a "
+            f"counterfactual. 'CN usual for {plan['target']}' asks only "
+            "whether the coordination number falls in that ion's normal "
+            "range, which neighbouring lanthanides share. 'Rank of bound "
+            "ion' is where the size score places the element that is actually "
+            "in each site — the score's own calibration, shown next to the "
+            "number it qualifies. Blank means that element is not tabulated "
+            "at that coordination number.")
 
         # The call column above is the strongest claim on this page. Every
         # site in a structure is scored against the same bar, so the bar and

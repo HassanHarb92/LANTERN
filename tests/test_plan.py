@@ -14,6 +14,7 @@ import pytest
 from lantern import llm, uniprot
 from lantern.agent import SYSTEM, run_campaign
 from lantern.chemistry import METALS
+from lantern.ions import LANTHANIDES_III
 from lantern.llm import ChatClient, LLMError
 from lantern.plan import (CORPORA, COMPETITORS, DEFAULT_COMPETITOR, DEFAULT_CORPUS,
                           DEFAULT_LIMIT, MAX_LIMIT, MAX_QUESTION_CHARS, MIN_LIMIT,
@@ -177,11 +178,27 @@ class TestIonSpelling:
         supported, unsupported = scan_ions(f"look at ligand {code} in the entry")
         assert supported == [] and unsupported == []
 
+    @pytest.mark.parametrize("ion", LANTHANIDES_III)
+    def test_every_trivalent_lanthanide_is_askable(self, ion):
+        """Ask for an ion, get that ion -- for all fifteen, not a favoured few.
+
+        chemistry.METALS listed five entries by hand, so eleven lanthanides parsed
+        correctly and were then dropped by the `ion in METALS` gate in scan_ions.
+        The question did not fail; it fell back to a plan with target None and ran
+        anyway, which is the worst shape a wrong answer can take. METALS is derived
+        from LANTHANIDES_III now, and this fails if anyone re-enumerates it.
+        """
+        assert fallback_plan(f"proteins for capturing {ion}").target == ion
+
     def test_a_real_but_unsupported_ion_is_named_and_refused_not_substituted(self):
-        plan = parse_question("which proteins capture Eu3+?")
+        """Eu2+, not Eu3+: the whole trivalent series is a screening target now, so the
+        unsupported-but-real case has to be an ion that still canonicalises and still
+        is not in METALS. Eu(II) is one of the four oxidation states ions.py accepts as
+        aqueous-reachable, which is what makes it a substitution risk worth refusing."""
+        plan = parse_question("which proteins capture Eu2+?")
         assert plan.target is None
         assert plan.needs_clarification is True
-        assert any("Eu3+" in note for note in plan.notes)
+        assert any("Eu2+" in note for note in plan.notes)
         # The refusal must not quietly hand back a supported neighbour, and the
         # plan must be unrunnable rather than runnable against a substitute.
         with pytest.raises(UnplannableQuestion):
@@ -437,12 +454,16 @@ class TestTheModelCannotBeTheSoleAuthority:
                    for note in plan.notes)
 
     def test_an_unsupported_ion_is_not_swapped_for_a_supported_one(self):
-        """The exact substitution the allow-list exists to prevent."""
-        plan = parse_question("which proteins capture Eu3+?",
+        """The exact substitution the allow-list exists to prevent.
+
+        Eu2+ -> Ce3+ is the dangerous shape: a model offering the trivalent ion for a
+        divalent question changes the chemistry and still returns something runnable.
+        """
+        plan = parse_question("which proteins capture Eu2+?",
                               json_client(target="Ce3+"))
         assert plan.target is None
         assert plan.needs_clarification is True
-        assert any("Eu3+" in note and "rejected, not swapped" in note
+        assert any("Eu2+" in note and "rejected, not swapped" in note
                    for note in plan.notes)
 
 

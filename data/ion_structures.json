@@ -1,0 +1,688 @@
+{
+  "_provenance": {
+    "description": "One deposited structure per trivalent lanthanide, chosen by measuring candidates rather than by resolution or by title. A structure is admitted when it has at least one site of that element which geometry-v2 calls lanthanide-like with a reliable call, which excludes the soaked chelate complexes that make up most of the index. These are NOT design-rule candidates: nothing here was screened for the lanmodulin architecture, and being listed means only that the protein is measurably holding the element.",
+    "built_by": "scripts/build_ion_structures.py",
+    "admitted_call": "lanthanide-like",
+    "entries_tried_per_ion": 30,
+    "source": "https://files.rcsb.org/download/"
+  },
+  "ions": {
+    "La3+": {
+      "ion": "La3+",
+      "element": "La",
+      "entries_in_index": 23,
+      "entries_tried": 1,
+      "limit": 30,
+      "chosen": {
+        "id": "9VY7",
+        "file": "9VY7.pdb",
+        "format": "pdb",
+        "bytes": 351216,
+        "sha256": "ff230badea5054f3a7e8728577aa478c094aff8b221f2b3016b2b65388644a96",
+        "resolution_A": 1.25,
+        "title": "Structure of MIF binding with Lanthanum ions",
+        "method": "X-RAY DIFFRACTION",
+        "sites_of_this_element": 5,
+        "sites_admitted": 4,
+        "coordination_numbers": [
+          9
+        ],
+        "mean_donor_distance_A": 2.62,
+        "protein_donors": [
+          6,
+          8
+        ]
+      },
+      "rejected": []
+    },
+    "Ce3+": {
+      "ion": "Ce3+",
+      "element": "Ce",
+      "entries_in_index": 6,
+      "entries_tried": 1,
+      "limit": 30,
+      "chosen": {
+        "id": "4MAE",
+        "file": "4MAE.pdb",
+        "format": "pdb",
+        "bytes": 881199,
+        "sha256": "3a87ed42b20fa5b1d967845d2a4c67e94c16ce0a88789ab6fa35f9fb404c2f5d",
+        "resolution_A": 1.6,
+        "title": "Methanol dehydrogenase from Methylacidiphilum fumariolicum SolV",
+        "method": "X-RAY DIFFRACTION",
+        "sites_of_this_element": 2,
+        "sites_admitted": 2,
+        "coordination_numbers": [
+          10
+        ],
+        "mean_donor_distance_A": 2.73,
+        "protein_donors": [
+          6
+        ]
+      },
+      "rejected": []
+    },
+    "Pr3+": {
+      "ion": "Pr3+",
+      "element": "Pr",
+      "entries_in_index": 57,
+      "entries_tried": 2,
+      "limit": 30,
+      "chosen": {
+        "id": "3MVC",
+        "file": "3MVC.pdb",
+        "format": "pdb",
+        "bytes": 504468,
+        "sha256": "75328a09a1ed08b8f3efaf8d0c280a3b5760a1607f67d7fd1bfd52f60d597710",
+        "resolution_A": 1.4,
+        "title": "High resolution crystal structure of the heme domain of GLB-6 from C. elegans",
+        "method": "X-RAY DIFFRACTION",
+        "sites_of_this_element": 4,
+        "sites_admitted": 1,
+        "coordination_numbers": [
+          9
+        ],
+        "mean_donor_distance_A": 2.68,
+        "protein_donors": [
+          2
+        ]
+      },
+      "rejected": [
+        {
+          "id": "2ZNR",
+          "why": "site is not a protein site",
+          "detail": "CN 6, 2 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 1.2,
+          "title": "Crystal structure of the DUB domain of human AMSH-LP"
+        }
+      ]
+    },
+    "Nd3+": {
+      "ion": "Nd3+",
+      "element": "Nd",
+      "entries_in_index": 4,
+      "entries_tried": 1,
+      "limit": 30,
+      "chosen": {
+        "id": "9PI2",
+        "file": "9PI2.pdb",
+        "format": "pdb",
+        "bytes": 362394,
+        "sha256": "a898081aa84ef630c0eb839ee4bd02ff597c02ccdf307ba0de1a1d00605bab12",
+        "resolution_A": 0.99,
+        "title": "X-ray crystal structure of Ancylobacter lacus LanM bound to Nd(III) and Ca(II)",
+        "method": "X-RAY DIFFRACTION",
+        "sites_of_this_element": 6,
+        "sites_admitted": 6,
+        "coordination_numbers": [
+          10
+        ],
+        "mean_donor_distance_A": 2.55,
+        "protein_donors": [
+          10
+        ]
+      },
+      "rejected": []
+    },
+    "Pm3+": {
+      "ion": "Pm3+",
+      "element": "Pm",
+      "entries_in_index": 0,
+      "entries_tried": 0,
+      "limit": 30,
+      "chosen": null,
+      "rejected": []
+    },
+    "Sm3+": {
+      "ion": "Sm3+",
+      "element": "Sm",
+      "entries_in_index": 52,
+      "entries_tried": 8,
+      "limit": 30,
+      "chosen": {
+        "id": "1UZP",
+        "file": "1UZP.pdb",
+        "format": "pdb",
+        "bytes": 150174,
+        "sha256": "84f1ea80eadf717ef90360af63a1e1f80e576f08c55b41fc5f5659ca3ee95211",
+        "resolution_A": 1.78,
+        "title": "Integrin binding cbEGF22-TB4-cbEGF33 fragment of human fibrillin-1, Sm bound form cbEGF23 domain only.",
+        "method": "X-RAY DIFFRACTION",
+        "sites_of_this_element": 3,
+        "sites_admitted": 1,
+        "coordination_numbers": [
+          9
+        ],
+        "mean_donor_distance_A": 2.47,
+        "protein_donors": [
+          9
+        ]
+      },
+      "rejected": [
+        {
+          "id": "2ANV",
+          "why": "site is not a protein site",
+          "detail": "CN 4, 3 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 1.04,
+          "title": "crystal structure of P22 lysozyme mutant L86M"
+        },
+        {
+          "id": "2ANX",
+          "why": "site is not a protein site",
+          "detail": "CN 4, 3 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 1.04,
+          "title": "crystal structure of bacteriophage P22 lysozyme mutant L87M"
+        },
+        {
+          "id": "4P1H",
+          "why": "site is not a protein site",
+          "detail": "CN 5, 3 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 1.5,
+          "title": "Crystal structure of wild type Hypocrea jecorina Cel7a in a monoclinic crystal form"
+        },
+        {
+          "id": "7LPZ",
+          "why": "site is not a protein site",
+          "detail": "CN 7, 2 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 1.55,
+          "title": "Crystal structures and ribonuclease activity of the Flavivirus host factor ERI3 that is involved in viral RNA synthesis define the ERI subfamily of structure-specific 3-prime - 5-prime exoribonucleases"
+        },
+        {
+          "id": "1A3C",
+          "why": "site is not a protein site",
+          "detail": "CN 3, 3 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 1.6,
+          "title": "PYRR, THE BACILLUS SUBTILIS PYRIMIDINE BIOSYNTHETIC OPERON REPRESSOR, DIMERIC FORM"
+        },
+        {
+          "id": "1TVG",
+          "why": "site is not a protein site",
+          "detail": "CN 1, 1 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 1.6,
+          "title": "X-ray structure of human PP25 gene product, HSPC034. Northeast Structural Genomics Target HR1958."
+        },
+        {
+          "id": "1YZR",
+          "why": "site is not a protein site",
+          "detail": "CN 8, 3 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 1.6,
+          "title": "Manganese peroxidase-Sm(III) complex"
+        }
+      ]
+    },
+    "Eu3+": {
+      "ion": "Eu3+",
+      "element": "Eu",
+      "entries_in_index": 28,
+      "entries_tried": 6,
+      "limit": 30,
+      "chosen": {
+        "id": "6FKW",
+        "file": "6FKW.pdb",
+        "format": "pdb",
+        "bytes": 3146607,
+        "sha256": "c1d3b4d4d339692f7179fc13cc02fab6e989614a0a96ef19e3a11e168fdc7cc9",
+        "resolution_A": 1.4,
+        "title": "Europium-containing methanol dehydrogenase",
+        "method": "X-RAY DIFFRACTION",
+        "sites_of_this_element": 4,
+        "sites_admitted": 3,
+        "coordination_numbers": [
+          9
+        ],
+        "mean_donor_distance_A": 2.76,
+        "protein_donors": [
+          6
+        ]
+      },
+      "rejected": [
+        {
+          "id": "4BAR",
+          "why": "site is not a protein site",
+          "detail": "CN 9, 0 protein donor(s), call not callable, reliable False",
+          "resolution_A": 1.2,
+          "title": "Thaumatin from Thaumatococcus daniellii structure in complex with the europium tris-hydroxyethyltriazoledipicolinate complex at 1.20 A resolution."
+        },
+        {
+          "id": "9KW1",
+          "why": "site is not a protein site",
+          "detail": "CN 8, 4 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 1.2,
+          "title": "Crystal structure of proteinase K from Engyodontium album"
+        },
+        {
+          "id": "4BAP",
+          "why": "site is not a protein site",
+          "detail": "CN 9, 0 protein donor(s), call not callable, reliable False",
+          "resolution_A": 1.207,
+          "title": "Hen egg-white lysozyme structure in complex with the europium tris- hydroxyethylcholinetriazoledipicolinate complex at 1.21 A resolution."
+        },
+        {
+          "id": "4BAL",
+          "why": "site is not a protein site",
+          "detail": "CN 9, 0 protein donor(s), call not callable, reliable False",
+          "resolution_A": 1.298,
+          "title": "Thaumatin from Thaumatococcus daniellii structure in complex with the europium tris-hydroxymethyltriazoledipicolinate complex at 1.30 A resolution."
+        },
+        {
+          "id": "4BAD",
+          "why": "site is not a protein site",
+          "detail": "CN 9, 0 protein donor(s), call not callable, reliable False",
+          "resolution_A": 1.35,
+          "title": "Hen egg-white lysozyme structure in complex with the europium tris- hydroxymethyltriazoledipicolinate complex at 1.35 A resolution."
+        }
+      ]
+    },
+    "Gd3+": {
+      "ion": "Gd3+",
+      "element": "Gd",
+      "entries_in_index": 179,
+      "entries_tried": 3,
+      "limit": 30,
+      "chosen": {
+        "id": "9VY9",
+        "file": "9VY9.pdb",
+        "format": "pdb",
+        "bytes": 1359180,
+        "sha256": "d6e2f8db761bc9c57d4b46b118aec5b2084e82efc96b22cae7fb36b787e098cf",
+        "resolution_A": 1.41,
+        "title": "Structure of MIF binding with Gadolinium ions",
+        "method": "X-RAY DIFFRACTION",
+        "sites_of_this_element": 27,
+        "sites_admitted": 16,
+        "coordination_numbers": [
+          9,
+          10
+        ],
+        "mean_donor_distance_A": 2.43,
+        "protein_donors": [
+          4,
+          5,
+          6,
+          7,
+          8
+        ]
+      },
+      "rejected": [
+        {
+          "id": "8ZST",
+          "why": "site is not a protein site",
+          "detail": "CN 9, 0 protein donor(s), call not callable, reliable False",
+          "resolution_A": 0.8,
+          "title": "Lysozyme Crystallized with Bioassembler on Earth"
+        },
+        {
+          "id": "8ZSU",
+          "why": "site is not a protein site",
+          "detail": "CN 11, 0 protein donor(s), call not callable, reliable False",
+          "resolution_A": 1.09,
+          "title": "Lysozyme Crystallized with Bioassembler in Space Microgravity"
+        }
+      ]
+    },
+    "Tb3+": {
+      "ion": "Tb3+",
+      "element": "Tb",
+      "entries_in_index": 64,
+      "entries_tried": 9,
+      "limit": 30,
+      "chosen": {
+        "id": "6Y0E",
+        "file": "6Y0E.pdb",
+        "format": "pdb",
+        "bytes": 377703,
+        "sha256": "616e8b0b5d512df6dba385d6e39dbe0c603e7acac024ceb41cc430cfadaef3ae",
+        "resolution_A": 1.5,
+        "title": "Nbe LBM",
+        "method": "X-RAY DIFFRACTION",
+        "sites_of_this_element": 2,
+        "sites_admitted": 1,
+        "coordination_numbers": [
+          9
+        ],
+        "mean_donor_distance_A": 2.4,
+        "protein_donors": [
+          9
+        ]
+      },
+      "rejected": [
+        {
+          "id": "6F2I",
+          "why": "site is not a protein site",
+          "detail": "CN 4, 0 protein donor(s), call not callable, reliable False",
+          "resolution_A": 1.2,
+          "title": "Crystal structure of Hen Egg-White Lysozyme co-crystallized in presence of 100 mM Tb-Xo4"
+        },
+        {
+          "id": "6XYM",
+          "why": "site is not a protein site",
+          "detail": "CN 8, 8 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 1.2,
+          "title": "Nbe-LBM"
+        },
+        {
+          "id": "6F2J",
+          "why": "site is not a protein site",
+          "detail": "CN 4, 0 protein donor(s), call not callable, reliable False",
+          "resolution_A": 1.3,
+          "title": "Crystal structure of Hen Egg-White Lysozyme co-crystallized in presence of 100 mM Tb-Xo4 and 100 mM sodium sulfate"
+        },
+        {
+          "id": "7NX1",
+          "why": "site is not a protein site",
+          "detail": "CN 8, 2 protein donor(s), call not callable, reliable False",
+          "resolution_A": 1.3,
+          "title": "TG domain of LTK"
+        },
+        {
+          "id": "4IRW",
+          "why": "site is not a protein site",
+          "detail": "CN 5, 0 protein donor(s), call not callable, reliable False",
+          "resolution_A": 1.396,
+          "title": "Co-crystallization of streptavidin-biotin complex with a lanthanide-ligand complex gives rise to a novel crystal form"
+        },
+        {
+          "id": "6FRO",
+          "why": "site is not a protein site",
+          "detail": "CN 9, 2 protein donor(s), call not callable, reliable False",
+          "resolution_A": 1.42,
+          "title": "Crystal structure of Hen Egg-White Lysozyme co-crystallized in presence of 100 mM Tb-Xo4 and 100 mM potassium iodide."
+        },
+        {
+          "id": "8U7C",
+          "why": "site is not a protein site",
+          "detail": "CN 9, 3 protein donor(s), call not callable, reliable False",
+          "resolution_A": 1.44,
+          "title": "Engineered NEMO minimal IKK-binding domain"
+        },
+        {
+          "id": "6F2K",
+          "why": "site is not a protein site",
+          "detail": "CN 2, 1 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 1.5,
+          "title": "Crystal structure of Hen Egg-White Lysozyme co-crystallized in presence of 100 mM Tb-Xo4 and 100 mM potassium phosphate monobasic."
+        }
+      ]
+    },
+    "Dy3+": {
+      "ion": "Dy3+",
+      "element": "Dy",
+      "entries_in_index": 2,
+      "entries_tried": 1,
+      "limit": 30,
+      "chosen": {
+        "id": "8FNR",
+        "file": "8FNR.pdb",
+        "format": "pdb",
+        "bytes": 687771,
+        "sha256": "b7da288458075fe269820a8dfdd6bc371bfadd9c9f07a59e03a096cc46677c88",
+        "resolution_A": 1.4,
+        "title": "X-ray crystal structure of Hansschlegelia quercus lanmodulin (LanM) with dysprosium (III) bound at pH 7",
+        "method": "X-RAY DIFFRACTION",
+        "sites_of_this_element": 14,
+        "sites_admitted": 9,
+        "coordination_numbers": [
+          9
+        ],
+        "mean_donor_distance_A": 2.43,
+        "protein_donors": [
+          9
+        ]
+      },
+      "rejected": []
+    },
+    "Ho3+": {
+      "ion": "Ho3+",
+      "element": "Ho",
+      "entries_in_index": 16,
+      "entries_tried": 16,
+      "limit": 30,
+      "chosen": null,
+      "rejected": [
+        {
+          "id": "1PSR",
+          "why": "site is not a protein site",
+          "detail": "CN 7, 6 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 1.05,
+          "title": "HUMAN PSORIASIN (S100A7)"
+        },
+        {
+          "id": "2BPU",
+          "why": "site is not a protein site",
+          "detail": "CN 3, 2 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 1.35,
+          "title": "The Kedge Holmium Derivative of Hen Egg-White Lysozyme at high resolution from Single Wavelength Anomalous Diffraction"
+        },
+        {
+          "id": "9C90",
+          "why": "site is not a protein site",
+          "detail": "CN 4, 4 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 1.38,
+          "title": "X-ray crystal structure of Methylorubrum extorquens Ho(III)-bound LanD"
+        },
+        {
+          "id": "1W6Z",
+          "why": "site is not a protein site",
+          "detail": "CN 4, 2 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 1.65,
+          "title": "High Energy Tetragonal Lysozyme X-ray Structure"
+        },
+        {
+          "id": "1BUU",
+          "why": "site is not a protein site",
+          "detail": "CN 8, 7 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 1.9,
+          "title": "ONE HO3+ FORM OF RAT MANNOSE-BINDING PROTEIN A"
+        },
+        {
+          "id": "2OLC",
+          "why": "site is not a protein site",
+          "detail": "CN 5, 1 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 2.0,
+          "title": "Crystal structure of 5-methylthioribose kinase in complex with ADP-2Ho"
+        },
+        {
+          "id": "3EEU",
+          "why": "site is not a protein site",
+          "detail": "CN 4, 3 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 2.0,
+          "title": "Structure of the RNA pyrophosphohydrolase BdRppH in complex with Holmium"
+        },
+        {
+          "id": "4BSP",
+          "why": "site is not a protein site",
+          "detail": "CN 5, 4 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 2.0,
+          "title": "Crystal structure of R-spondin 1 (Fu1Fu2) - Holmium soak"
+        },
+        {
+          "id": "1MSB",
+          "why": "site is not a protein site",
+          "detail": "CN 8, 7 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 2.3,
+          "title": "STRUCTURE OF THE CALCIUM-DEPENDENT LECTIN DOMAIN FROM A RAT MANNOSE-BINDING PROTEIN DETERMINED BY MAD PHASING"
+        },
+        {
+          "id": "2Y9W",
+          "why": "site is not a protein site",
+          "detail": "CN 5, 3 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 2.3,
+          "title": "Crystal structure of PPO3, a tyrosinase from Agaricus bisporus, in deoxy-form that contains additional unknown lectin-like subunit"
+        },
+        {
+          "id": "4BDW",
+          "why": "site is not a protein site",
+          "detail": "CN 6, 6 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 2.501,
+          "title": "The structure of the FnI-EGF tandem domain of coagulation factor XII in complex with Holmium"
+        },
+        {
+          "id": "2Y9X",
+          "why": "site is not a protein site",
+          "detail": "CN 3, 3 protein donor(s), call not callable, reliable False",
+          "resolution_A": 2.78,
+          "title": "Crystal structure of PPO3, a tyrosinase from Agaricus bisporus, in deoxy-form that contains additional unknown lectin-like subunit, with inhibitor tropolone"
+        },
+        {
+          "id": "9VY6",
+          "why": "site is not a protein site",
+          "detail": "CN 8, 8 protein donor(s), call not callable, reliable False",
+          "resolution_A": 3.05,
+          "title": "Structure of MIF binding with Holmium ions"
+        },
+        {
+          "id": "1RER",
+          "why": "site is not a protein site",
+          "detail": "CN 7, 6 protein donor(s), call not callable, reliable False",
+          "resolution_A": 3.2,
+          "title": "Crystal structure of the homotrimer of fusion glycoprotein E1 from Semliki Forest Virus."
+        },
+        {
+          "id": "7PEO",
+          "why": "site is not a protein site",
+          "detail": "CN 4, 4 protein donor(s), call not callable, reliable False",
+          "resolution_A": 4.37,
+          "title": "Structure of the Caulobacter crescentus S-layer protein RsaA N-terminal domain bound to LPS and soaked with Holmium"
+        },
+        {
+          "id": "8D87",
+          "why": "site is not a protein site",
+          "detail": "CN 7, 6 protein donor(s), call not callable, reliable False",
+          "resolution_A": 27.2,
+          "title": "Fitted crystal structure of the homotrimer of fusion glycoprotein E1 from SFV into subtomogram averaged CHIKV E1 glycoprotein density"
+        }
+      ]
+    },
+    "Er3+": {
+      "ion": "Er3+",
+      "element": "Er",
+      "entries_in_index": 6,
+      "entries_tried": 6,
+      "limit": 30,
+      "chosen": null,
+      "rejected": [
+        {
+          "id": "8U7C",
+          "why": "site is not a protein site",
+          "detail": "CN 7, 0 protein donor(s), call not callable, reliable False",
+          "resolution_A": 1.44,
+          "title": "Engineered NEMO minimal IKK-binding domain"
+        },
+        {
+          "id": "9DE4",
+          "why": "site is not a protein site",
+          "detail": "CN 2, 2 protein donor(s), call calcium-like, reliable False",
+          "resolution_A": 2.0,
+          "title": "Er-Bound Structure of Computationally Designed Homotetramer PW1"
+        },
+        {
+          "id": "3CM6",
+          "why": "site is not a protein site",
+          "detail": "CN 4, 4 protein donor(s), call not callable, reliable False",
+          "resolution_A": 2.6,
+          "title": "Crystal structure of cell-death related nuclease 4 (CRN-4) bound with Er"
+        },
+        {
+          "id": "3DH4",
+          "why": "site is not a protein site",
+          "detail": "CN 2, 2 protein donor(s), call not callable, reliable False",
+          "resolution_A": 2.7,
+          "title": "Crystal Structure of Sodium/Sugar symporter with bound Galactose from vibrio parahaemolyticus"
+        },
+        {
+          "id": "6THE",
+          "why": "site is not a protein site",
+          "detail": "CN 0, 0 protein donor(s), call not callable, reliable False",
+          "resolution_A": 2.87,
+          "title": "Crystal structure of core domain of four-domain heme-cupredoxin-Cu nitrite reductase from Bradyrhizobium sp. ORS 375"
+        },
+        {
+          "id": "5NJ8",
+          "why": "site is not a protein site",
+          "detail": "CN 2, 2 protein donor(s), call not callable, reliable False",
+          "resolution_A": 3.3,
+          "title": "Structural basis for aryl hydrocarbon receptor mediated gene activation"
+        }
+      ]
+    },
+    "Tm3+": {
+      "ion": "Tm3+",
+      "element": "Tm",
+      "entries_in_index": 0,
+      "entries_tried": 0,
+      "limit": 30,
+      "chosen": null,
+      "rejected": []
+    },
+    "Yb3+": {
+      "ion": "Yb3+",
+      "element": "Yb",
+      "entries_in_index": 119,
+      "entries_tried": 2,
+      "limit": 30,
+      "chosen": {
+        "id": "9VY4",
+        "file": "9VY4.pdb",
+        "format": "pdb",
+        "bytes": 705186,
+        "sha256": "cafab94b9cca8e9c2b8ef97e0d2ab6dcb98618159325f956cebb3c03b35d7a12",
+        "resolution_A": 1.21,
+        "title": "Structure of MIF binding with Ytterbium ions",
+        "method": "X-RAY DIFFRACTION",
+        "sites_of_this_element": 10,
+        "sites_admitted": 2,
+        "coordination_numbers": [
+          9
+        ],
+        "mean_donor_distance_A": 2.37,
+        "protein_donors": [
+          6
+        ]
+      },
+      "rejected": [
+        {
+          "id": "2O6N",
+          "why": "site is not a protein site",
+          "detail": "CN 4, 0 protein donor(s), call not callable, reliable False",
+          "resolution_A": 1.1,
+          "title": "RH4B: designed right-handed coiled coil tetramer with all biological amino acids"
+        }
+      ]
+    },
+    "Lu3+": {
+      "ion": "Lu3+",
+      "element": "Lu",
+      "entries_in_index": 17,
+      "entries_tried": 2,
+      "limit": 30,
+      "chosen": {
+        "id": "5F8A",
+        "file": "5F8A.pdb",
+        "format": "pdb",
+        "bytes": 443718,
+        "sha256": "1226685a22e67dadecf1aff0387bb095fa5c93baa070af96ff964946d506448e",
+        "resolution_A": 1.76,
+        "title": "Crystal structure of the ternary EcoRV-DNA-Lu complex with uncleaved DNA substrate. Lanthanide binding to EcoRV-DNA complex inhibits cleavage.",
+        "method": "X-RAY DIFFRACTION",
+        "sites_of_this_element": 2,
+        "sites_admitted": 1,
+        "coordination_numbers": [
+          9
+        ],
+        "mean_donor_distance_A": 2.46,
+        "protein_donors": [
+          4
+        ]
+      },
+      "rejected": [
+        {
+          "id": "2PES",
+          "why": "site is not a protein site",
+          "detail": "CN 9, 0 protein donor(s), call not callable, reliable False",
+          "resolution_A": 1.6,
+          "title": "Urate Oxidase in complex with tris-dipicolinate Lutetium"
+        }
+      ]
+    }
+  }
+}

@@ -2,6 +2,7 @@
 import re
 from collections import Counter
 
+from .ions import LANTHANIDES_III, element_name
 from .models import Protein, Candidate
 
 # Flexible EF-hand-like patterns are search hints, not proof of a functional site.
@@ -83,13 +84,25 @@ LIGAND_POSITIONS = (1, 3, 5, 7, 9, 12)   # X, Y, Z, -Y, -X, -Z
 # calcium proteins.
 POSITION_9 = 9
 LANTHANIDE_LIKE_POSITION_9 = frozenset("DE")
-METALS = {
-    "Nd3+": {"name": "Neodymium(III)", "kind": "lanthanide", "notes": "Hard trivalent cation; often prefers oxygen donors."},
-    "Dy3+": {"name": "Dysprosium(III)", "kind": "lanthanide", "notes": "Hard trivalent cation; often prefers oxygen donors."},
-    "La3+": {"name": "Lanthanum(III)", "kind": "lanthanide", "notes": "Large trivalent lanthanide; often oxygen-coordinated."},
-    "Ce3+": {"name": "Cerium(III)", "kind": "lanthanide", "notes": "Trivalent oxidation state used for this screening."},
-    "Ca2+": {"name": "Calcium(II)", "kind": "competitor", "notes": "Divalent competitor for oxygen-rich binding sites."},
-}
+# The whole trivalent series, derived rather than listed. Five entries used to be
+# written out here, which made four lanthanides askable and eleven not: plan.py gates
+# the parsed ion on `ion in METALS`, so "proteins for capturing Gd3+" parsed the ion
+# correctly and then dropped it, and the run continued on a fallback plan with no
+# target at all. Nothing about the scoring was ever specific to those four -- ions.py
+# carries Shannon radii for all fifteen and the site corpus holds fourteen of them --
+# so the short list was a typo's worth of coverage, not a claim about chemistry.
+#
+# Pm3+ is included for the same reason ions.py includes it: leaving a hole in the
+# series is how a loop over "the lanthanides" silently becomes a loop over fourteen.
+# It is flagged instead, because no protein structure with promethium exists to find.
+_LN_NOTE = "Hard trivalent lanthanide; oxygen-donor preference, binds EF-hand loops."
+METALS = {ion: {"name": f"{element_name(ion[:-2])}(III)", "kind": "lanthanide",
+                "notes": _LN_NOTE} for ion in LANTHANIDES_III}
+METALS["Pm3+"]["notes"] = ("Hard trivalent lanthanide, but radioactive with no natural "
+                           "isotopes: no protein structure contains it, so a search will "
+                           "return size scores against other ions' structures and nothing else.")
+METALS["Ca2+"] = {"name": "Calcium(II)", "kind": "competitor",
+                  "notes": "Divalent competitor for oxygen-rich binding sites."}
 
 def ef_hand_loops(sequence: str, pattern: re.Pattern = EF_HAND_HINT) -> list[dict]:
     """Every loop `pattern` matches, with its ligand positions named.
