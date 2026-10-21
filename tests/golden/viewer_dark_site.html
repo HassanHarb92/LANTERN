@@ -1,0 +1,140 @@
+<div id="lantern-site" style="position:relative;width:100%;height:480px;
+ background:#0c1424;border-radius:12px;overflow:hidden"></div>
+<div id="lantern-controls" style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px">
+</div>
+<div id="lantern-legend" style="display:flex;flex-wrap:wrap;gap:10px;
+ font:12px/1.5 -apple-system,Segoe UI,sans-serif;color:#b8c7d4"></div>
+<script src="/s.js"></script>
+<script>
+(function () {
+  const SPEC = {"title": "Nd 301 \u00b7 chain A", "element": "Nd", "chain": "A", "site": "301", "background": "#0c1424", "metal": {"label": "Nd", "xyz": [0.0, 0.0, 0.0], "color": "#f5b544", "radius": 0.85}, "donor_radius": 0.28, "bond_radius": 0.055, "donors": [{"label": "GLU58", "atom": "OE1", "element": "O", "kind": "protein", "donor_class": "carboxylate", "color": "#e2574c", "distance_A": 2.41, "xyz": [1.0, 0.0, 0.0], "midpoint": [0.5, 0.0, 0.0], "is_water": false}, {"label": "ALA61", "atom": "O", "element": "O", "kind": "protein", "donor_class": "backbone_carbonyl", "color": "#e8954a", "distance_A": 2.55, "xyz": [0.0, 2.0, 0.0], "midpoint": [0.0, 1.0, 0.0], "is_water": false}, {"label": "HOH401", "atom": "O", "element": "O", "kind": "water", "donor_class": "water", "color": "#6fa8dc", "distance_A": 2.7, "xyz": [0.0, 0.0, 3.0], "midpoint": [0.0, 0.0, 1.5], "is_water": true}], "residue_selection": [{"chain": "A", "resi": 58}, {"chain": "A", "resi": 61}], "legend": [{"donor_class": "carboxylate", "label": "Side-chain carboxylate O", "color": "#e2574c", "count": 1}, {"donor_class": "backbone_carbonyl", "label": "Backbone carbonyl O", "color": "#e8954a", "count": 1}, {"donor_class": "water", "label": "Water", "color": "#6fa8dc", "count": 1}], "summary": "CN 3 \u00b7 2 protein donors \u00b7 1 water \u00b7 2.41\u20132.70 \u00c5", "call": {"call": "lanthanide-like", "reliable": true, "score_version": "geometry-v2", "text": "geometry-v2: lanthanide-like"}};
+  const COORDS = "ATOM";
+  const FMT = "pdb";
+  const host = document.getElementById('lantern-site');
+
+  function fail() {
+    // Say so rather than leaving a black rectangle: the numbers below the
+    // viewer are computed server-side and remain valid without 3Dmol.
+    host.innerHTML = '<div style="padding:18px;color:#f0b5a8;font:13px -apple-system,sans-serif">'
+      + '3Dmol.js could not be loaded, so the structure cannot be drawn. '
+      + 'The coordination numbers and distances below are computed server-side and are unaffected.</div>';
+  }
+
+  function start() {
+  const viewer = $3Dmol.createViewer(host, {backgroundColor: SPEC.background});
+  viewer.addModel(COORDS, FMT);
+  const state = {residues: true, distances: true, waters: true, cartoon: true};
+
+  function draw() {
+    viewer.removeAllShapes();
+    viewer.removeAllLabels();
+    viewer.setStyle({}, {});
+    if (state.cartoon) {
+      viewer.setStyle({}, {cartoon: {color: '#4a5d70', opacity: 0.55}});
+    }
+    if (SPEC.residue_selection.length) {
+      viewer.addStyle({or: SPEC.residue_selection},
+                      {stick: {radius: 0.13, colorscheme: 'whiteCarbon'}});
+    }
+
+    const m = SPEC.metal;
+    viewer.addSphere({center: {x: m.xyz[0], y: m.xyz[1], z: m.xyz[2]},
+                      radius: m.radius, color: m.color});
+    viewer.addLabel(m.label, {position: {x: m.xyz[0], y: m.xyz[1], z: m.xyz[2]},
+      fontSize: 13, fontColor: '#1b2330', backgroundColor: m.color,
+      backgroundOpacity: 0.95, borderThickness: 0, inFront: true});
+
+    SPEC.donors.forEach(function (d) {
+      if (d.is_water && !state.waters) return;
+      const p = {x: d.xyz[0], y: d.xyz[1], z: d.xyz[2]};
+      viewer.addCylinder({start: {x: m.xyz[0], y: m.xyz[1], z: m.xyz[2]}, end: p,
+        radius: SPEC.bond_radius, color: d.color, dashed: true,
+        dashLength: 0.22, gapLength: 0.16, fromCap: 1, toCap: 1});
+      viewer.addSphere({center: p, radius: SPEC.donor_radius, color: d.color});
+      if (state.residues) {
+        viewer.addLabel(d.label + ' ' + d.atom, {position: p, fontSize: 10,
+          fontColor: '#e8f1f8', backgroundColor: '#17202e', backgroundOpacity: 0.78,
+          borderThickness: 0, inFront: true});
+      }
+      if (state.distances && d.distance_A !== null) {
+        viewer.addLabel(d.distance_A.toFixed(2), {
+          position: {x: d.midpoint[0], y: d.midpoint[1], z: d.midpoint[2]},
+          fontSize: 10, fontColor: '#0c1424', backgroundColor: d.color,
+          backgroundOpacity: 0.9, borderThickness: 0, inFront: true});
+      }
+    });
+    viewer.render();
+  }
+
+  function frame() {
+    // Chain/residue identifiers can be numbered differently by the two
+    // parsers in an mmCIF file. Falling back to the whole model keeps a
+    // failed match from throwing away the scene.
+    try {
+      if (!SPEC.residue_selection.length) throw new Error('no residues');
+      viewer.zoomTo({or: SPEC.residue_selection});
+    } catch (err) {
+      viewer.zoomTo();
+    }
+    viewer.zoom(0.9);
+    viewer.render();
+  }
+
+  const CONTROLS = [
+    ['residues', 'Residue labels'], ['distances', 'Distances'],
+    ['waters', 'Waters'], ['cartoon', 'Cartoon'],
+  ];
+  const bar = document.getElementById('lantern-controls');
+  function style(button, on) {
+    button.style.cssText = 'cursor:pointer;border-radius:7px;padding:4px 10px;'
+      + 'font:12px -apple-system,Segoe UI,sans-serif;border:1px solid #2d3f52;'
+      + (on ? 'background:#1d4f63;color:#dff3f7' : 'background:#141d2b;color:#7f93a6');
+  }
+  CONTROLS.forEach(function (pair) {
+    const button = document.createElement('button');
+    button.textContent = pair[1];
+    style(button, state[pair[0]]);
+    button.onclick = function () {
+      state[pair[0]] = !state[pair[0]];
+      style(button, state[pair[0]]);
+      draw();
+    };
+    bar.appendChild(button);
+  });
+  const reset = document.createElement('button');
+  reset.textContent = 'Reset view';
+  style(reset, false);
+  reset.onclick = frame;
+  bar.appendChild(reset);
+
+  const legend = document.getElementById('lantern-legend');
+  [{color: SPEC.metal.color, label: SPEC.metal.label + ' ion', count: null}]
+    .concat(SPEC.legend.map(function (entry) {
+      return {color: entry.color, label: entry.label, count: entry.count};
+    }))
+    .forEach(function (entry) {
+      const row = document.createElement('span');
+      const dot = document.createElement('span');
+      dot.style.cssText = 'display:inline-block;width:10px;height:10px;border-radius:50%;'
+        + 'margin-right:5px;background:' + entry.color;
+      row.appendChild(dot);
+      row.appendChild(document.createTextNode(
+        entry.label + (entry.count === null ? '' : ' \u00d7 ' + entry.count)));
+      legend.appendChild(row);
+    });
+
+  draw();
+  frame();
+  }
+
+  if (typeof $3Dmol !== 'undefined') {
+    start();
+  } else {
+    const s = document.createElement('script');
+    s.src = "https://cdn/x.js";
+    s.onload = function () { (typeof $3Dmol === 'undefined') ? fail() : start(); };
+    s.onerror = fail;
+    document.head.appendChild(s);
+  }
+})();
+</script>

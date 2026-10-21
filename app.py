@@ -19,11 +19,13 @@ from dotenv import load_dotenv
 from lantern.catalog import load_reference
 from lantern.discover import (NARRATION_IS_NOT_A_SOURCE, NARRATION_TIMEOUT_S,
                               answer, exportable, headline, narrate)
+from lantern.explorer import render_explorer
 from lantern.geometry import SCORE_VERSION
 from lantern.llm import LLMError, PROVIDERS, make_client, provider_status
 from lantern.plan import SOURCE_LLM, TARGETS
 from lantern.viewer import (RARE_EARTH_ELEMENTS, overview_html,
-                            site_viewer_html, tmol_sources, viewer_spec)
+                            site_viewer_html, theme_control, tmol_sources,
+                            viewer_spec)
 
 # Vendored 3Dmol first, CDN behind it. Resolved once: it is a file-existence
 # check, and the answer cannot change while the process runs.
@@ -135,6 +137,18 @@ with st.sidebar:
         st.success(detail) if ok else st.warning(detail)
     st.caption("Research prototype, not a validated affinity predictor.")
 
+
+# ------------------------------------------------------------- the explorer --
+# A section switch rather than st.tabs: every st.tabs body runs on every
+# rerun, so the Ask page's existing widgets would share the script with the
+# Explorer's, and the Explorer would load its data on every question. Here the
+# unselected section simply does not run. st.stop() ends the script, so the
+# rest of the page is untouched when Explorer is chosen.
+section = st.segmented_control("Section", ["Ask", "Explorer"], default="Ask",
+                               key="section", label_visibility="collapsed")
+if section == "Explorer":
+    render_explorer(embed)
+    st.stop()
 
 # ---------------------------------------------------------------- the ask --
 if "question" not in st.session_state:
@@ -283,6 +297,10 @@ def tab_label(evidence: dict) -> str:
     return f"{name if len(name) <= 30 else name[:29] + '…'} · {evidence['accession']}"
 
 
+viewer_theme = "dark"
+if any(ev["structure_kind"] == "deposited" for ev in record["evidence"]):
+    viewer_theme = theme_control()
+
 tabs = st.tabs([tab_label(ev) for ev in record["evidence"]] or ["—"])
 for tab, ev in zip(tabs, record["evidence"]):
     with tab:
@@ -366,7 +384,7 @@ for tab, ev in zip(tabs, record["evidence"]):
                  "keep the whole fold for orientation.")
         if chosen == 0:
             embed(overview_html(text, fmt, raw_sites, script_src=TMOL_PRIMARY,
-                                fallback_src=TMOL_FALLBACK), 480)
+                                fallback_src=TMOL_FALLBACK, theme=viewer_theme), 480)
             st.caption("Every deposited metal is marked and named. Select one "
                        "above to see the donor atoms it binds and the "
                        "distance to each.")
@@ -376,7 +394,8 @@ for tab, ev in zip(tabs, record["evidence"]):
                     "score_version": ev["score_version"]}
             embed(site_viewer_html(text, fmt, raw, call=call,
                                    script_src=TMOL_PRIMARY,
-                                   fallback_src=TMOL_FALLBACK), 620)
+                                   fallback_src=TMOL_FALLBACK,
+                                   theme=viewer_theme), 620)
             st.caption(
                 f"**{site['deposited_element']} {site['site']}, chain "
                 f"{site['chain']}** — {viewer_spec(raw)['summary']}. Dashed "
