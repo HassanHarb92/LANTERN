@@ -111,6 +111,41 @@ SPHERE_CLOSED_AROUND_THE_DEPOSITED_ION = (
     "do; it is not evidence the protein will not bind that ion."
 )
 
+# Why the structure step does not simply take the top of the shortlist.
+#
+# Only `max_structures` candidates are measured, and they used to be the first
+# few of an ordering `design.rank` itself calls uncalibrated -- a stable
+# tie-break on EF-hand count and spacing, explicitly not a ranking by anything
+# measured. Run against the 189-member LanM family on 2026-10-20 that ordering
+# put C5B164 -- lanmodulin, the one member of the family with deposited
+# coordinates -- 106th of the 109 that pass. The page measured three proteins
+# that have no structures and reported "No deposited coordinates were available
+# to measure", which is a true sentence about the three it picked rendered as a
+# sentence about the search.
+#
+# So coordinates come first. This is not a claim that a crystallised protein is
+# a better candidate: it displaces an order that was never a ranking, and the
+# thing it buys is the only step where the user's ion enters at all.
+VERIFIED_SUBSET_IS_NOT_A_RANKING = (
+    "Not every shortlisted protein is measured. Candidates with deposited "
+    "coordinates are measured first, so that the structure step runs at all; "
+    "that is a choice about what can be checked, not about which candidates "
+    "are best. Every protein in the shortlist passed the same rules, and "
+    "having been crystallised is not one of them."
+)
+
+# What a pass rate is worth, which depends entirely on what it was screened
+# over. Both numbers measured 2026-10-20 and both will drift as the databases
+# grow; they are here as illustrations of the two shapes, not as constants.
+PASS_RATE_IS_RELATIVE_TO_THE_CORPUS = (
+    "A pass rate means nothing on its own -- it is a property of the set it "
+    "was screened over. The bundled set is two lanthanide binders and four "
+    "deliberate negatives, so 2 of 6 is by construction. The LanM family is "
+    "189 members of the very family these rules describe, and 109 of them "
+    "pass, which is closer to agreeing with InterPro's family assignment than "
+    "to finding anything. Neither figure is a hit rate."
+)
+
 PREDICTION_HAS_NO_METAL = (
     "An AlphaFold model is apo: it contains no metal ion, so there is no "
     "coordination number, no donor distance and no size comparison to make "
