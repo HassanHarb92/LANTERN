@@ -268,6 +268,19 @@ _ELEMENT_NAMES: dict[str, str] = {
     "yttrium": "Y", "scandium": "Sc", "calcium": "Ca",
 }
 
+_NAME_BY_SYMBOL: dict[str, str] = {sym: name.capitalize() for name, sym in _ELEMENT_NAMES.items()}
+
+
+def element_name(symbol: str) -> str:
+    """"Ce" -> "Cerium". The symbol itself for anything not in the table.
+
+    Exists so a caller building display text does not have to reach into
+    _ELEMENT_NAMES and invert it, or keep a second copy of the names that can
+    drift out of step with the one the parser accepts.
+    """
+    return _NAME_BY_SYMBOL.get(symbol.strip().capitalize(), symbol)
+
+
 # Oxidation state assumed when a bare element or name is given with no charge.
 # Every rare earth is 3+; calcium is 2+. Stated as data rather than inferred,
 # so that adding an element without deciding its default charge is impossible.
