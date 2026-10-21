@@ -2,6 +2,81 @@
   "description": "One line per archived run. Derived from the run files beside it and rebuilt automatically when they disagree, so it is a cache and never the record of truth.",
   "runs": [
     {
+      "id": "147252fab992",
+      "question": "Give me 5 candidates for Dy3+ recovery",
+      "origin": "app",
+      "target": "Dy3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 18 deposited metal site(s) were measured across them, 14 of them holding Dy3+.",
+      "verdict_kind": "observed",
+      "sites_holding_the_target": 14,
+      "candidates": 2,
+      "structures": [
+        "8FNR",
+        "8FNS"
+      ],
+      "ion_structure": null,
+      "narrated": false,
+      "first_answered": "2026-10-21T21:50:25Z",
+      "last_answered": "2026-10-21T21:50:25Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    },
+    {
+      "id": "830fae397365",
+      "question": "Which proteins bind Nd3+ rather than calcium?",
+      "origin": "app",
+      "target": "Nd3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 18 deposited metal site(s) were measured across them, 4 of them holding Nd3+.",
+      "verdict_kind": "observed",
+      "sites_holding_the_target": 4,
+      "candidates": 2,
+      "structures": [
+        "8FNR",
+        "8FNS"
+      ],
+      "ion_structure": null,
+      "narrated": false,
+      "first_answered": "2026-10-21T21:50:14Z",
+      "last_answered": "2026-10-21T21:50:14Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    },
+    {
+      "id": "44aa59f69aa4",
+      "question": "What proteins should I try for capturing Ce3+?",
+      "origin": "app",
+      "target": "Ce3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 18 deposited metal site(s) were measured across them; none holds Ce3+, so every Ce3+ number is a counterfactual fit against another ion's site.",
+      "verdict_kind": "counterfactual",
+      "sites_holding_the_target": 0,
+      "candidates": 2,
+      "structures": [
+        "8FNR",
+        "8FNS"
+      ],
+      "ion_structure": "4MAE",
+      "narrated": false,
+      "first_answered": "2026-10-21T21:50:05Z",
+      "last_answered": "2026-10-21T21:50:05Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    },
+    {
       "id": "a3b49bc6e14f",
       "question": "what proteins should I try for capturing Yb3+",
       "origin": "seed",
