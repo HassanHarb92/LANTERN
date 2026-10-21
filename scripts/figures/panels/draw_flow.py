@@ -52,7 +52,7 @@ def draw_flow(ax):
     yt, yb = 66, 30
     ax.text(0, 99, "structures", fontsize=FS_SMALL, style="italic", color=MUTED, va="top")
     ax.text(0, 60, "sequences", fontsize=FS_SMALL, style="italic", color=MUTED, va="top")
-    top = [("PDB", "636 entries", "Acquire"), ("Parse", "3,375 sites", "Process"), ("Curate", "62 by hand", "Process"),
+    top = [("PDB", "636 entries", "Acquire"), ("Parse", "3,375 sites", "Process"), ("Curate", "62 entries", "Process"),
            ("Descriptor", "CN \u2265 9", "Select"), ("Verify", "measured", "Verify and present")]
     bot = [("UniProt", "165,902 seqs", "Acquire"), ("Spacing rule", "EF loops", "Select"), ("Candidates", "156 hits", "Select"),
            ("Structures", "PDB, AlphaFold", "Verify and present"), ("Shortlist + UI", "cards, 3D viewer", "Verify and present")]
