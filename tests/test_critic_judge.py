@@ -450,9 +450,10 @@ class TestClaimsFromRecord:
         numeric = [c for c in claims if c.kind == "number"]
         assert numeric
         for c in numeric:
-            assert c.source_field.endswith(".coordination_number")
             assert c.value == float(resolve(record, c.source_field))
-            assert f"coordination number {c.value:g}" in c.text
+            word = ("coordination number" if c.source_field.endswith("coordination_number")
+                    else "distance of")
+            assert f"{word} {c.value:g}" in c.text
 
     def test_ids_unique_contiguous_and_stable(self, record):
         a, b = claims_from_record(record), claims_from_record(record)
@@ -463,11 +464,39 @@ class TestClaimsFromRecord:
     def test_cap_keeps_both_structures_and_the_rules(self, record):
         claims = claims_from_record(record, max_claims=12)
         assert len(claims) == 12
-        assert {"8FNR", "8FNS"} <= {re.search(r"of (\w+) holds", c.text).group(1)
-                                    for c in claims if c.kind == "number"}
+        numeric = " ".join(c.text for c in claims if c.kind == "number")
+        assert "8FNR" in numeric and "8FNS" in numeric
+        # Grouping by (element, CN) is what keeps the record's one CN 10 site, which
+        # in record order sits behind fourteen sites of 8FNR, from falling off the cap.
+        assert 10 in {c.value for c in claims
+                      if c.source_field.endswith("coordination_number")}
         rules = [c for c in claims if c.source_field.startswith("shortlist.rules")]
         assert len(rules) == len(record["shortlist"]["rules"])
         assert all(c.kind == "qualitative" and c.value is None for c in rules)
+
+    def test_one_coordination_claim_per_element_and_value(self, record):
+        """The judge is asked each (element, CN) question once, and asked all of them.
+
+        Nine per-site claims were nine ways of asking about five pairs, so a judge
+        spent most of its calls re-answering. The trailing clause has to stay true to
+        the record: it is the only part of a claim that counts sites rather than
+        restating one field.
+        """
+        claims = claims_from_record(record, max_claims=100)
+        cn = [c for c in claims if c.source_field.endswith("coordination_number")]
+        sites = [(ev["pdb_id"].upper(), f"{s['chain']}{s['site']}",
+                  str(s["deposited_element"]).upper(), float(s["coordination_number"]))
+                 for ev in record["evidence"] if ev.get("structure_kind") == "deposited"
+                 for s in ev["sites"]
+                 if s.get("deposited_element") and s.get("coordination_number") is not None]
+        asked = [(resolve(record, c.source_field.replace(
+            "coordination_number", "deposited_element")).upper(), c.value) for c in cn]
+        assert len(asked) == len(set(asked)) == len({(e, n) for _, _, e, n in sites})
+        for (element, value), c in zip(asked, cn):
+            matching = {(pdb, label) for pdb, label, e, n in sites
+                        if (e, n) == (element, value)}
+            assert f"measured at {len(matching)} such site" in c.text
+            assert c.text.endswith(" in " + ", ".join(sorted({p for p, _ in matching})))
 
     def test_distances_appear_when_there_is_room(self, record):
         claims = claims_from_record(record, max_claims=100)
@@ -493,9 +522,11 @@ class TestClaimsFromRecord:
             {"structure_kind": "predicted", "sites": [], "name": "Y"}],
             "shortlist": None}
         claims = claims_from_record(rec)
+        # "1 such site", not 2: the repeated site is the same measurement written
+        # twice, and counting it would overstate how often CN 9 was observed.
         assert [c.text for c in claims] == [
-            "Site A201 of 1ABC holds Nd3+ with coordination number 9 "
-            "(O/N/S donors within 3.2 A)"]
+            "Nd3+ in lanmodulin sites has coordination number 9 "
+            "(O/N/S donors within 3.2 A), measured at 1 such site in 1ABC"]
         assert claims[0].source_field == "evidence[0].sites[0].coordination_number"
 
     @pytest.mark.parametrize("rec", [
