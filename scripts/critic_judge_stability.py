@@ -31,7 +31,7 @@ from lantern.discover import answer  # noqa: E402
 from lantern.llm import make_client  # noqa: E402
 from lantern.scholarbud import BM25Index, Library  # noqa: E402
 
-from critic_live_trial import cached_search  # noqa: E402  (same directory; shares the polite Crossref cache)
+from scripts.critic_live_trial import cached_search  # noqa: E402  (shares the polite Crossref cache)
 
 # The table below this line is generated; the reading of it underneath is written by hand
 # and is the part worth keeping. Rerunning with --out replaces the table and carries the
