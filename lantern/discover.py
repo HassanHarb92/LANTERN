@@ -384,6 +384,105 @@ def _structure_choice(protein, measured: str, target: str | None = None) -> dict
     }
 
 
+def _ion_report(target: str, evidence: list[dict]) -> dict:
+    """One verdict about the ion that was actually asked for.
+
+    Everything else in a record is organised by protein, and a reader looking
+    for their own ion has to reconstruct its fate from eighteen per-site flags.
+    This states it once: how many measured sites hold it, which structures
+    those were, what its coordination range is, and -- when none of them holds
+    it -- how many deposited structures anywhere do, so that "we measured
+    something else" can be told apart from "nothing exists to measure".
+
+    `verdict_kind` is the field to branch on:
+      observed       at least one measured site holds the element asked about
+      counterfactual sites were measured and none holds it
+      no_sites       nothing was measured, so there is nothing to say
+    """
+    element = _element_of(target).capitalize()
+    sites = [s for ev in evidence for s in ev["sites"]]
+    holding = [s for s in sites if not s["size_match_is_counterfactual"]]
+    others = sorted({(s["deposited_element"] or "?").capitalize()
+                     for s in sites if s["size_match_is_counterfactual"]})
+    structures = [ev["pdb_id"] for ev in evidence if ev.get("pdb_id")]
+    with_target = [ev["pdb_id"] for ev in evidence if ev.get("holds_the_target_element")]
+
+    # Only consulted when nothing measured holds the ion. It is the difference
+    # between "no structure of this protein has your ion in it" and "no
+    # structure of anything does", and the second is a much stronger claim that
+    # this platform is in a position to check rather than imply.
+    elsewhere = entries_holding(element) if not holding else []
+    report = {
+        "target": target,
+        "element": element,
+        "name": element_name(element),
+        "sites_measured": len(sites),
+        "sites_holding_the_target": len(holding),
+        "other_elements_measured": others,
+        "structures_measured": structures,
+        "structures_holding_the_target": with_target,
+        "coordination": typical_coordination(target),
+        "deposited_elsewhere": [
+            {k: e[k] for k in ("id", "resolution_A", "method", "title")}
+            for e in elsewhere[:5]],
+        "deposited_elsewhere_count": len(elsewhere),
+        "caveat": COORDINATION_FIT_IS_NOT_BINDING,
+    }
+    if not sites:
+        report["verdict_kind"] = "no_sites"
+        report["statement"] = (
+            f"No deposited metal sites were measured, so this run says nothing "
+            f"about {target} beyond the sequence rules above, which are "
+            f"ion-independent.")
+        return report
+
+    counts = ", ".join(f"{e}" for e in others) or "other elements"
+    if holding and len(holding) == len(sites):
+        report["verdict_kind"] = "observed"
+        report["statement"] = EVERY_MEASURED_SITE_HOLDS_THE_TARGET.format(
+            measured=len(sites), target=target)
+    elif holding:
+        report["verdict_kind"] = "observed"
+        report["statement"] = SOME_MEASURED_SITES_HOLD_THE_TARGET.format(
+            matched=len(holding), measured=len(sites),
+            unmatched=len(sites) - len(holding), target=target, elements=counts)
+    else:
+        report["verdict_kind"] = "counterfactual"
+        report["statement"] = NO_MEASURED_SITE_HOLDS_THE_TARGET.format(
+            measured=len(sites), target=target, elements=counts)
+        if elsewhere:
+            best = elsewhere[0]
+            report["statement"] += (
+                f" {len(elsewhere)} deposited structure(s) elsewhere in the PDB do "
+                f"hold {element} -- the sharpest is {best['id']} at "
+                f"{best['resolution_A']} A -- but none of them is in this corpus, "
+                "so none was measured here.")
+        else:
+            report["statement"] += (
+                f" No deposited structure anywhere in this platform's index holds "
+                f"{element}, so there is nothing that could have been measured "
+                "instead.")
+
+    # Where the ion asked about fits the geometry, whoever is sitting in it.
+    # Reported for counterfactual sites too: that a CN is typical for Eu3+ is a
+    # fact about Eu3+ and the coordinates, and it does not become less true
+    # because the atom in the file is Dy.
+    fits = [s["target_coordination_fit"] for s in sites if s["target_coordination_fit"]]
+    compatible = [f for f in fits if f["compatible"]]
+    report["sites_compatible_with_the_target"] = len(compatible)
+    report["sites_with_a_coordination_verdict"] = len(fits)
+    if fits:
+        report["coordination_verdict"] = (
+            f"{len(compatible)} of the {len(fits)} measured site(s) with a "
+            f"coordination number have one that falls in the range {target} is "
+            f"normally found in"
+            + (f" ({report['coordination']['minimum']}-"
+               f"{report['coordination']['maximum']}, typically "
+               f"{report['coordination']['typical']})" if report["coordination"] else "")
+            + ". " + COORDINATION_FIT_IS_NOT_BINDING)
+    return report
+
+
 def _evidence_for(candidate: dict, protein, target: str, *, live: bool,
                   allow_predictions: bool, timeout: int) -> dict:
     """Whatever structural evidence can be had for one candidate, or why none."""
@@ -481,8 +580,10 @@ def answer(question, *, client=None, proteins=None, live=False,
     record["answered"] = True
     record["caveats"].append(
         f"The shortlist does not depend on {target}: every design rule is a "
-        "lanmodulin-architecture rule and fires identically for all four "
-        "supported lanthanides. The ion enters only at the structure step.")
+        f"lanmodulin-architecture rule and fires identically for all "
+        f"{len(LANTHANIDES_III)} trivalent lanthanides. The ion enters only at "
+        "the structure step, where it chooses which deposited file to measure "
+        "and is compared against the geometry found there.")
 
     if not verify:
         return record
@@ -501,16 +602,18 @@ def answer(question, *, client=None, proteins=None, live=False,
         evidence["organism"] = getattr(protein, "organism", None)
         record["evidence"].append(evidence)
 
+    # The answer to the question as asked, before any per-protein detail. It
+    # goes in front of the caveats because it is the thing the caveats qualify.
+    record["ion_report"] = _ion_report(target, record["evidence"])
     if any(ev["structure_kind"] == "deposited" for ev in record["evidence"]):
         record["caveats"] += [SIZE_MATCH_IS_NOT_BINDING, SIZE_RANK_SELF_CHECK]
     if any(site["size_match_is_counterfactual"]
            for ev in record["evidence"] for site in ev["sites"]):
-        record["caveats"] += [
-            f"At least one site below holds a different element than {target}. "
-            f"Its size comparison asks whether {target} would fit a sphere "
-            "measured around another ion; it is not evidence that this protein "
-            f"was observed binding {target}.",
-            SPHERE_CLOSED_AROUND_THE_DEPOSITED_ION]
+        # Counted, not hedged. "At least one site" was the old wording and it
+        # reads as an exception; for thirteen of the fifteen askable
+        # lanthanides it was every site on the page.
+        record["caveats"] += [record["ion_report"]["statement"],
+                              SPHERE_CLOSED_AROUND_THE_DEPOSITED_ION]
     return critic(record) if critic is not None else record
 
 
@@ -645,14 +748,30 @@ def exportable(record: dict) -> dict:
 
 
 def headline(record: dict) -> str:
-    """One sentence a user can read before any of the tables."""
+    """One sentence a user can read before any of the tables.
+
+    It used to end "the lanmodulin architecture, the fold that binds Eu3+",
+    rendered in green above every caveat, on a page where all eighteen measured
+    sites held Dy or Nd. The shortlist is ion-independent, so the clause was
+    never true of the target in particular -- design.py scopes the same fold
+    correctly as the one that binds lanthanides. The ion belongs in the tail,
+    with the count that makes it checkable.
+    """
     if not record["answered"]:
         return "That question did not resolve to a target ion this platform screens."
     shortlist = record["shortlist"]
     n, total = shortlist["selected_count"], shortlist["considered"]
     target = record["plan"]["target"]
     verified = sum(e["site_count"] for e in record["evidence"])
-    tail = (f" {verified} deposited metal site(s) were measured across them."
-            if verified else " No deposited coordinates were available to measure.")
-    return (f"{n} of {total} protein(s) pass every design rule for the "
-            f"lanmodulin architecture, the fold that binds {target}.{tail}")
+    head = (f"{n} of {total} protein(s) pass every design rule for the "
+            "lanmodulin architecture, the fold that binds lanthanides.")
+    if not verified:
+        return head + " No deposited coordinates were available to measure."
+    report = record.get("ion_report") or {}
+    held = report.get("sites_holding_the_target")
+    if held:
+        return (f"{head} {verified} deposited metal site(s) were measured across "
+                f"them, {held} of them holding {target}.")
+    return (f"{head} {verified} deposited metal site(s) were measured across "
+            f"them; none holds {target}, so every {target} number is a "
+            "counterfactual fit against another ion's site.")

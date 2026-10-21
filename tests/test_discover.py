@@ -142,8 +142,13 @@ class TestTheSizeComparisonIsLabelledAsACounterfactual:
             assert site["size_match_is_counterfactual"] is True
 
     def test_and_in_the_caveats(self, run):
-        assert any("not evidence that this protein was observed binding Ce3+" in c
-                   for c in run["caveats"])
+        """Counted, not hedged. The caveat that carries this is the ion
+        report's own statement, so it says how many of the measured sites
+        hold Ce3+ -- none of the eighteen -- rather than "at least one site
+        holds a different element", which read as an exception."""
+        assert run["ion_report"]["statement"] in run["caveats"]
+        assert any("none of it is evidence that this protein was observed "
+                   "binding Ce3+" in c for c in run["caveats"])
         assert SPHERE_CLOSED_AROUND_THE_DEPOSITED_ION in run["caveats"]
 
     def test_the_flag_is_false_when_the_elements_do_match(self):
