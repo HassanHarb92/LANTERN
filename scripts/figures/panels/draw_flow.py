@@ -5,7 +5,8 @@ from _shapes import *
 
 ASPECT = (2.5 / 100) / (7.0 / 100)
 
-def draw_flow(ax):
+def draw_flow_detailed(ax):
+    """The original, text-heavy version (kept; saved as Fig1A_flow_detailed)."""
     ax.set_xlim(-1, 101); ax.set_ylim(0, 100); ax.set_axis_off()
     W, G = 17.6, 3.0
     xs = [i * (W + G) for i in range(5)]
@@ -36,3 +37,39 @@ def draw_flow(ax):
     bx = xs[3] + W + G / 2
     line(ax, [(xs[3] + W, ym_b + 6), (bx, ym_b + 6), (bx, ym_t)])
     arrow(ax, (xs[4] + W / 2, yt), (xs[4] + W / 2, yb + H))
+
+
+# Rough category of action -> (tinted fill, saturated border). Chosen to avoid orange (= Ca elsewhere in the figures).
+CATS = {"Acquire": ("#dff3ec", AQUA), "Process": ("#e9e5fa", VIOLET), "Select": ("#fbf0d3", YELLOW),
+        "Verify and present": ("#dce9fa", BLUE)}
+
+
+def draw_flow(ax):
+    """Panel A, simplified: short labels, thick coloured boxes; colour = the kind of action the stage performs."""
+    ax.set_xlim(-1, 101); ax.set_ylim(0, 100); ax.set_axis_off()
+    W, G, H = 17.6, 3.0, 22
+    xs = [i * (W + G) for i in range(5)]
+    yt, yb = 66, 30
+    ax.text(0, 99, "structures", fontsize=FS_SMALL, style="italic", color=MUTED, va="top")
+    ax.text(0, 60, "sequences", fontsize=FS_SMALL, style="italic", color=MUTED, va="top")
+    top = [("PDB", "636 entries", "Acquire"), ("Parse", "3,375 sites", "Process"), ("Curate", "62 by hand", "Process"),
+           ("Descriptor", "CN \u2265 9", "Select"), ("Verify", "measured", "Verify and present")]
+    bot = [("UniProt", "165,902 seqs", "Acquire"), ("Spacing rule", "EF loops", "Select"), ("Candidates", "156 hits", "Select"),
+           ("Structures", "PDB, AlphaFold", "Verify and present"), ("Shortlist + UI", "cards, 3D viewer", "Verify and present")]
+    for row, y in ((top, yt), (bot, yb)):
+        for i, (t, b, cat) in enumerate(row):
+            fc, ec = CATS[cat]
+            box(ax, xs[i], y, W, H, t, b, ASPECT, fc=fc, ec=ec, lw=2.4, tsize=FS + 1.2, bsize=FS_SMALL + .4)
+    ym_t, ym_b = yt + H / 2 - 5, yb + H / 2 - 5
+    for i in range(4):
+        arrow(ax, (xs[i] + W, ym_t), (xs[i + 1], ym_t), lw=1.3, scale=8)
+        arrow(ax, (xs[i] + W, ym_b), (xs[i + 1], ym_b), lw=1.3, scale=8)
+    bx = xs[3] + W + G / 2   # structures also feed Verify, through a bus in the gap
+    line(ax, [(xs[3] + W, ym_b + 5), (bx, ym_b + 5), (bx, ym_t)], lw=1.3)
+    arrow(ax, (xs[4] + W / 2, yt), (xs[4] + W / 2, yb + H), lw=1.3, scale=8)
+    # legend: one swatch per category, along the bottom
+    x = 0.0
+    for name, (fc, ec) in CATS.items():
+        ax.add_patch(plt.Rectangle((x, 5), 3.2, 8, fc=fc, ec=ec, lw=1.8, zorder=2))
+        ax.text(x + 4.6, 9, name, fontsize=FS_SMALL, va="center", color=INK2)
+        x += 4.6 + 1.05 * len(name) * 0.95 + 5.5

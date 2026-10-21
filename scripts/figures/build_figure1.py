@@ -8,7 +8,7 @@ HERE = pathlib.Path(__file__).resolve().parent; REPO = HERE.parents[1]
 sys.path.insert(0, str(HERE)); sys.path.insert(0, str(HERE / "panels"))
 import matplotlib.pyplot as plt, matplotlib.image as mpimg
 import style; style.apply()
-from draw_flow import draw_flow; from draw_harness import draw_harness; from draw_caricature import draw_caricature
+from draw_flow import draw_flow, draw_flow_detailed; from draw_harness import draw_harness; from draw_caricature import draw_caricature
 ap = argparse.ArgumentParser()
 ap.add_argument("--out", default=os.environ.get("LANTERN_FIG_OUT") or str(REPO / "docs/figures/paper/fig1"))
 ap.add_argument("--screens", default=str(REPO / "docs/figures/paper/screens"))
@@ -37,6 +37,12 @@ for k, (x, y, w, h) in L.items():
     FN[k](ax); style.panel_letter(ax, k, dx=-.015, dy=0.995)
     for ext in ("png", "svg"): fig.savefig(OUT / "panels" / f"Fig1{k}_{NAME[k]}.{ext}")
     plt.close(fig)
+# the original, text-heavy panel A is kept as an alternative
+_w, _h = L["A"][2], L["A"][3]
+_f = plt.figure(figsize=(_w + .25, _h + .22)); _ax = _f.add_axes([.2 / (_w + .25), .04 / (_h + .22), _w / (_w + .25), _h / (_h + .22)])
+draw_flow_detailed(_ax); style.panel_letter(_ax, "A", dx=-.015, dy=0.995)
+for ext in ("png", "svg"): _f.savefig(OUT / "panels" / f"Fig1A_flow_detailed.{ext}")
+plt.close(_f)
 fig = plt.figure(figsize=(W, H))
 for k, (x, y, w, h) in L.items():
     ax = fig.add_axes([x / W, y / H, w / W, h / H]); FN[k](ax)
