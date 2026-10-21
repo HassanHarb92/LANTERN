@@ -27,3 +27,10 @@ schematic, not data; 1D/E are UI screenshots.
 
 ## Style
 `style.py` is the single source: DejaVu Sans, white background, fixed palette (Ln blue, Ca orange). Panels are functions `draw_X(ax)`; no titles, panel letters only.
+
+## Talk figures
+Slide-scale versions of the Figure 2 data (F1 ranking, F2 composition, F3 CN distribution, F4 paired sites, F5 artefacts, F7 retrieval, F8 AlphaFold) live in `scripts/figures/talk/make_talk_figures.py`.
+They reuse `style.py` (DejaVu Sans, white background, Ln blue / Ca orange) at slide font sizes (13 pt base, 15 pt titles) and, unlike the paper figures, keep a title and an explanatory footnote. Inputs are repo files only (`data/*.parquet`, `data/paired_sites.csv`, `data/reference_proteins.json`, `data/figures/*.json`); F1 "before" scores and the F5 LanD counts are quoted from ROADMAP.md (3.1, 3.17).
+
+    python scripts/figures/talk/make_talk_figures.py [--out DIR]   # default docs/figures/talk
+Writes `F<n>_<name>.png` (200 dpi) and `.svg` for each figure. `pytest tests/test_talk_figures.py` builds all of them into a temp directory.
