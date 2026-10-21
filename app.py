@@ -55,8 +55,8 @@ st.markdown("""<style>
 .ion-none{background:#17262d;border-color:#4e8294;color:#e8f3f7}
 </style>""", unsafe_allow_html=True)
 st.markdown(
-    '<div class="hero"><h1>🧬 LANTERN</h1><p>Lanthanide-Aware Network for '
-    'Targeted Exploration and Recognition in Nature · Ask a question, get '
+    '<div class="hero"><h1>🧬 LANTERN</h1><p>Learning and Analysis of '
+    "Nature's Tools for Element Recovery Networks · Ask a question, get "
     'candidates you can check</p></div>', unsafe_allow_html=True)
 
 

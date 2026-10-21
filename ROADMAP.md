@@ -1,6 +1,6 @@
 # LANTERN — Roadmap to a Working System
 
-*Lanthanide-Aware Network for Targeted Exploration and Recognition in Nature*
+*Learning and Analysis of Nature's Tools for Element Recovery Networks*
 
 **Status date:** 2026-10-20 (§3.20; everything above it dated 2026-10-19)
 **Method:** every claim below was verified by running the code in this repo and querying the live

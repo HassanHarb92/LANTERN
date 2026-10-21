@@ -1,6 +1,6 @@
 # 🧬 LANTERN
 
-*Lanthanide-Aware Network for Targeted Exploration and Recognition in Nature*
+*Learning and Analysis of Nature's Tools for Element Recovery Networks*
 
 **An evidence-aware prototype for exploring naturally occurring rare-earth-binding proteins.**
 
