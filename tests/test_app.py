@@ -56,8 +56,14 @@ class TestTheQuestionBoxProducesAPage:
         assert len(page.tabs) == len(page.session_state["record"]["evidence"])
 
     def test_it_draws_the_rules_table_and_a_site_table_per_structure(self, page):
+        """One rules table, then per structure a site table and a table of the
+        structures passed over. The curated lanmodulins carry alternatives now
+        -- 8FNR/8DQ2 and 8FNS/6MI5 -- so the second table per structure is
+        drawn for the offline set too, where it used to appear only live."""
         evidence = page.session_state["record"]["evidence"]
-        assert len(page.dataframe) == 1 + len(evidence)
+        alternatives = sum(1 for ev in evidence
+                           if (ev.get("structure_choice") or {}).get("not_measured"))
+        assert len(page.dataframe) == 1 + len(evidence) + alternatives
 
     def test_it_reports_no_errors(self, page):
         assert [e.value for e in page.error] == []

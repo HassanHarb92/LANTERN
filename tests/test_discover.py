@@ -292,17 +292,35 @@ class TestMeasuringOneStructureOfSeveralSaysSo:
         assert "8FNS" not in [o["id"]
                               for o in measured["structure_choice"]["not_measured"]]
 
-    def test_it_says_when_the_file_measured_is_not_the_one_the_rule_picks(self):
-        """pdb_id can come from somewhere other than the rule -- a curated
-        record, or a hand-set field. Silently printing the rule's reasoning
-        over a different file would explain a choice that was not made."""
+    def test_a_hand_set_pdb_id_does_not_override_the_rule(self):
+        """This used to assert the opposite -- that a hand-set pdb_id won and
+        the record admitted the rule disagreed. That was the bug: the rule was
+        computed, its disagreement reported, and the other file measured
+        anyway. Whichever file the rule picks is now the file measured, so the
+        reasoning printed next to a structure is the reasoning that chose it.
+        """
         record = answer(CANONICAL, proteins=[live_shaped("8FNR")])
-        assert record["evidence"][0]["structure_choice"]["agrees_with_the_rule"] is False
+        choice = record["evidence"][0]["structure_choice"]
+        assert record["evidence"][0]["pdb_id"] == "8FNS"
+        assert choice["agrees_with_the_rule"] is True
 
-    def test_a_curated_record_claims_no_choice_was_made(self, run):
-        """The bundled set names one structure per protein and lists no
-        alternatives. An empty "others" expander would imply it had looked."""
-        assert all(ev.get("structure_choice") is None for ev in run["evidence"])
+    def test_a_curated_record_lists_the_alternatives_it_passed_over(self, run):
+        """The bundled lanmodulins carry every structure UniProt lists for
+        them, which is what lets a question about La3+ reach 8DQ2. Having
+        alternatives means the choice is real and has to be shown; the old
+        assertion here was that curated records made no choice at all."""
+        choices = [ev["structure_choice"] for ev in run["evidence"]]
+        assert all(c is not None for c in choices)
+        assert {c["measured"] for c in choices} == {"8FNR", "8FNS"}
+        assert all(c["not_measured"] for c in choices)
+
+    def test_a_curated_record_says_which_element_each_alternative_holds(self, run):
+        """The fact a UniProt cross-reference cannot supply, and the only
+        reason the choice can be ion-aware at all."""
+        holds = {o["id"]: o["holds"] for c in (ev["structure_choice"] for ev in run["evidence"])
+                 for o in c["deposited"]}
+        assert holds["8FNR"] == ["Dy"] and holds["8DQ2"] == ["La"]
+        assert holds["8FNS"] == ["Nd"] and holds["6MI5"] == ["Y"]
 
     def test_the_download_keeps_the_choice(self):
         record = exportable(answer(CANONICAL, proteins=[live_shaped()]))

@@ -52,11 +52,13 @@ import json
 from .agent import SYSTEM as CAUTIOUS_ASSISTANT
 from .alphafold import (EVIDENCE as PREDICTION_EVIDENCE, NotAPredictedModel,
                         confidence_gate, fetch_model, residue_plddt)
-from .catalog import load_reference
+from .catalog import deposited_rare_earths, entries_holding, known_entry, load_reference
 from .chemistry import LOOP_LENGTH
 from .design import SELECTION_IS_NOT_AFFINITY, ef_hand_layout, rank
 from .geometry import SCORE_VERSION, score_site
-from .ions import LANTHANIDES_III, rank_by_size_match, size_match
+from .ions import (COORDINATION_FIT_IS_NOT_BINDING, LANTHANIDES_III,
+                   coordination_fit, element_name, rank_by_size_match,
+                   size_match, typical_coordination)
 from .plan import parse_question
 from .structure import (ALL_METAL_CODES, binding_neighborhood, cached_structure,
                         fetch_structure, resolution_from_coordinates)
@@ -98,6 +100,35 @@ SIZE_RANK_SELF_CHECK = (
     "not 1st -- the score does not recover the ion known to bind the site. "
     "Read the fit as a rough size compatibility, never as a choice between "
     "one lanthanide and another."
+)
+
+# Which question the page actually answered, said once and said first.
+#
+# Every number on a counterfactual page is individually true and the page as a
+# whole answers a question nobody asked: ask about Eu3+ and the old record came
+# back with eighteen Dy and Nd sites, a column headed "Eu3+ size fit", and a
+# green headline calling the fold "the fold that binds Eu3+". The wording that
+# used to carry this was "at least one site below holds a different element",
+# which reads as an exception when it was all eighteen of them. So these count.
+NO_MEASURED_SITE_HOLDS_THE_TARGET = (
+    "None of the {measured} deposited metal site(s) measured here holds "
+    "{target} -- they hold {elements}. Every {target} number below therefore "
+    "asks whether {target} would fit a sphere that closed around another ion, "
+    "and none of it is evidence that this protein was observed binding {target}."
+)
+
+SOME_MEASURED_SITES_HOLD_THE_TARGET = (
+    "{matched} of the {measured} deposited metal site(s) measured here hold "
+    "{target} and the other {unmatched} hold {elements}. Only those {matched} "
+    "are observations of {target} in a structure; the {target} fit on the rest "
+    "is a counterfactual."
+)
+
+EVERY_MEASURED_SITE_HOLDS_THE_TARGET = (
+    "All {measured} deposited metal site(s) measured here hold {target}. These "
+    "are observations of {target} in a crystal structure -- which is evidence "
+    "that the ion binds this protein, and still not a measurement of how "
+    "tightly, nor of whether it is preferred over any other lanthanide."
 )
 
 # Why a poor counterfactual fit is not a prediction of non-binding.
@@ -183,6 +214,13 @@ def _structure_evidence(target: str, text: str, fmt: str, pdb_id: str) -> dict:
             "criteria": call["criteria"],
             "caveats": call["caveats"],
             "size_match": fit,
+            # The one verdict on this page that is about the ion the user named
+            # rather than about the ion in the file. size_match ranks the series
+            # and cannot recover the deposited ion (SIZE_RANK_SELF_CHECK); this
+            # compares a measured coordination number against a range that was
+            # never fitted to this corpus, so it survives that self-check.
+            "target_coordination_fit": coordination_fit(
+                target, site["coordination_number"]),
             # True whenever the ion asked about is not the ion in the crystal.
             "size_match_is_counterfactual": deposited != _element_of(target),
             "ion_context": _ion_context(target, deposited,
@@ -201,6 +239,14 @@ def _structure_evidence(target: str, text: str, fmt: str, pdb_id: str) -> dict:
         "resolution_A": resolution,
         "sites": measured,
         "site_count": len(measured),
+        # Stated once per structure, next to the PDB id, because that is where
+        # a reader decides what they are looking at. Previously the only way to
+        # learn that a Eu3+ question had been answered with a Dy file was to
+        # open one site and read a nested per-site flag.
+        "sites_holding_the_target": sum(1 for m in measured
+                                        if not m["size_match_is_counterfactual"]),
+        "holds_the_target_element": any(not m["size_match_is_counterfactual"]
+                                        for m in measured),
         "lanthanide_sites": sum(1 for m in measured
                                 if (m["deposited_element"] or "").upper()
                                 in LANTHANIDE_ELEMENTS),
@@ -302,7 +348,7 @@ def _prediction_evidence(accession: str, sequence: str, *, timeout: int) -> dict
     }
 
 
-def _structure_choice(protein, measured: str) -> dict | None:
+def _structure_choice(protein, measured: str, target: str | None = None) -> dict | None:
     """What else was deposited for this protein, and why this one was measured.
 
     A live search can turn up several structures for one accession, and the
@@ -311,20 +357,30 @@ def _structure_choice(protein, measured: str) -> dict | None:
     rest on a pick the user never saw, so the rule and the structures it
     passed over travel with the measurement.
 
-    None when there was no choice to make: one deposited structure, or a
-    curated record that names its own.
+    None when there were no deposited structures at all. A single option is
+    still reported, because with a target in hand the interesting fact about
+    it is whether it holds that ion, and that is worth saying even when there
+    was nothing to choose between.
     """
     options = list(getattr(protein, "pdb_options", None) or [])
-    if len(options) < 2:
+    if not options:
         return None
-    chosen, reason = choose_structure(options)
+    chosen, reason = choose_structure(options, target)
+    element = _element_of(target).capitalize() if target else ""
     return {
         "measured": measured,
         "reason": reason,
         "agrees_with_the_rule": (chosen or "").upper() == (measured or "").upper(),
-        "deposited": options,
+        "deposited": [dict(o, holds=list(deposited_rare_earths(o["id"])),
+                           indexed=known_entry(o["id"])) for o in options],
         "not_measured": [o for o in options
                          if o["id"].upper() != (measured or "").upper()],
+        # Whether the file being measured is the one the question was about.
+        # The per-site size_match_is_counterfactual flag says the same thing
+        # one site at a time; this says it once, about the structure, where a
+        # reader looking at the PDB id will actually be looking.
+        "holds_the_target_element": bool(element) and element in deposited_rare_earths(measured),
+        "target_element": element or None,
     }
 
 
@@ -332,7 +388,15 @@ def _evidence_for(candidate: dict, protein, target: str, *, live: bool,
                   allow_predictions: bool, timeout: int) -> dict:
     """Whatever structural evidence can be had for one candidate, or why none."""
     notes: list[str] = []
-    pdb_id = getattr(protein, "pdb_id", None)
+    # The ion chooses the file. Until this line the target reached nothing but
+    # the per-site size comparison, so a question about La3+ measured the
+    # sharpest structure -- 8FNR, which holds Dy -- while 8DQ2, which holds La,
+    # sat unmeasured in the same record. choose_structure falls back to
+    # resolution when nothing holds the ion, so an entry with one structure, or
+    # with none holding the target, behaves exactly as before.
+    options = list(getattr(protein, "pdb_options", None) or [])
+    chosen, _ = choose_structure(options, target) if options else (None, "")
+    pdb_id = chosen or getattr(protein, "pdb_id", None)
 
     if pdb_id:
         coords = cached_structure(pdb_id)
@@ -349,7 +413,7 @@ def _evidence_for(candidate: dict, protein, target: str, *, live: bool,
             text, fmt = coords
             evidence = _structure_evidence(target, text, fmt, pdb_id.upper())
             evidence["structure_choice"] = _structure_choice(protein,
-                                                             pdb_id.upper())
+                                                             pdb_id.upper(), target)
             evidence["notes"] = notes
             return evidence
 
