@@ -1,5 +1,6 @@
 import json
 import random
+import re
 
 import pytest
 
@@ -116,6 +117,34 @@ def test_contradiction_demotes():
     assert d["net"] > 5 and d["action"] == "review"
     # a vetoed candidate is never badged
     assert d["action"] != "badge"
+
+
+def test_a_recorded_reason_never_states_a_false_inequality():
+    """The reason is what a human reads instead of recomputing the policy.
+
+    Found by the second live run: the veto tests contradiction mass, so a candidate
+    with more support than contradiction is still demoted, and explaining that with
+    the net rule printed "net evidence +0.52 <= -0.5". Checking the arithmetic of
+    every inequality catches the whole class, not just the branch that had it.
+    """
+    cases = [
+        [vd("contradicts", [1], conf=0.9)],
+        [vd("contradicts", [1], conf=0.9), vd("supports", [2], conf=0.9)],
+        [vd("supports", [n], conf=0.9) for n in range(2, 11)] + [vd("contradicts", [1], conf=0.9)],
+        [vd("supports", [1], conf=0.9), vd("supports", [2], conf=0.9)],
+        [vd("supports", [1], conf=0.6)],
+        [vd("supports", [1], conf=0.9, cid="a"), vd("contradicts", [2], conf=0.2, cid="b")],
+        [vd("no_evidence", [], conf=0.9)],
+    ]
+    evidence = [ev(n) for n in range(1, 12)]
+    stated = 0
+    for verdicts in cases:
+        reason = decide(verdicts, evidence)["reason"]
+        for left, op, right in re.findall(r"([-+]?\d+\.\d+)\s*(<=|>=)\s*([-+]?\d*\.?\d+)", reason):
+            stated += 1
+            true = float(left) <= float(right) if op == "<=" else float(left) >= float(right)
+            assert true, f"reason states a false inequality {left} {op} {right}: {reason}"
+    assert stated >= 3, "no inequalities were checked, so the assertion above proved nothing"
 
 
 def test_no_evidence_keeps():

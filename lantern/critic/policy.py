@@ -158,7 +158,12 @@ def _reason(action: str, d: dict, p: Params) -> str:
         note = (f" Lineage sources (papers the rule was derived from) count at {p.alpha_lineage:g} of an external "
                 f"source's weight.")
     if action == "review":
-        return (f"Literature contradicts this candidate (net evidence {net:+.2f} <= -{p.tau_review:g}); "
+        # Report the quantity the veto actually tested. The veto reads contradiction
+        # mass, so a candidate with more support than contradiction still crosses it,
+        # and explaining it with the net rule prints an inequality that is false: the
+        # first live review read "net evidence +0.52 <= -0.5".
+        return (f"Literature contradicts this candidate (contradiction weight "
+                f"{d['contradict']:.2f} >= {p.tau_review:g}, net evidence {net:+.2f}); "
                 f"demoted to human review, numbers unchanged.{note}")
     if action == "badge":
         return (f"Literature supports this candidate (net evidence {net:+.2f} >= {p.tau_badge:g}) with "
