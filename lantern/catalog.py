@@ -84,6 +84,52 @@ def deposited_rare_earths(pdb_id: str) -> tuple[str, ...]:
     return tuple(sorted(entry.get("elements", [])))
 
 
+# One structure per lanthanide that is measurably holding it, built by
+# scripts/build_ion_structures.py. Separate from the enumeration above because
+# it answers a different question: not "which entries contain this element"
+# -- most of those contain it as a soaked phasing chelate the protein never
+# touches -- but "which entry can this platform show a user as their own ion,
+# held by a protein". The admission test is geometry-v2's own call, so the
+# file records a measurement rather than somebody's shortlist.
+ION_STRUCTURES_PATH = DATA_DIR / "ion_structures.json"
+
+
+@lru_cache(maxsize=1)
+def _ion_structures() -> dict:
+    payload = json.loads(ION_STRUCTURES_PATH.read_text())
+    return payload.get("ions", {})
+
+
+def structure_search(ion: str) -> dict | None:
+    """What the build script found for `ion`, whether or not it found one.
+
+    None only when the ion was never searched. Everything else -- how many
+    entries the index held, how many were measured, and what each rejection
+    measured -- is here even on a failed search, because "no promethium
+    structure has ever been deposited" and "every holmium entry turned out to
+    be a soaked chelate" are both failures and are not the same failure.
+    """
+    record = _ion_structures().get(str(ion).strip())
+    return dict(record) if record else None
+
+
+def structure_holding(ion: str) -> dict | None:
+    """The structure measured as holding `ion`, with how it was chosen.
+
+    None when the search found nothing to admit, which is a real answer for
+    Pm3+ -- no promethium structure has ever been deposited -- and a different
+    real answer for an element whose every indexed entry turned out to be a
+    chelate soak. The counts that tell those apart travel with the result.
+    """
+    record = _ion_structures().get(str(ion).strip())
+    if not record or not record.get("chosen"):
+        return None
+    return dict(record["chosen"],
+                entries_in_index=record.get("entries_in_index"),
+                entries_tried=record.get("entries_tried"),
+                rejected=record.get("rejected", []))
+
+
 def entries_holding(element: str) -> list[dict]:
     """Every enumerated PDB entry containing `element`, sharpest first.
 

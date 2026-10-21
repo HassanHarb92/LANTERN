@@ -354,6 +354,101 @@ class TestVerificationCanBeSkippedButNotFaked:
         assert len(record["evidence"]) == 1
 
 
+class TestTheIonAskedAboutIsSomewhereOnThePage:
+    """The design rules are ion-independent, so for thirteen of the fifteen
+    askable lanthanides every coordinate on this page used to belong to some
+    other element: ask about Eu3+, get Dy and Nd. The shortlist cannot be
+    fixed -- it answers "what should I try", and sequence cannot tell Eu from
+    Dy -- so the ion gets a structure of its own, chosen by measuring
+    candidates rather than by sorting on resolution."""
+
+    def test_the_structure_shown_for_an_ion_actually_holds_that_element(self):
+        for ion, element in (("Eu3+", "Eu"), ("Ce3+", "Ce"), ("Tb3+", "Tb")):
+            own = answer(f"what proteins should I try for capturing {ion}")
+            own = own["ion_structure"]
+            held = [s for s in own["sites"]
+                    if s["deposited_element"].capitalize() == element]
+            assert held, f"{ion} drew {own['pdb_id']} with no {element} site"
+            assert own["sites_holding_the_target"] == len(held)
+            assert own["holds_the_target_element"] is True
+
+    def test_every_admitted_site_is_one_the_geometry_code_stands_behind(self):
+        """The admission rule, restated where a reader will find it. 4BAR is
+        the sharpest Eu entry in the index and is not what Eu3+ draws: its
+        europium sits in a soaked tris-dipicolinate cage with zero protein
+        donors, which geometry-v2 declines to call. Sorting on resolution
+        takes the thaumatin; measuring takes the dehydrogenase."""
+        own = answer("what proteins should I try for capturing Eu3+")["ion_structure"]
+        assert own["pdb_id"] != "4BAR"
+        admitted = [s for s in own["sites"]
+                    if s["deposited_element"].capitalize() == "Eu"]
+        assert any(s["call"] == "lanthanide-like" and s["call_reliable"]
+                   for s in admitted)
+        assert any(s["protein_donors"] > 0 for s in admitted)
+        assert any(r["id"] == "4BAR" for r in own["rejected"])
+
+    def test_it_is_never_mistaken_for_a_shortlist_candidate(self, run):
+        """The one way this feature could do real damage: a structure nothing
+        screened for the lanmodulin architecture, read as a recommendation."""
+        own = run["ion_structure"]
+        assert own["is_a_design_rule_candidate"] is False
+        assert own["pdb_id"] not in [ev.get("pdb_id") for ev in run["evidence"]]
+        assert own not in run["evidence"]
+        assert own["caveat"] in run["caveats"]
+        assert all(c["accession"] != own.get("accession")
+                   for c in run["shortlist"]["candidates"])
+
+    def test_a_question_already_holding_its_ion_does_not_draw_one(self):
+        """La3+ is measured in the corpus itself. Adding a second La structure
+        would be answering a question the page already answered."""
+        record = answer("what proteins should I try for capturing La3+")
+        assert record["ion_report"]["verdict_kind"] == "observed"
+        assert "ion_structure" not in record
+
+    def test_an_element_with_nothing_deposited_says_so_and_draws_nothing(self):
+        """Pm3+ has no deposited structure anywhere. Silence would read as a
+        bug; a fabricated structure would be worse than either."""
+        record = answer("what proteins should I try for capturing Pm3+")
+        assert "ion_structure" not in record
+        assert ("No deposited structure anywhere in this platform's index "
+                "holds Pm" in record["ion_report"]["statement"])
+
+    def test_an_element_measured_and_rejected_says_that_instead(self):
+        """Ho3+ is the other kind of nothing: sixteen entries hold holmium and
+        all sixteen were measured. "None exists" and "all of them were a
+        chelate soak" are different facts and must not share a sentence."""
+        record = answer("what proteins should I try for capturing Ho3+")
+        assert "ion_structure" not in record
+        statement = record["ion_report"]["statement"]
+        assert "All 16 were downloaded and measured" in statement
+        assert "does not call a protein site" in statement
+
+    def test_the_report_does_not_deny_the_structure_printed_below_it(self):
+        """The sentence this replaced read "none of them is in this corpus, so
+        none was measured here" on a page that then measured one of them."""
+        record = answer("what proteins should I try for capturing Eu3+")
+        statement = record["ion_report"]["statement"]
+        assert "none was measured here" not in statement
+        assert record["ion_structure"]["pdb_id"] in statement
+
+    def test_the_coordinates_are_read_from_the_cache_and_not_the_network(self):
+        """answer(live=False) must stay offline. A block that quietly fetches
+        is a block that fails in the room it is being demonstrated in."""
+        import lantern.structure as structure
+
+        def explode(*a, **k):
+            raise AssertionError("ion structure reached the network")
+
+        saved = structure.requests.get
+        structure.requests.get = explode
+        try:
+            record = answer("what proteins should I try for capturing Eu3+",
+                            live=False)
+        finally:
+            structure.requests.get = saved
+        assert record["ion_structure"]["pdb_id"] == "6FKW"
+
+
 class TestTheRecordIsSelfDescribing:
 
     def test_every_site_names_itself(self, run):
@@ -407,12 +502,18 @@ class TestTheDownloadKeepsEveryJustification:
         assert "evidence.sites.raw" not in after
 
     def test_and_drops_nothing_else_whatsoever(self, run):
-        """The assertion that survives new fields being added to a site."""
+        """The assertion that survives new fields being added to a site.
+
+        Two blocks carry coordinates now -- the candidates and the ion's own
+        structure -- and both are trimmed the same way, so the exemption is
+        written once per block rather than widened to any key named `raw`."""
         removed = key_paths(run) - key_paths(exportable(run))
+        allowed = {f"{block}.{leaf}"
+                   for block in ("evidence", "ion_structure")
+                   for leaf in ("coordinates", "sites.raw")}
         collateral = {path for path in removed
-                      if path != "evidence.coordinates"
-                      and path != "evidence.sites.raw"
-                      and not path.startswith("evidence.sites.raw.")}
+                      if path not in allowed
+                      and not any(path.startswith(f"{a}.") for a in allowed)}
         assert not collateral, f"exportable() also dropped {sorted(collateral)}"
 
     def test_and_invents_nothing(self, run):

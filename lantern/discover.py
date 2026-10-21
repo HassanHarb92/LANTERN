@@ -52,7 +52,8 @@ import json
 from .agent import SYSTEM as CAUTIOUS_ASSISTANT
 from .alphafold import (EVIDENCE as PREDICTION_EVIDENCE, NotAPredictedModel,
                         confidence_gate, fetch_model, residue_plddt)
-from .catalog import deposited_rare_earths, entries_holding, known_entry, load_reference
+from .catalog import (deposited_rare_earths, entries_holding, known_entry,
+                      load_reference, structure_holding, structure_search)
 from .chemistry import LOOP_LENGTH
 from .design import SELECTION_IS_NOT_AFFINITY, ef_hand_layout, rank
 from .geometry import SCORE_VERSION, score_site
@@ -110,11 +111,18 @@ SIZE_RANK_SELF_CHECK = (
 # green headline calling the fold "the fold that binds Eu3+". The wording that
 # used to carry this was "at least one site below holds a different element",
 # which reads as an exception when it was all eighteen of them. So these count.
+#
+# "Every number on the candidates below", not "every number below": a page
+# that also draws the ion its own structure has numbers below that were
+# measured on the element asked about, and sweeping those into the same
+# sentence would make the one honest block on the page sound counterfactual
+# too. The candidates are what the sentence has always been about.
 NO_MEASURED_SITE_HOLDS_THE_TARGET = (
     "None of the {measured} deposited metal site(s) measured here holds "
-    "{target} -- they hold {elements}. Every {target} number below therefore "
-    "asks whether {target} would fit a sphere that closed around another ion, "
-    "and none of it is evidence that this protein was observed binding {target}."
+    "{target} -- they hold {elements}. Every {target} number on those "
+    "candidates therefore asks whether {target} would fit a sphere that "
+    "closed around another ion, and none of it is evidence that this protein "
+    "was observed binding {target}."
 )
 
 SOME_MEASURED_SITES_HOLD_THE_TARGET = (
@@ -384,6 +392,36 @@ def _structure_choice(protein, measured: str, target: str | None = None) -> dict
     }
 
 
+# What the ion's own structure is, and the four things it is not. It is shown
+# precisely because the shortlist cannot reach it, so every instinct a reader
+# has about why something appears on this page is wrong about this one.
+ION_STRUCTURE_IS_NOT_A_CANDIDATE = (
+    "This structure is not a candidate and was not selected by any rule on "
+    "this page. It was found by asking which deposited entries hold the "
+    "element asked about and measuring them until one turned out to be a "
+    "protein site rather than a soaked chelate. It is shown so that the ion "
+    "can be seen in coordinates at all: it is not screened for the lanmodulin "
+    "architecture, it is not ranked against the shortlist above, its protein "
+    "is usually an unrelated one, and nothing here is an affinity or a "
+    "selectivity over any other lanthanide."
+)
+
+# Why the admission test is the geometry call and not the resolution. Stated
+# here because the alternative is so much more obvious: the index is sorted
+# sharpest first, and taking the top row would be one line.
+ION_STRUCTURE_WAS_CHOSEN_BY_MEASUREMENT = (
+    "Chosen by measuring candidates, not by resolution. Most deposited "
+    "entries containing a lanthanide contain it as a crystallographic "
+    "additive -- a chelate soaked in for phasing, which the protein does not "
+    "coordinate -- and those are sharper on average than the biological "
+    "ones. The sharpest Eu entry in this index is thaumatin at 1.2 A, whose "
+    "europium geometry-v2 reads as CN 9 with zero protein donors. Entries "
+    "were tried sharpest first and the first one with a site this platform "
+    "calls lanthanide-like, at a resolution that supports making the call, "
+    "was taken."
+)
+
+
 def and_list(items) -> str:
     """["Dy", "Nd"] -> "Dy and Nd". For prose a reader has to parse quickly.
 
@@ -396,7 +434,20 @@ def and_list(items) -> str:
     return f"{', '.join(items[:-1])} and {items[-1]}"
 
 
-def _ion_report(target: str, evidence: list[dict]) -> dict:
+def _sites_holding_target(evidence: list[dict]) -> list[dict]:
+    """Measured sites whose deposited element is the one asked about.
+
+    One predicate, two callers: the report says how many there are, and
+    `answer` uses the same emptiness to decide whether the ion needs a
+    structure of its own. Reading it off `size_match_is_counterfactual`
+    rather than re-deriving it keeps the two from ever disagreeing.
+    """
+    return [s for ev in evidence for s in ev["sites"]
+            if not s["size_match_is_counterfactual"]]
+
+
+def _ion_report(target: str, evidence: list[dict],
+                ion_structure: dict | None = None) -> dict:
     """One verdict about the ion that was actually asked for.
 
     Everything else in a record is organised by protein, and a reader looking
@@ -413,7 +464,7 @@ def _ion_report(target: str, evidence: list[dict]) -> dict:
     """
     element = _element_of(target).capitalize()
     sites = [s for ev in evidence for s in ev["sites"]]
-    holding = [s for s in sites if not s["size_match_is_counterfactual"]]
+    holding = _sites_holding_target(evidence)
     others = sorted({(s["deposited_element"] or "?").capitalize()
                      for s in sites if s["size_match_is_counterfactual"]})
     structures = [ev["pdb_id"] for ev in evidence if ev.get("pdb_id")]
@@ -424,6 +475,13 @@ def _ion_report(target: str, evidence: list[dict]) -> dict:
     # structure of anything does", and the second is a much stronger claim that
     # this platform is in a position to check rather than imply.
     elsewhere = entries_holding(element) if not holding else []
+    # Entries the index lists as holding the element that this run measured
+    # anyway. Usually empty, and it is computed rather than assumed: the index
+    # and the geometry code can disagree -- an entry can list an element that
+    # sits in a pre-chelated component the site finder deliberately skips --
+    # and when they do, saying "none was measured here" would be false.
+    also_measured = sorted({e["id"].upper() for e in elsewhere}
+                           & {s.upper() for s in structures})
     report = {
         "target": target,
         "element": element,
@@ -465,10 +523,57 @@ def _ion_report(target: str, evidence: list[dict]) -> dict:
         if elsewhere:
             best = elsewhere[0]
             report["statement"] += (
-                f" {len(elsewhere)} deposited structure(s) elsewhere in the PDB do "
-                f"hold {element} -- the sharpest is {best['id']} at "
-                f"{best['resolution_A']} A -- but none of them is in this corpus, "
-                "so none was measured here.")
+                f" {len(elsewhere)} deposited structure(s) in this platform's "
+                f"rare-earth index do hold {element} -- the sharpest is "
+                f"{best['id']} at {best['resolution_A']} A.")
+            # Which of the three follows is a fact about what this run did, not
+            # a stock sentence. The first used to read "none of them is in this
+            # corpus, so none was measured here", which is now false on any page
+            # that shows the ion its own structure, and was never computed.
+            if ion_structure:
+                # Named once. When the sharpest entry is the one that was
+                # admitted, "the sharpest is 4MAE ... one of them, 4MAE" puts
+                # the same id in two consecutive clauses.
+                which = ("It is" if ion_structure["pdb_id"] == best["id"]
+                         else f"One of them, {ion_structure['pdb_id']}, is")
+                report["statement"] += (
+                    f" {which} measured below: it was reached by looking "
+                    f"{element} up in that index, not by the design rules, so "
+                    f"it is shown as a structure of {element} and not as a "
+                    f"candidate.")
+            elif also_measured:
+                report["statement"] += (
+                    f" {and_list(also_measured)} was measured here and no site "
+                    f"in it came out as {element}.")
+            else:
+                # Why no structure of the element itself is shown below. The
+                # three cases are different facts and the build data tells
+                # them apart, so none of them is reported as the others:
+                # measured-and-rejected is a result, stopped-early is a budget,
+                # and never-searched is neither.
+                searched = structure_search(target) or {}
+                tried = searched.get("entries_tried") or 0
+                if tried >= len(elsewhere) > 0:
+                    report["statement"] += (
+                        f" All {tried} were downloaded and measured, and in "
+                        f"every one the {element} sits in a site this "
+                        f"platform does not call a protein site -- the usual "
+                        f"reason being a chelate soaked in to phase the "
+                        f"crystal, which the protein never coordinates. So "
+                        f"there is no structure of {element} to show you "
+                        f"either.")
+                elif tried:
+                    report["statement"] += (
+                        f" The {tried} sharpest were downloaded and measured "
+                        f"and none has a site this platform calls a protein "
+                        f"site; the other {len(elsewhere) - tried} were not "
+                        f"measured, so they are unexamined rather than ruled "
+                        f"out.")
+                else:
+                    report["statement"] += (
+                        " None of them was measured here: the design rules "
+                        "select proteins, and none of these entries is a "
+                        "deposited structure of a protein they selected.")
         else:
             report["statement"] += (
                 f" No deposited structure anywhere in this platform's index holds "
@@ -493,6 +598,46 @@ def _ion_report(target: str, evidence: list[dict]) -> dict:
                f"{report['coordination']['typical']})" if report["coordination"] else "")
             + ". " + COORDINATION_FIT_IS_NOT_BINDING)
     return report
+
+
+def _ion_structure_evidence(target: str) -> dict | None:
+    """The ion the user asked for, measured in a structure that holds it.
+
+    Everything else on a counterfactual page is a question about {target}
+    answered with another element's coordinates. This is the one block where
+    the atom in the file is the atom in the question, so the coordination
+    number, the donor distances and the viewer are all about {target} itself
+    rather than about what {target} would do in somebody else's site.
+
+    None when no structure survived the admission test, which `structure_
+    holding` distinguishes from "the element has no deposited structure at
+    all". The coordinates come from the cache the build script filled, so this
+    costs no network; a cache miss returns None rather than reaching out,
+    because an offline page that silently starts making requests is worse
+    than one that says it has nothing.
+    """
+    chosen = structure_holding(target)
+    if not chosen:
+        return None
+    hit = cached_structure(chosen["id"])
+    if hit is None:
+        return None
+    text, fmt = hit
+    evidence = _structure_evidence(target, text, fmt, chosen["id"])
+    element = _element_of(target).capitalize()
+    evidence.update(
+        title=chosen.get("title"),
+        is_a_design_rule_candidate=False,
+        selection=ION_STRUCTURE_WAS_CHOSEN_BY_MEASUREMENT,
+        caveat=ION_STRUCTURE_IS_NOT_A_CANDIDATE,
+        entries_in_index=chosen.get("entries_in_index"),
+        entries_tried=chosen.get("entries_tried"),
+        rejected=chosen.get("rejected", []),
+        sites_holding_the_target=sum(
+            1 for s in evidence["sites"]
+            if (s["deposited_element"] or "").capitalize() == element),
+        holds_the_target_element=True)
+    return evidence
 
 
 def _evidence_for(candidate: dict, protein, target: str, *, live: bool,
@@ -614,9 +759,24 @@ def answer(question, *, client=None, proteins=None, live=False,
         evidence["organism"] = getattr(protein, "organism", None)
         record["evidence"].append(evidence)
 
+    # The ion's own coordinates, when nothing the design rules reached holds
+    # it. Measured, not looked up, and kept out of `evidence` so that no
+    # caller can mistake it for a candidate: the shortlist is the answer to
+    # "what should I try", and this is the answer to "show me my ion".
+    #
+    # Found before the report rather than after, because the report's closing
+    # sentence is about what exists elsewhere and was measured, and it cannot
+    # say that truthfully without knowing whether this block is on the page.
+    if not _sites_holding_target(record["evidence"]):
+        found = _ion_structure_evidence(target)
+        if found:
+            record["ion_structure"] = found
+            record["caveats"].append(ION_STRUCTURE_IS_NOT_A_CANDIDATE)
+
     # The answer to the question as asked, before any per-protein detail. It
     # goes in front of the caveats because it is the thing the caveats qualify.
-    record["ion_report"] = _ion_report(target, record["evidence"])
+    record["ion_report"] = _ion_report(target, record["evidence"],
+                                       record.get("ion_structure"))
     if any(ev["structure_kind"] == "deposited" for ev in record["evidence"]):
         record["caveats"] += [SIZE_MATCH_IS_NOT_BINDING, SIZE_RANK_SELF_CHECK]
     if any(site["size_match_is_counterfactual"]
@@ -750,13 +910,19 @@ def exportable(record: dict) -> dict:
     measurement, verdict, caveat and basis survives, which is the property
     that makes this safe to call on the export path.
     """
-    evidence = []
-    for item in record["evidence"]:
+    def trim(item: dict) -> dict:
         trimmed = {k: v for k, v in item.items() if k != "coordinates"}
         trimmed["sites"] = [{k: v for k, v in site.items() if k != "raw"}
                             for site in item["sites"]]
-        evidence.append(trimmed)
-    return {**record, "evidence": evidence}
+        return trimmed
+
+    out = {**record, "evidence": [trim(item) for item in record["evidence"]]}
+    # The ion's own structure is measured the same way and carries the same
+    # two picture-only fields, so it is trimmed the same way. Without this the
+    # download grows by a whole coordinate file.
+    if record.get("ion_structure"):
+        out["ion_structure"] = trim(record["ion_structure"])
+    return out
 
 
 def headline(record: dict) -> str:

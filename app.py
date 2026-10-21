@@ -101,7 +101,7 @@ def step(number: str, title: str, caption: str = "") -> None:
         st.caption(caption)
 
 
-def ion_banner(report: dict) -> None:
+def ion_banner(report: dict, own: dict | None = None) -> None:
     """The ion the question named, drawn at the size it was asked in.
 
     Everything below this point is organised by protein, and for thirteen of
@@ -120,12 +120,19 @@ def ion_banner(report: dict) -> None:
     # A lead, not a summary: the statement under it carries the elements and
     # the consequence, and saying those twice in consecutive sentences is how
     # a reader learns to skip the second one.
+    #
+    # "candidate sites", not "metal sites", because there are now two kinds of
+    # site below and only one of them is counted here. On a page that draws
+    # the ion its own structure, "none of the 18 metal sites below" would be
+    # contradicted four inches further down by four sites of exactly this
+    # element -- and the lead has to point at them rather than deny them.
+    found = f", but measured in {own['pdb_id']}, shown first" if own else ""
     verdict = {
         "observed": f"measured in {report['sites_holding_the_target']} of the "
                     f"{report['sites_measured']} metal sites below",
-        "counterfactual": f"in none of the {report['sites_measured']} metal "
-                          f"sites below",
-    }.get(report["verdict_kind"], "nothing structural was measured")
+        "counterfactual": f"in none of the {report['sites_measured']} "
+                          f"candidate sites below{found}",
+    }.get(report["verdict_kind"], f"nothing structural was measured{found}")
     st.markdown(
         f'<div class="ion {tone}">'
         f'<div class="sym">{symbol}<sup>{charge}</sup></div>'
@@ -282,7 +289,7 @@ sites_measured = sum(ev["site_count"] for ev in record["evidence"])
 st.success(headline(record))
 report = record.get("ion_report") or {}
 if report:
-    ion_banner(report)
+    ion_banner(report, record.get("ion_structure"))
 
 a, b, c, d = st.columns(4)
 a.metric("Target ion", plan["target"], help=report.get("name"))
@@ -362,8 +369,96 @@ step("2", "Verified against structure",
      "Coordination numbers measured from deposited coordinates, not modelled. "
      "This is the only step where the ion you asked about enters.")
 
+# Called once per run and before the first viewer, which is now the ion's own
+# structure rather than the first candidate tab.
+own = record.get("ion_structure")
+viewer_theme = "dark"
+if own or any(ev["structure_kind"] == "deposited" for ev in record["evidence"]):
+    viewer_theme = theme_control()
+
+# ------------------------------------------------- the ion's own structure --
+# First in this step, because a user who asked about Eu3+ came to see europium
+# and no candidate below has any. It stays outside the candidate tabs and
+# carries its own not-a-candidate caveat: the shortlist answers "what should I
+# try", this answers "show me my ion", and the two must not read as one list.
+if own:
+    st.markdown(f"#### {plan['target']} itself, measured")
+    held_here = own["sites_holding_the_target"]
+    st.success(f"**{own['pdb_id']} holds {plan['target']}.** {held_here} of its "
+               f"{own['site_count']} measured metal site(s) contain "
+               f"{report['element']}, at {own['resolution_A']} Å — "
+               f"{own['title']}.")
+    st.caption(f"{own['selection']} {own['entries_tried']} of the "
+               f"{own['entries_in_index']} {report['element']} entries in the "
+               f"index were measured to get here.")
+    st.warning(own["caveat"])
+
+    own_text, own_fmt = own["coordinates"]
+    own_sites = own["sites"]
+    own_raw = [s["raw"] for s in own_sites]
+    # Same label order as the candidate tabs: element first, because a reader
+    # scanning for their own ion is scanning the first token.
+    own_views = ["Whole structure"] + [
+        f"{s['deposited_element']} {s['site']} · chain {s['chain']} "
+        f"— CN {s['coordination_number']}" for s in own_sites]
+    # Opens on a site of the element asked about. Falling back to the whole
+    # fold rather than to another element's site: this block exists to show
+    # one atom, so if it cannot open on that atom it should not pretend to.
+    own_opening = next((i for i, s in enumerate(own_sites, start=1)
+                        if (s["deposited_element"] or "").capitalize()
+                        == report["element"]), 0)
+    own_chosen = st.selectbox(
+        "View", range(len(own_views)), index=own_opening,
+        format_func=lambda i, v=own_views: v[i], key=f"view_ion_{own['pdb_id']}",
+        help=f"Pick a metal site to see its first coordination shell. The "
+             f"{report['element']} sites are the ones this block is for.")
+    if own_chosen == 0:
+        embed(overview_html(own_text, own_fmt, own_raw, script_src=TMOL_PRIMARY,
+                            fallback_src=TMOL_FALLBACK, theme=viewer_theme), 480)
+    else:
+        own_site = own_sites[own_chosen - 1]
+        embed(site_viewer_html(
+            own_text, own_fmt, own_raw[own_chosen - 1],
+            call={"call": own_site["call"],
+                  "call_reliable": own_site["call_reliable"],
+                  "score_version": own["score_version"]},
+            script_src=TMOL_PRIMARY, fallback_src=TMOL_FALLBACK,
+            theme=viewer_theme), 620)
+        st.caption(
+            f"**{own_site['deposited_element']} {own_site['site']}, chain "
+            f"{own_site['chain']}** — {viewer_spec(own_raw[own_chosen - 1])['summary']}. "
+            "Distances are measured from the deposited coordinates, not "
+            "modelled. No size fit is shown: the deposited element is the "
+            "one asked about, so there is no counterfactual to score.")
+    st.dataframe(pd.DataFrame([{
+        "Element": s["deposited_element"], "Chain": s["chain"],
+        "Site": s["site"], "CN": s["coordination_number"],
+        "Mean donor distance (Å)": s["mean_donor_distance_A"],
+        "Protein donors": s["protein_donors"],
+        "Water donors": s["water_donors"],
+        f"{SCORE_VERSION} call": s["call"],
+        "Call reliable": s["call_reliable"],
+    } for s in own_sites]), width="stretch", hide_index=True)
+    if own["rejected"]:
+        with st.expander(f"{len(own['rejected'])} {report['element']} "
+                         f"entry/entries measured before it and passed over"):
+            st.dataframe(pd.DataFrame([{
+                "PDB": r["id"], "Resolution (Å)": r.get("resolution_A") or "—",
+                "Why it was passed over": r["why"],
+                "What was measured": r.get("detail") or "—",
+            } for r in own["rejected"]]), width="stretch", hide_index=True)
+            st.caption("Each was downloaded and measured by the same code that "
+                       "measured the structure above, in sharpest-first order. "
+                       "A chelate soaked in to phase a crystal gives a site "
+                       "with no protein donors, which is what most of these "
+                       "rows are, and it is why resolution alone was not "
+                       "enough to choose.")
+    st.divider()
+    st.markdown("#### The candidates from step 1, measured")
+
 if not record["evidence"]:
     st.info("No candidate had a structure to measure.")
+
 
 def tab_label(evidence: dict) -> str:
     """Accession always survives truncation; it is the unambiguous half.
@@ -383,10 +478,6 @@ def tab_label(evidence: dict) -> str:
     mark = "✅ " if evidence.get("holds_the_target_element") else ""
     return f"{head} · {mark}{'/'.join(elements)}"
 
-
-viewer_theme = "dark"
-if any(ev["structure_kind"] == "deposited" for ev in record["evidence"]):
-    viewer_theme = theme_control()
 
 tabs = st.tabs([tab_label(ev) for ev in record["evidence"]] or ["—"])
 for tab, ev in zip(tabs, record["evidence"]):
