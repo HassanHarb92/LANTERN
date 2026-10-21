@@ -1,0 +1,380 @@
+{
+  "description": "One line per archived run. Derived from the run files beside it and rebuilt automatically when they disagree, so it is a cache and never the record of truth.",
+  "runs": [
+    {
+      "id": "a3b49bc6e14f",
+      "question": "what proteins should I try for capturing Yb3+",
+      "origin": "seed",
+      "target": "Yb3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 18 deposited metal site(s) were measured across them; none holds Yb3+, so every Yb3+ number is a counterfactual fit against another ion's site.",
+      "verdict_kind": "counterfactual",
+      "sites_holding_the_target": 0,
+      "candidates": 2,
+      "structures": [
+        "8FNR",
+        "8FNS"
+      ],
+      "ion_structure": "9VY4",
+      "narrated": false,
+      "first_answered": "2026-10-21T21:30:18Z",
+      "last_answered": "2026-10-21T21:30:18Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    },
+    {
+      "id": "d5086ef6f695",
+      "question": "what proteins should I try for capturing Lu3+",
+      "origin": "seed",
+      "target": "Lu3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 18 deposited metal site(s) were measured across them; none holds Lu3+, so every Lu3+ number is a counterfactual fit against another ion's site.",
+      "verdict_kind": "counterfactual",
+      "sites_holding_the_target": 0,
+      "candidates": 2,
+      "structures": [
+        "8FNR",
+        "8FNS"
+      ],
+      "ion_structure": "5F8A",
+      "narrated": false,
+      "first_answered": "2026-10-21T21:30:18Z",
+      "last_answered": "2026-10-21T21:30:18Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    },
+    {
+      "id": "4091ee18566c",
+      "question": "what proteins should I try for capturing Er3+",
+      "origin": "seed",
+      "target": "Er3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 18 deposited metal site(s) were measured across them; none holds Er3+, so every Er3+ number is a counterfactual fit against another ion's site.",
+      "verdict_kind": "counterfactual",
+      "sites_holding_the_target": 0,
+      "candidates": 2,
+      "structures": [
+        "8FNR",
+        "8FNS"
+      ],
+      "ion_structure": null,
+      "narrated": false,
+      "first_answered": "2026-10-21T21:30:17Z",
+      "last_answered": "2026-10-21T21:30:17Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    },
+    {
+      "id": "46aab8399031",
+      "question": "what proteins should I try for capturing Tm3+",
+      "origin": "seed",
+      "target": "Tm3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 18 deposited metal site(s) were measured across them; none holds Tm3+, so every Tm3+ number is a counterfactual fit against another ion's site.",
+      "verdict_kind": "counterfactual",
+      "sites_holding_the_target": 0,
+      "candidates": 2,
+      "structures": [
+        "8FNR",
+        "8FNS"
+      ],
+      "ion_structure": null,
+      "narrated": false,
+      "first_answered": "2026-10-21T21:30:17Z",
+      "last_answered": "2026-10-21T21:30:17Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    },
+    {
+      "id": "7a7a3f87dc1f",
+      "question": "what proteins should I try for capturing Dy3+",
+      "origin": "seed",
+      "target": "Dy3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 18 deposited metal site(s) were measured across them, 14 of them holding Dy3+.",
+      "verdict_kind": "observed",
+      "sites_holding_the_target": 14,
+      "candidates": 2,
+      "structures": [
+        "8FNR",
+        "8FNS"
+      ],
+      "ion_structure": null,
+      "narrated": false,
+      "first_answered": "2026-10-21T21:30:16Z",
+      "last_answered": "2026-10-21T21:30:16Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    },
+    {
+      "id": "424a6fb6be8b",
+      "question": "what proteins should I try for capturing Ho3+",
+      "origin": "seed",
+      "target": "Ho3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 18 deposited metal site(s) were measured across them; none holds Ho3+, so every Ho3+ number is a counterfactual fit against another ion's site.",
+      "verdict_kind": "counterfactual",
+      "sites_holding_the_target": 0,
+      "candidates": 2,
+      "structures": [
+        "8FNR",
+        "8FNS"
+      ],
+      "ion_structure": null,
+      "narrated": false,
+      "first_answered": "2026-10-21T21:30:16Z",
+      "last_answered": "2026-10-21T21:30:16Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    },
+    {
+      "id": "d39efcaa8767",
+      "question": "what proteins should I try for capturing Gd3+",
+      "origin": "seed",
+      "target": "Gd3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 18 deposited metal site(s) were measured across them; none holds Gd3+, so every Gd3+ number is a counterfactual fit against another ion's site.",
+      "verdict_kind": "counterfactual",
+      "sites_holding_the_target": 0,
+      "candidates": 2,
+      "structures": [
+        "8FNR",
+        "8FNS"
+      ],
+      "ion_structure": "9VY9",
+      "narrated": false,
+      "first_answered": "2026-10-21T21:30:15Z",
+      "last_answered": "2026-10-21T21:30:15Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    },
+    {
+      "id": "7ca8ee5a6851",
+      "question": "what proteins should I try for capturing Tb3+",
+      "origin": "seed",
+      "target": "Tb3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 18 deposited metal site(s) were measured across them; none holds Tb3+, so every Tb3+ number is a counterfactual fit against another ion's site.",
+      "verdict_kind": "counterfactual",
+      "sites_holding_the_target": 0,
+      "candidates": 2,
+      "structures": [
+        "8FNR",
+        "8FNS"
+      ],
+      "ion_structure": "6Y0E",
+      "narrated": false,
+      "first_answered": "2026-10-21T21:30:15Z",
+      "last_answered": "2026-10-21T21:30:15Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    },
+    {
+      "id": "b8eee2ef3ceb",
+      "question": "what proteins should I try for capturing Eu3+",
+      "origin": "seed",
+      "target": "Eu3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 18 deposited metal site(s) were measured across them; none holds Eu3+, so every Eu3+ number is a counterfactual fit against another ion's site.",
+      "verdict_kind": "counterfactual",
+      "sites_holding_the_target": 0,
+      "candidates": 2,
+      "structures": [
+        "8FNR",
+        "8FNS"
+      ],
+      "ion_structure": "6FKW",
+      "narrated": false,
+      "first_answered": "2026-10-21T21:30:13Z",
+      "last_answered": "2026-10-21T21:30:13Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    },
+    {
+      "id": "c5fa5b05062f",
+      "question": "what proteins should I try for capturing Nd3+",
+      "origin": "seed",
+      "target": "Nd3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 18 deposited metal site(s) were measured across them, 4 of them holding Nd3+.",
+      "verdict_kind": "observed",
+      "sites_holding_the_target": 4,
+      "candidates": 2,
+      "structures": [
+        "8FNR",
+        "8FNS"
+      ],
+      "ion_structure": null,
+      "narrated": false,
+      "first_answered": "2026-10-21T21:30:11Z",
+      "last_answered": "2026-10-21T21:30:11Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    },
+    {
+      "id": "900e30629713",
+      "question": "what proteins should I try for capturing Pm3+",
+      "origin": "seed",
+      "target": "Pm3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 18 deposited metal site(s) were measured across them; none holds Pm3+, so every Pm3+ number is a counterfactual fit against another ion's site.",
+      "verdict_kind": "counterfactual",
+      "sites_holding_the_target": 0,
+      "candidates": 2,
+      "structures": [
+        "8FNR",
+        "8FNS"
+      ],
+      "ion_structure": null,
+      "narrated": false,
+      "first_answered": "2026-10-21T21:30:11Z",
+      "last_answered": "2026-10-21T21:30:11Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    },
+    {
+      "id": "45abbab06eda",
+      "question": "what proteins should I try for capturing Sm3+",
+      "origin": "seed",
+      "target": "Sm3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 18 deposited metal site(s) were measured across them; none holds Sm3+, so every Sm3+ number is a counterfactual fit against another ion's site.",
+      "verdict_kind": "counterfactual",
+      "sites_holding_the_target": 0,
+      "candidates": 2,
+      "structures": [
+        "8FNR",
+        "8FNS"
+      ],
+      "ion_structure": "1UZP",
+      "narrated": false,
+      "first_answered": "2026-10-21T21:30:11Z",
+      "last_answered": "2026-10-21T21:30:11Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    },
+    {
+      "id": "f34058f4019a",
+      "question": "what proteins should I try for capturing Ce3+",
+      "origin": "seed",
+      "target": "Ce3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 18 deposited metal site(s) were measured across them; none holds Ce3+, so every Ce3+ number is a counterfactual fit against another ion's site.",
+      "verdict_kind": "counterfactual",
+      "sites_holding_the_target": 0,
+      "candidates": 2,
+      "structures": [
+        "8FNR",
+        "8FNS"
+      ],
+      "ion_structure": "4MAE",
+      "narrated": false,
+      "first_answered": "2026-10-21T21:30:10Z",
+      "last_answered": "2026-10-21T21:30:10Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    },
+    {
+      "id": "9b1d4fdb75c1",
+      "question": "what proteins should I try for capturing Pr3+",
+      "origin": "seed",
+      "target": "Pr3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 18 deposited metal site(s) were measured across them; none holds Pr3+, so every Pr3+ number is a counterfactual fit against another ion's site.",
+      "verdict_kind": "counterfactual",
+      "sites_holding_the_target": 0,
+      "candidates": 2,
+      "structures": [
+        "8FNR",
+        "8FNS"
+      ],
+      "ion_structure": "3MVC",
+      "narrated": false,
+      "first_answered": "2026-10-21T21:30:10Z",
+      "last_answered": "2026-10-21T21:30:10Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    },
+    {
+      "id": "fb010d9eef38",
+      "question": "what proteins should I try for capturing La3+",
+      "origin": "seed",
+      "target": "La3+",
+      "answered": true,
+      "headline": "2 of 6 protein(s) pass every design rule for the lanmodulin architecture, the fold that binds lanthanides. 16 deposited metal site(s) were measured across them, 12 of them holding La3+.",
+      "verdict_kind": "observed",
+      "sites_holding_the_target": 12,
+      "candidates": 2,
+      "structures": [
+        "8DQ2",
+        "8FNS"
+      ],
+      "ion_structure": null,
+      "narrated": false,
+      "first_answered": "2026-10-21T21:30:09Z",
+      "last_answered": "2026-10-21T21:30:09Z",
+      "times_answered": 1,
+      "settings": {
+        "live": false,
+        "allow_predictions": false,
+        "max_structures": 3
+      }
+    }
+  ]
+}

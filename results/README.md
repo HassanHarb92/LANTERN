@@ -2,11 +2,13 @@
 
 Every question this platform can be asked, answered offline and written out so it can be read, checked and diffed without running anything.
 
-**Generated** by `scripts/export_results.py`. Do not edit by hand -- rerun it. The JSON beside this file is the artifact to cite; this table is only its headline.
+`runs/` is the **run archive**. Every question answered in the app is saved there automatically and can be reopened from its *Saved runs* page -- the proteins the design rules selected, the structures that were measured, and the 3D view of each metal site. The runs listed below are the fifteen seeded by `scripts/export_results.py` so the page is not empty in a fresh clone; anything asked in the app joins them.
 
-- code: `27d0158` on `rag_dev`
+**Generated. Do not edit by hand** -- rerun the script. Each run's JSON is the artifact to cite; this table is only its headline.
+
+- code: `e968f1a` on `rag_dev`
 - geometry: `geometry-v2`
-- generated: 2026-10-21T21:13:56Z
+- generated: 2026-10-21T21:31:21Z
 
 ## What each column means
 
@@ -47,4 +49,6 @@ All 15 share the same 2 of 6 design-rule candidates: the rules are sequence rule
 .venv/bin/python scripts/export_results.py --check
 ```
 
-`--check` regenerates every record in memory and fails if it differs from what is committed here. It needs no network: the answers read bundled data and the cached coordinates under `data/structures/`. A difference means the platform's claims changed, and the diff says how.
+`--check` re-answers every seeded question in memory and fails if the result differs from what is archived here. It needs no network: the answers read bundled data and the cached coordinates under `data/structures/`. A difference means the platform's claims changed, and the diff says how.
+
+A seeded run whose measurements have not changed is left on disk untouched, timestamps included, so rerunning the script on unchanged code produces no diff at all.

@@ -21,6 +21,8 @@ from lantern.discover import (NARRATION_IS_NOT_A_SOURCE, NARRATION_TIMEOUT_S,
                               and_list, answer, exportable, headline, narrate)
 from lantern.explorer import render_explorer
 from lantern.geometry import SCORE_VERSION
+from lantern.history import render_runs
+from lantern.runs import save as save_run
 from lantern.llm import LLMError, PROVIDERS, make_client, provider_status
 from lantern.plan import SOURCE_LLM, TARGETS
 from lantern.viewer import (RARE_EARTH_ELEMENTS, overview_html,
@@ -193,10 +195,14 @@ with st.sidebar:
 # Explorer's, and the Explorer would load its data on every question. Here the
 # unselected section simply does not run. st.stop() ends the script, so the
 # rest of the page is untouched when Explorer is chosen.
-section = st.segmented_control("Section", ["Ask", "Explorer"], default="Ask",
-                               key="section", label_visibility="collapsed")
+section = st.segmented_control("Section", ["Ask", "Explorer", "Saved runs"],
+                               default="Ask", key="section",
+                               label_visibility="collapsed")
 if section == "Explorer":
     render_explorer(embed)
+    st.stop()
+if section == "Saved runs":
+    render_runs(embed)
     st.stop()
 
 # ---------------------------------------------------------------- the ask --
@@ -231,6 +237,25 @@ for column, example in zip(chips, EXAMPLES):
     column.button(example, key=f"ex_{example}", width="stretch",
                   on_click=ask_this, args=(example,))
 
+
+def archive(record: dict, narration: str | None = None) -> None:
+    """Keep this run, so the Saved runs page can open it again.
+
+    Never allowed to break the page it is called from. An answer that was
+    computed is worth showing whether or not the disk accepted a copy of
+    it, and the failure is reported where it happened rather than raised
+    over the top of the measurements.
+    """
+    try:
+        save_run(record, record["question"],
+                 {"live": live, "allow_predictions": allow_predictions,
+                  "max_structures": max_structures}, narration=narration)
+    except Exception as exc:                            # noqa: BLE001
+        st.caption(f"This run was answered but could not be archived "
+                   f"({type(exc).__name__}). It is on screen but will not "
+                   f"appear under Saved runs.")
+
+
 pending = st.session_state.pop("pending", None)
 if asked or pending:
     text = pending or question
@@ -245,6 +270,10 @@ if asked or pending:
                     allow_predictions=allow_predictions,
                     max_structures=max_structures)
             st.session_state.pop("narration", None)
+            # Refusals are archived too. "This question did not resolve to a
+            # target" is a result about the question, and losing it would
+            # make the archive read as though it had never been asked.
+            archive(st.session_state.record)
         except Exception as exc:
             st.error(f"The search failed ({type(exc).__name__}). If live "
                      "search is on, try turning it off to use the offline "
@@ -712,6 +741,9 @@ if st.button(f"✨ Summarise with {llm.label}", disabled=not llm.configured()):
             # gateway stall the question box for a minute and a half.
             narrator = make_client(provider, timeout=NARRATION_TIMEOUT_S)
             st.session_state.narration = narrate(record, narrator, ask)
+        # Re-archived with the summary attached, so a reopened run carries
+        # the reading that was written from its own numbers.
+        archive(record, st.session_state.narration)
     except LLMError as exc:
         st.error(str(exc))
     except Exception as exc:

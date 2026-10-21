@@ -1,78 +1,90 @@
-"""The committed results have to still be true. No network access.
+"""The committed run archive has to still be true. No network access.
 
 A generated file committed to a repository is a claim that outlives the run
 that made it, and the failure mode is silent: someone changes discover.py,
-nobody reruns the exporter, and results/ keeps telling GitHub visitors an
-answer the code no longer gives. These tests are the tripwire for that --
-they read what is committed and check it against the code as it is now.
+nobody reseeds, and results/ keeps telling GitHub visitors an answer the
+code no longer gives. These tests are the tripwire for that -- they read
+what is committed and check it against the code as it is now.
 
-The README gets the same treatment as the JSON. It is the only part most
-people will ever read, so a summary that has drifted from the records beside
-it is worse than no summary.
+They deliberately read `DEFAULT_RUNS_DIR` rather than `runs_dir()`, because
+conftest.py points the latter at a temporary directory for the session. The
+subject here is the archive in the repository, not wherever the app happens
+to be writing.
 """
 import json
-from pathlib import Path
 
 import pytest
 
-from lantern.ions import LANTHANIDES_III
-from scripts.export_results import (QUESTION, RESULTS, _ion_row, _nothing_found,
-                                    _readme)
 from lantern.discover import answer, exportable
+from lantern.ions import LANTHANIDES_III
+from lantern.runs import DEFAULT_RUNS_DIR, run_id
+from scripts.export_results import (QUESTION, RESULTS, SETTINGS, _ion_row,
+                                    _nothing_found, _readme)
 
-COMMITTED = sorted(p for p in RESULTS.glob("*.json")
-                   if not p.name.startswith("_"))
+SEEDED = {ion: DEFAULT_RUNS_DIR / f"{run_id(QUESTION.format(ion=ion), SETTINGS)}.json"
+          for ion in LANTHANIDES_III}
 
 
-def _record(ion: str) -> dict:
-    return json.loads((RESULTS / f"{ion.replace('+', '')}.json").read_text())
+def _run(ion: str) -> dict:
+    return json.loads(SEEDED[ion].read_text())
 
 
-def test_every_lanthanide_has_a_committed_answer():
-    """A missing file is an ion whose answer nobody can see."""
-    assert {p.stem for p in COMMITTED} == {i.replace("+", "")
-                                           for i in LANTHANIDES_III}
+def test_every_lanthanide_is_seeded_into_the_archive():
+    """A missing run is an ion whose answer nobody can open."""
+    missing = [ion for ion, path in SEEDED.items() if not path.exists()]
+    assert not missing, f"not seeded: {missing}"
+
+
+def test_the_archive_holds_nothing_but_its_runs_and_its_index():
+    """A stray file here would be served to the browser as a run."""
+    unexpected = [p.name for p in DEFAULT_RUNS_DIR.glob("*")
+                  if p.suffix != ".json"]
+    assert not unexpected
 
 
 @pytest.mark.parametrize("ion", list(LANTHANIDES_III))
-def test_a_committed_record_answers_the_ion_it_is_filed_under(ion):
-    record = _record(ion)
+def test_a_seeded_run_answers_the_ion_it_is_filed_under(ion):
+    run = _run(ion)
+    record = run["record"]
     assert record["plan"]["target"] == ion
     assert record["ion_report"]["target"] == ion
-    assert ion in record["question"], "the question has to name the ion"
+    assert ion in run["question"], "the question has to name the ion"
+    assert run["origin"] == "seed"
+    assert run["settings"] == SETTINGS
 
 
 @pytest.mark.parametrize("ion", list(LANTHANIDES_III))
-def test_a_committed_record_keeps_its_caveats(ion):
-    """Stripping the record for export must never strip what qualifies it."""
-    record = _record(ion)
+def test_a_seeded_run_keeps_its_caveats(ion):
+    """Stripping a record for the archive must never strip what qualifies it."""
+    record = _run(ion)["record"]
     assert record["caveats"], "an answer with no caveats is not this platform's"
     assert record["ion_report"]["caveat"]
 
 
 @pytest.mark.parametrize("ion", list(LANTHANIDES_III))
-def test_a_committed_record_carries_no_coordinates(ion):
-    """Coordinates are for the viewer; committing them would bloat the diff."""
-    record = _record(ion)
+def test_a_seeded_run_carries_no_coordinates(ion):
+    """Coordinates are for the viewer; archiving them would bloat every diff."""
+    record = _run(ion)["record"]
     for item in record["evidence"] + [record.get("ion_structure") or {}]:
         assert "coordinates" not in item
         assert all("raw" not in site for site in item.get("sites", []))
 
 
-def test_the_readme_says_what_the_records_say():
-    """The summary and the records cannot disagree; most readers see only one.
+def test_the_readme_says_what_the_archive_says():
+    """The summary and the runs cannot disagree; most readers see only one.
 
-    Built from the committed JSON rather than from a fresh run, so this
-    fails when the README is stale even if the records are current.
+    Built from the committed runs rather than from a fresh answer, so this
+    fails when the README is stale even if the runs are current.
     """
-    rows = [_ion_row(ion, _record(ion)) for ion in LANTHANIDES_III]
-    blank = {"commit": "", "branch": "", "score_version": "", "generated_at_utc": ""}
+    rows = [_ion_row(ion, _run(ion)["record"]) for ion in LANTHANIDES_III]
+    blank = {"commit": "", "branch": "", "score_version": "",
+             "generated_at_utc": ""}
     want = _readme(rows, blank)
     have = (RESULTS / "README.md").read_text()
     for row in rows:
         line = (f"| **{row['ion']}** | {row['structure_shown']} | "
                 f"{row['how']} | {row['sites_holding_the_ion']} |")
-        assert line in have, f"README disagrees with {row['ion']}'s record"
+        assert line in have, f"README disagrees with {row['ion']}'s run"
     assert want.count("|") == have.count("|"), "the tables differ in shape"
 
 
@@ -80,7 +92,7 @@ def test_a_named_structure_is_one_that_holds_the_ion():
     """Naming a structure in the table is a measurement claim, not a label."""
     named = 0
     for ion in LANTHANIDES_III:
-        record = _record(ion)
+        record = _run(ion)["record"]
         row = _ion_row(ion, record)
         if row["structure_shown"] == "--":
             assert row["sites_holding_the_ion"] == 0
@@ -122,14 +134,14 @@ def test_the_summary_distinguishes_the_three_kinds_of_nothing(monkeypatch):
     assert "all" not in capped
 
 
-def test_regenerating_one_ion_reproduces_what_is_committed():
+def test_reanswering_one_ion_reproduces_what_is_archived():
     """The whole point of committing generated files: they stay reproducible.
 
     One ion, not fifteen, because this calls the real pipeline. Eu3+ is the
     one to pin -- it is the ion that drove the ion-structure work, and its
-    answer comes from the element lookup rather than the corpus.
+    answer comes from the element lookup rather than from the corpus.
     """
     fresh = exportable(answer(QUESTION.format(ion="Eu3+"), live=False))
-    text = json.dumps(fresh, indent=2, default=str, sort_keys=True) + "\n"
-    assert text == (RESULTS / "Eu3.json").read_text(), (
-        "results/ is stale -- run scripts/export_results.py")
+    through_json = json.loads(json.dumps(fresh, default=str))
+    assert through_json == _run("Eu3+")["record"], (
+        "the archive is stale -- run scripts/export_results.py")

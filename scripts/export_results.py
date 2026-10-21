@@ -1,28 +1,22 @@
-"""Every askable question, answered offline and written to results/.
+"""Seed the run archive with every question this platform can be asked.
 
-The app answers one question at a time, in a browser, on one person's
-machine. That is the wrong medium for a result somebody else has to check:
-a collaborator cannot rerun a Streamlit session from a screenshot, and a
-reviewer cannot diff one. So the same records the page draws are written to
-disk here, committed, and rendered by GitHub.
+The app archives each run a person asks (see lantern/runs.py), which means
+a fresh clone opens the Saved runs page on an empty table and a reviewer
+who has not run anything sees nothing at all. This script fills it: all
+fifteen trivalent lanthanides, answered offline, written as runs into the
+same `results/runs/` archive the app browses and reads back through the
+same code. One archive, two ways of filling it, no second format to drift.
 
-Two formats, because they have two readers:
+It also writes `results/README.md`, the table GitHub renders when anyone
+opens the folder, so the headline answers are legible without cloning
+anything or running Python.
 
-  results/<ion>.json  the full exportable record -- every measurement,
-                      verdict, caveat and basis, exactly what the page's
-                      download button produces. This is the artifact to
-                      check, cite or diff.
-  results/README.md   one table GitHub renders when anyone opens the folder,
-                      so the headline answer for all fifteen lanthanides is
-                      visible without cloning anything or running Python.
-
-Deterministic by construction: `answer(live=False)` reads only bundled data
-and the structure cache, and the records carry no timestamps, so rerunning
-this on unchanged code and unchanged data produces byte-identical JSON. A
-diff in results/ therefore means a real change in what the platform claims,
-which is the only property that makes committing generated files worth it.
-The one timestamp lives in results/_provenance.json, alone, so it cannot
-churn the fifteen files that matter.
+Deterministic where it counts: `answer(live=False)` reads only bundled data
+and the structure cache, and a seeded run whose measurements have not
+changed is left untouched on disk, timestamps and all. Rerunning this on
+unchanged code is therefore a no-op, and a diff under results/ means a real
+change in what the platform claims -- which is the property that makes
+committing generated files worth doing at all.
 
 Run:  .venv/bin/python scripts/export_results.py [--ion Eu3+] [--check]
 """
@@ -39,11 +33,27 @@ from lantern.catalog import structure_search  # noqa: E402
 from lantern.discover import answer, exportable  # noqa: E402
 from lantern.geometry import SCORE_VERSION  # noqa: E402
 from lantern.ions import LANTHANIDES_III  # noqa: E402
+from lantern.runs import index, load, run_id, runs_dir, save  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS = ROOT / "results"
 
 QUESTION = "what proteins should I try for capturing {ion}"
+
+# What the app would have been set to. Recorded on every seeded run, and
+# part of its identity, so a seed cannot be mistaken for -- or silently
+# overwrite -- the same question asked with live search on.
+SETTINGS = {"live": False, "allow_predictions": False, "max_structures": 3}
+
+
+def _comparable(record: dict) -> dict:
+    """A fresh record in the shape the archive stores it in.
+
+    Through JSON and back, because the archive has been through a file and
+    a tuple that came out of it is a list. Comparing a live record against
+    a loaded one without this reports every structure as changed.
+    """
+    return json.loads(json.dumps(exportable(record), default=str))
 
 
 def _git(*args: str) -> str:
@@ -151,9 +161,16 @@ def _readme(rows: list[dict], provenance: dict) -> str:
         "written out so it can be read, checked and diffed without running "
         "anything.",
         "",
-        "**Generated** by `scripts/export_results.py`. Do not edit by hand -- "
-        "rerun it. The JSON beside this file is the artifact to cite; this "
-        "table is only its headline.",
+        "`runs/` is the **run archive**. Every question answered in the app "
+        "is saved there automatically and can be reopened from its *Saved "
+        "runs* page -- the proteins the design rules selected, the "
+        "structures that were measured, and the 3D view of each metal site. "
+        "The runs listed below are the fifteen seeded by "
+        "`scripts/export_results.py` so the page is not empty in a fresh "
+        "clone; anything asked in the app joins them.",
+        "",
+        "**Generated. Do not edit by hand** -- rerun the script. Each run's "
+        "JSON is the artifact to cite; this table is only its headline.",
         "",
         f"- code: `{provenance['commit']}` on `{provenance['branch']}`",
         f"- geometry: `{provenance['score_version']}`",
@@ -200,11 +217,15 @@ def _readme(rows: list[dict], provenance: dict) -> str:
         ".venv/bin/python scripts/export_results.py --check",
         "```",
         "",
-        "`--check` regenerates every record in memory and fails if it differs "
-        "from what is committed here. It needs no network: the answers read "
-        "bundled data and the cached coordinates under `data/structures/`. "
-        "A difference means the platform's claims changed, and the diff says "
-        "how.",
+        "`--check` re-answers every seeded question in memory and fails if "
+        "the result differs from what is archived here. It needs no network: "
+        "the answers read bundled data and the cached coordinates under "
+        "`data/structures/`. A difference means the platform's claims "
+        "changed, and the diff says how.",
+        "",
+        "A seeded run whose measurements have not changed is left on disk "
+        "untouched, timestamps included, so rerunning the script on "
+        "unchanged code produces no diff at all.",
         "",
     ]
     return "\n".join(lines)
@@ -223,28 +244,32 @@ def main() -> int:
 
     rows, stale = [], []
     for ion in ions:
-        record = exportable(answer(QUESTION.format(ion=ion), live=False))
-        text = json.dumps(record, indent=2, default=str, sort_keys=True) + "\n"
-        path = RESULTS / f"{ion.replace('+', '')}.json"
+        question = QUESTION.format(ion=ion)
+        record = answer(question, live=False)
+        identifier = run_id(question, SETTINGS)
 
         if args.check:
-            current = path.read_text() if path.exists() else None
-            if current != text:
-                stale.append(path.name)
+            # Compare the measurements, not the envelope. The timestamps on
+            # a seeded run are deliberately sticky, so comparing whole files
+            # would pass on a stale archive whose record had drifted.
+            archived = load(identifier)
+            if archived is None:
+                stale.append(f"{ion} (not archived)")
+            elif archived["record"] != _comparable(record):
+                stale.append(f"{ion} ({identifier})")
         else:
-            path.write_text(text)
+            save(record, question, SETTINGS, origin="seed")
         rows.append(_ion_row(ion, record))
-        mark = rows[-1]["structure_shown"]
-        print(f"{ion:5} -> {mark}", flush=True)
+        print(f"{ion:5} -> {rows[-1]['structure_shown']}", flush=True)
 
     provenance = {
         "description": (
-            "Answers generated offline by scripts/export_results.py. Each "
-            "<ion>.json is the full record the app's download button "
-            "produces: every measurement, verdict, caveat and basis, with "
-            "coordinates and per-atom donor lists left out. Regenerating on "
-            "unchanged code and data is byte-identical, so a diff here is a "
-            "change in what the platform claims."),
+            "Seed runs generated offline by scripts/export_results.py into "
+            "results/runs/, the same archive the app's Saved runs page "
+            "writes to and reads back. Each carries the full record the "
+            "download button produces: every measurement, verdict, caveat "
+            "and basis, with coordinates and per-atom donor lists left out "
+            "because they are already in data/structures/."),
         "generated_by": "scripts/export_results.py",
         "generated_at_utc": datetime.now(timezone.utc).strftime(
             "%Y-%m-%dT%H:%M:%SZ"),
@@ -252,8 +277,9 @@ def main() -> int:
         "branch": _git("rev-parse", "--abbrev-ref", "HEAD"),
         "score_version": SCORE_VERSION,
         "question_template": QUESTION,
-        "live": False,
-        "ions": len(rows),
+        "settings": SETTINGS,
+        "seeded_ions": len(rows),
+        "runs_in_archive": len(index()),
     }
 
     if args.check:
@@ -276,14 +302,15 @@ def main() -> int:
             print(f"\nSTALE: {', '.join(stale)}")
             print("Run scripts/export_results.py to regenerate.")
             return 1
-        print(f"\nall {len(rows)} committed results match")
+        print(f"\nall {len(rows)} seeded runs match the archive")
         return 0
 
     (RESULTS / "README.md").write_text(_readme(rows, provenance))
     (RESULTS / "_provenance.json").write_text(
         json.dumps(provenance, indent=2) + "\n")
-    print(f"\nwrote {len(rows)} records, README.md and _provenance.json "
-          f"to {RESULTS.relative_to(ROOT)}/")
+    print(f"\nseeded {len(rows)} runs into "
+          f"{runs_dir().relative_to(ROOT)}/ ({len(index())} in the archive), "
+          f"and wrote README.md and _provenance.json")
     return 0
 
 

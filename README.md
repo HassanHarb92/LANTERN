@@ -15,11 +15,15 @@ from UniProt and InterPro, selected by stated sequence rules (EF-hand loops and 
 structure (experimental from the PDB, or a predicted model from AlphaFold DB, with ESMFold planned). The shaded stages are
 deterministic and versioned; the language model only narrates and never produces a score or a citation.
 
-## Results
+## Saved runs
 
-**[`results/`](results/) holds the answer to every question this platform can be asked**, generated offline and committed, so they can be read and checked without installing anything. The folder's own page is a table of all fifteen trivalent lanthanides -- which deposited structure holds each one, how it was reached, and at what resolution. Beside it, one JSON per ion carries the full record: every measurement, verdict, caveat and basis.
+**Every question this platform answers is kept.** Ask one on the *Ask* page and it is archived automatically; the **Saved runs** page lists them all and reopens any of them -- the proteins the design rules selected, the structures that were measured, the metal sites inside those structures, and the same 3D view of the first coordination shell the live page drew. Nothing on that page is recomputed: every number is the number that was saved when the question was answered.
 
-Regenerate with `python scripts/export_results.py`, or verify what is committed still matches the code with `--check`. The records carry no timestamps, so a diff in `results/` is a change in what the platform claims.
+Coordinates are the one thing not archived -- they are megabytes per run and already on disk under `data/structures/` -- so the viewer is rebuilt at view time by re-measuring the cached file. Where that file is gone, or no longer reproduces the sites that were saved, the view is withheld and the saved numbers are shown alone.
+
+**[`results/runs/`](results/) is that archive, committed.** It ships seeded with all fifteen trivalent lanthanides so a fresh clone opens on a full table rather than an empty one, and [`results/README.md`](results/) is the summary GitHub renders: which deposited structure holds each ion, how it was reached, at what resolution.
+
+Reseed with `python scripts/export_results.py`, or verify what is committed still matches the code with `--check`. A seeded run whose measurements have not changed is left on disk untouched, so a diff under `results/` is a change in what the platform claims.
 
 ## Quick start (macOS/Linux)
 
@@ -131,10 +135,18 @@ LANTERN/
 │   ├── models.py                 # Typed data records
 │   ├── chemistry.py              # Unvalidated transparent sequence heuristic
 │   ├── catalog.py                # Loads the authentic reference set and the test fixtures
+│   ├── ions.py                   # Target-ion chemistry: the part of "which lanthanide?" that is real
+│   ├── plan.py                   # Question -> typed target; falls back when no model answers
+│   ├── design.py                 # The sequence rules, each one stated and individually scored
+│   ├── discover.py               # The spine: plan -> select -> verify -> shortlist -> narrate
 │   ├── uniprot.py                # UniProt search + InterPro family retrieval
 │   ├── structure.py              # Structure fetch + first-shell coordination analysis
+│   ├── alphafold.py              # Predicted models, kept separable from deposited ones
 │   ├── geometry.py               # geometry-v2: the structural call, and what it refuses to score
 │   ├── viewer.py                 # Binding-site scene: pure spec, then the 3Dmol serialisation
+│   ├── explorer.py               # Explorer page: look at the data files directly, no model in the loop
+│   ├── runs.py                   # The run archive: save, index, and rehydrate for the viewer
+│   ├── history.py                # Saved runs page: browse every run, reopen any of them
 │   ├── llm.py                    # Provider layer: OpenAI + Anthropic clients, and the factory
 │   ├── argo.py                   # Argo chat client, fails closed on rejected credentials
 │   └── agent.py                  # Fixed retrieve-then-score pipeline (not a planner)
@@ -157,8 +169,9 @@ LANTERN/
 │   ├── curate_corpus.py          # Shortlist the 636 for hand-curation; never auto-labels
 │   ├── selectivity_contrast.py   # Native Ln biology vs native Ca -- what actually separates
 │   ├── build_ion_structures.py   # One deposited structure per lanthanide, chosen by measuring
-│   └── export_results.py         # Answer every question offline and write results/
-├── results/                      # Every answer, committed and rendered by GitHub
+│   └── export_results.py         # Seed the run archive offline, and write results/README.md
+├── results/runs/                 # The run archive: every answered run, committed
+├── results/README.md             # Its summary table, rendered by GitHub
 ├── data/reference_proteins.json  # 6 authentic UniProt sequences, checksummed
 ├── data/synthetic_examples.json  # Synthetic fixtures, used only by tests
 ├── data/structures/              # Prefetched coordinates + manifest
@@ -209,6 +222,11 @@ pytest -q
   that way — swapping it in would look like a recall improvement and would destroy the score.
   Build and validate: `python scripts/loop_detector.py`.
 - Interactive result table, workflow trace, downloadable JSON.
+- **Every run kept** (`lantern/runs.py`, `lantern/history.py`). Each answered question is archived
+  under `results/runs/` and reopens on the **Saved runs** page with its proteins, its structures
+  and its 3D sites. Runs are keyed by what was asked, not by when, so asking the same question
+  twice updates one row instead of growing a second copy; a click is not a result. Saved and live
+  runs go through the same code, so the archive cannot drift into a second format.
 - Structure retrieval with automatic mmCIF fallback (RCSB publishes no legacy `.pdb` for large
   entries such as 6EK0, 7K00, 3J3Q); 3Dmol.js is vendored in `static/`, so the viewer needs no
   network either.
